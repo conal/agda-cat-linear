@@ -20,21 +20,39 @@ private
   variable
     A B C : Obj
 
+Op⇒₀ : Set (o ⊔ ℓ)
+Op⇒₀ = ∀ {A B} → A ⇒ B
+
+Op⇒₂ : Set (o ⊔ ℓ)
+Op⇒₂ = ∀ {A B} → Op₂ (A ⇒ B)
+
+record IsPreadditive (_⊹_ : Op⇒₂) (𝟎 : Op⇒₀) : Set (levelOfTerm 𝒞) where
+  field
+    ⊹-zero-isMonoid : ∀ {A B} → IsMonoid (_≈_ {A} {B}) _⊹_ 𝟎
+    -- Why do I need the explicit "bi" argument here?
+    bilinearˡ : ∀ {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
+    bilinearʳ : ∀ {f g : B ⇒ C} {h : A ⇒ B} → (f ⊹ g) ∘ h ≈ (f ∘ h) ⊹ (g ∘ h)
+
+record Preadditive : Set (levelOfTerm 𝒞) where
+  field
+    _⊹_ : Op⇒₂
+    𝟎 : Op⇒₀
+    isPreadditive : IsPreadditive _⊹_ 𝟎
+
+  open IsPreadditive isPreadditive public
+
 -- A bicartesian category is cartesian and cocartesian
 record Bicartesian : Set (levelOfTerm 𝒞) where
   field
     cartesian   : Cartesian
     cocartesian : Cocartesian
 
-  module   cartesian =   Cartesian   cartesian ; open   cartesian public
-  module cocartesian = Cocartesian cocartesian ; open cocartesian public
+  open   Cartesian   cartesian public
+  open Cocartesian cocartesian public
 
-record IsBiproduct (bi : Bicartesian) (z : Zero) : Set (levelOfTerm 𝒞) where
-  module bi = Bicartesian bi ; open bi hiding (!;¡)
-  module zm = Zero z ; open zm
-
-  𝟎 : A ⇒ B
-  𝟎 = ! ∘ ¡
+record IsBiproduct (bi : Bicartesian) (pre : Preadditive) : Set (levelOfTerm 𝒞) where
+  open Bicartesian bi
+  open Preadditive pre
 
   +⇒× : A + B ⇒ A × B
   +⇒× = ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩
@@ -43,28 +61,27 @@ record IsBiproduct (bi : Bicartesian) (z : Zero) : Set (levelOfTerm 𝒞) where
   -- ×⇒+ : A × B ⇒ A + B
   -- ×⇒+ = ?
 
--- Do we really need Zero, or could we fashion 𝟎 from ! and ¡ of Bicartesian?
--- We'd need ⊥ → ⊤ and maybe ⊥ ≅ ⊤.
-
 -- A biproduct category is bicartesian, has a zero object, and has coinciding
 -- products and coproducts.
 record Biproduct : Set (levelOfTerm 𝒞) where
   field
     bicartesian : Bicartesian
-    zeroObj : Zero
-    isBiproduct : IsBiproduct bicartesian zeroObj
+    preadditive : Preadditive
+    isBiproduct : IsBiproduct bicartesian preadditive
     
-  module bicartesian = Bicartesian bicartesian ; open bicartesian public
-  module isBiproduct = IsBiproduct isBiproduct ; open isBiproduct public
+  open Bicartesian bicartesian public
+  open Preadditive preadditive public
+  open IsBiproduct isBiproduct public
 
 open Biproduct
 
-Op⇒₂ : Set (o ⊔ ℓ)
-Op⇒₂ = ∀ {A B} → Op₂ (A ⇒ B)
+{-
+
+-- Oops. Too much. More like Abelian
 
 record IsPreadditive (bi : Biproduct) (_⊹_ : Op⇒₂) : Set (levelOfTerm 𝒞) where
   private
-    module biproduct = Biproduct bi ; open bi
+    open Biproduct bi
   field
     ⊹-zero-isMonoid : ∀ {A B} → IsMonoid (_≈_ {A} {B}) _⊹_ (𝟎 bi)
     -- Why do I need the explicit "bi" argument here?
@@ -79,3 +96,5 @@ record Preadditive : Set (levelOfTerm 𝒞) where
 
   module biproduct = Biproduct biproduct ; open biproduct public
   module isPreadditive = IsPreadditive isPreadditive ; open isPreadditive public
+
+-}
