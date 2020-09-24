@@ -68,7 +68,8 @@ record IsPreadditive (bi : Biproduct) (_⊹_ : Op⇒₂) : Set (levelOfTerm 𝒞
   field
     ⊹-zero-isMonoid : ∀ {A B} → IsMonoid (_≈_ {A} {B}) _⊹_ (zero⇒ bi)
     -- Why do I need the explicit "bi" argument here?
-    -- TODO: bilinearity of composition
+    bilinearˡ : ∀ {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
+    bilinearʳ : ∀ {f g : B ⇒ C} {h : A ⇒ B} → (f ⊹ g) ∘ h ≈ (f ∘ h) ⊹ (g ∘ h)
 
 record Preadditive : Set (levelOfTerm 𝒞) where
   field
