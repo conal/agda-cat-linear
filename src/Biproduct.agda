@@ -8,23 +8,17 @@ open import Level
 
 open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Algebra.Core using (Op₂)
+open import Algebra.Structures using (IsMonoid)
 
 open import Categories.Category.Cartesian 𝒞
 open import Categories.Category.Cocartesian 𝒞
-open import Categories.Object.Terminal 𝒞
-open import Categories.Object.Initial 𝒞
-open import Categories.Morphism 𝒞
-
 open import Categories.Object.Zero 𝒞
--- open Zero.initial
--- open Zero.terminal
 
 open Category 𝒞
 
 private
   variable
     A B C : Obj
-    f g : A ⇒ B
 
 -- A bicartesian category is cartesian and cocartesian
 record Bicartesian : Set (levelOfTerm 𝒞) where
@@ -32,16 +26,8 @@ record Bicartesian : Set (levelOfTerm 𝒞) where
     cartesian : Cartesian
     cocartesian : Cocartesian
 
-  module cartesian = Cartesian cartesian
-  module cocartesian = Cocartesian cocartesian
-  open cartesian public
-  open cocartesian public
-
-  -- Co-diagonal. Belongs in Cocartesian? Already in agda-categories somewhere?
-  ∇ : A + A ⇒ A
-  ∇ = [ id , id ]
-
--- open Bicartesian using ()
+  module cartesian = Cartesian cartesian ; open cartesian public
+  module cocartesian = Cocartesian cocartesian ; open cocartesian public
 
 record IsBiproduct (bi : Bicartesian) (z : Zero) : Set (levelOfTerm 𝒞) where
   module bi = Bicartesian bi ; open bi hiding (!;¡)
@@ -53,37 +39,41 @@ record IsBiproduct (bi : Bicartesian) (z : Zero) : Set (levelOfTerm 𝒞) where
   +⇒× : A + B ⇒ A × B
   +⇒× = ⟨ [ id , zero⇒ ] , [ zero⇒ , id ] ⟩
 
--- Do we really need Zero, or could we define zero⇒ from ! and ¡ of Bicartesian?
+  -- Maybe a field along with an isomorphism proof.
+  -- ×⇒+ : A × B ⇒ A + B
+  -- ×⇒+ = ?
+
+-- Do we really need Zero, or could we fashion zero⇒ from ! and ¡ of Bicartesian?
+-- We'd need ⊥ → ⊤ and maybe ⊥ ≅ ⊤.
 
 -- A biproduct category is bicartesian, has a zero object, and has coinciding
 -- products and coproducts.
 record Biproduct : Set (levelOfTerm 𝒞) where
   field
-    zeroObj : Zero
     bicartesian : Bicartesian
+    zeroObj : Zero
     isBiproduct : IsBiproduct bicartesian zeroObj
     
-  module bicartesian = Bicartesian bicartesian
-  open bicartesian public
-
-  -- fork : (A ⇒ B) → (A ⇒ C) → (A ⇒ B × C)
-  -- fork = ⟨_,_⟩
-
-  -- _⊹_ : Op₂ (A ⇒ B)
-  -- f ⊹ g = ∇ ∘ ⟨ f , g ⟩
+  module bicartesian = Bicartesian bicartesian ; open bicartesian public
+  module isBiproduct = IsBiproduct isBiproduct ; open isBiproduct public
 
 open Biproduct
 
+Op⇒₂ : Set (o ⊔ ℓ)
+Op⇒₂ = ∀ {A B} → Op₂ (A ⇒ B)
 
+record IsPreadditive (bi : Biproduct) (_⊹_ : Op⇒₂) : Set (levelOfTerm 𝒞) where
+  private
+    module biproduct = Biproduct bi ; open bi
+  field
+    ⊹-zero-isMonoid : ∀ {A B} → IsMonoid (_≈_ {A} {B}) _⊹_ (zero⇒ bi)
+    -- Why do I need the explicit "bi" argument here?
 
--- record Preadditive (_+_ : {A B : Obj} → Op₂ (A ⇒ B)) : Set (levelOfTerm 𝒞) where
---   field
---     biproduct : Biproduct
+record Preadditive : Set (levelOfTerm 𝒞) where
+  field
+    biproduct : Biproduct
+    _⊹_ : Op⇒₂
+    isPreadditive : IsPreadditive biproduct _⊹_
 
---     -- add
-
--- open import Algebra.Structures
---   {A : Set a}  -- The underlying set
---   (_≈_ : Rel A ℓ)    -- The underlying equality relation
---   where
-
+  module biproduct = Biproduct biproduct ; open biproduct public
+  module isPreadditive = IsPreadditive isPreadditive ; open isPreadditive public
