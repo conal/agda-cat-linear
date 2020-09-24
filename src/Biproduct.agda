@@ -23,10 +23,10 @@ private
 -- A bicartesian category is cartesian and cocartesian
 record Bicartesian : Set (levelOfTerm 𝒞) where
   field
-    cartesian : Cartesian
+    cartesian   : Cartesian
     cocartesian : Cocartesian
 
-  module cartesian = Cartesian cartesian ; open cartesian public
+  module   cartesian =   Cartesian   cartesian ; open   cartesian public
   module cocartesian = Cocartesian cocartesian ; open cocartesian public
 
 record IsBiproduct (bi : Bicartesian) (z : Zero) : Set (levelOfTerm 𝒞) where
@@ -68,6 +68,7 @@ record IsPreadditive (bi : Biproduct) (_⊹_ : Op⇒₂) : Set (levelOfTerm 𝒞
   field
     ⊹-zero-isMonoid : ∀ {A B} → IsMonoid (_≈_ {A} {B}) _⊹_ (zero⇒ bi)
     -- Why do I need the explicit "bi" argument here?
+    -- TODO: bilinearity of composition
 
 record Preadditive : Set (levelOfTerm 𝒞) where
   field
