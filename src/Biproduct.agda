@@ -12,7 +12,6 @@ open import Algebra.Structures using (IsMonoid)
 
 open import Categories.Category.Cartesian 𝒞
 open import Categories.Category.Cocartesian 𝒞
-open import Categories.Object.Zero 𝒞
 
 open Category 𝒞
 
@@ -38,22 +37,22 @@ record Preadditive : Set (levelOfTerm 𝒞) where
     _⊹_ : Op⇒₂
     𝟎 : Op⇒₀
     isPreadditive : IsPreadditive _⊹_ 𝟎
-
   open IsPreadditive isPreadditive public
+
+-- TODO: Try replacing _⊹_, 𝟎, and ⊹-zero-isMonoid with a single polymorphic
+-- Monoid field in Preadditive.
 
 -- A bicartesian category is cartesian and cocartesian
 record Bicartesian : Set (levelOfTerm 𝒞) where
   field
     cartesian   : Cartesian
     cocartesian : Cocartesian
-
   open   Cartesian   cartesian public
   open Cocartesian cocartesian public
 
 record IsBiproduct (bi : Bicartesian) (pre : Preadditive) : Set (levelOfTerm 𝒞) where
   open Bicartesian bi
   open Preadditive pre
-
   +⇒× : A + B ⇒ A × B
   +⇒× = ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩
 
@@ -68,33 +67,8 @@ record Biproduct : Set (levelOfTerm 𝒞) where
     bicartesian : Bicartesian
     preadditive : Preadditive
     isBiproduct : IsBiproduct bicartesian preadditive
-    
   open Bicartesian bicartesian public
   open Preadditive preadditive public
   open IsBiproduct isBiproduct public
 
 open Biproduct
-
-{-
-
--- Oops. Too much. More like Abelian
-
-record IsPreadditive (bi : Biproduct) (_⊹_ : Op⇒₂) : Set (levelOfTerm 𝒞) where
-  private
-    open Biproduct bi
-  field
-    ⊹-zero-isMonoid : ∀ {A B} → IsMonoid (_≈_ {A} {B}) _⊹_ (𝟎 bi)
-    -- Why do I need the explicit "bi" argument here?
-    bilinearˡ : ∀ {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
-    bilinearʳ : ∀ {f g : B ⇒ C} {h : A ⇒ B} → (f ⊹ g) ∘ h ≈ (f ∘ h) ⊹ (g ∘ h)
-
-record Preadditive : Set (levelOfTerm 𝒞) where
-  field
-    biproduct : Biproduct
-    _⊹_ : Op⇒₂
-    isPreadditive : IsPreadditive biproduct _⊹_
-
-  module biproduct = Biproduct biproduct ; open biproduct public
-  module isPreadditive = IsPreadditive isPreadditive ; open isPreadditive public
-
--}
