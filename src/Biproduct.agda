@@ -33,17 +33,17 @@ record IsBiproduct (bi : Bicartesian) (z : Zero) : Set (levelOfTerm 𝒞) where
   module bi = Bicartesian bi ; open bi hiding (!;¡)
   module zm = Zero z ; open zm
 
-  zero⇒ : A ⇒ B
-  zero⇒ = ! ∘ ¡
+  𝟎 : A ⇒ B
+  𝟎 = ! ∘ ¡
 
   +⇒× : A + B ⇒ A × B
-  +⇒× = ⟨ [ id , zero⇒ ] , [ zero⇒ , id ] ⟩
+  +⇒× = ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩
 
   -- Maybe a field along with an isomorphism proof.
   -- ×⇒+ : A × B ⇒ A + B
   -- ×⇒+ = ?
 
--- Do we really need Zero, or could we fashion zero⇒ from ! and ¡ of Bicartesian?
+-- Do we really need Zero, or could we fashion 𝟎 from ! and ¡ of Bicartesian?
 -- We'd need ⊥ → ⊤ and maybe ⊥ ≅ ⊤.
 
 -- A biproduct category is bicartesian, has a zero object, and has coinciding
@@ -66,7 +66,7 @@ record IsPreadditive (bi : Biproduct) (_⊹_ : Op⇒₂) : Set (levelOfTerm 𝒞
   private
     module biproduct = Biproduct bi ; open bi
   field
-    ⊹-zero-isMonoid : ∀ {A B} → IsMonoid (_≈_ {A} {B}) _⊹_ (zero⇒ bi)
+    ⊹-zero-isMonoid : ∀ {A B} → IsMonoid (_≈_ {A} {B}) _⊹_ (𝟎 bi)
     -- Why do I need the explicit "bi" argument here?
     bilinearˡ : ∀ {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
     bilinearʳ : ∀ {f g : B ⇒ C} {h : A ⇒ B} → (f ⊹ g) ∘ h ≈ (f ∘ h) ⊹ (g ∘ h)
