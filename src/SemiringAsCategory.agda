@@ -2,11 +2,9 @@
 
 -- Based on Categories.Category.Construction.MonoidAsCategory
 
-open import Algebra.Bundles -- using (Monoid;Semiring)
+open import Algebra.Bundles
 
 module SemiringAsCategory o {c ℓ} (S : Semiring c ℓ) where
-
-open import Data.Product using (proj₁; proj₂)
 
 open import Categories.Category.Core
 
@@ -20,7 +18,6 @@ SemiringAsCategory = MonoidAsCategory
 
 open Category SemiringAsCategory
 
-open import Categories.Category.Cocartesian SemiringAsCategory
 open import Biproduct SemiringAsCategory
 
 SemiringAsPreadditive : Preadditive
