@@ -7,6 +7,7 @@ open import Algebra.Bundles -- using (Monoid;Semiring)
 module SemiringAsCategory o {c ℓ} (S : Semiring c ℓ) where
 
 open import Data.Product using (proj₁; proj₂)
+
 open import Categories.Category.Core
 
 open Semiring S
@@ -32,4 +33,6 @@ SemiringAsPreadditive = record
      ; bilinearʳ = distribʳ _ _ _
      }
   }
+
+open import Semimodule S
 
