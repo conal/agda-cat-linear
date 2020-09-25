@@ -1,17 +1,25 @@
 {-# OPTIONS --without-K --safe #-}
 
+
+
+-- Hah! After updating my clone of agda-stdlib, I see that it has semimodules!
+-- Junk this module.
+
+
 open import Algebra.Structures using (IsMonoid)
 open import Algebra.Bundles using (Monoid;Semiring)
 
 module Semimodule {c ℓ} (S : Semiring c ℓ) where
 
-open import Level using (suc;_⊔_)
+open import Level hiding (zero)
 open import Data.Product
 open import Relation.Binary using (Rel)
 
 open import Algebra.Core using (Op₁;Op₂)
 
 open Semiring S renaming (Carrier to Scalar)
+
+-- For Algebra.Structures
 
 record IsSemimodule {Carrier : Set c} (_≈_ : Rel Carrier ℓ)
          (_+m_ : Op₂ Carrier) (0m : Carrier)
@@ -24,6 +32,19 @@ record IsSemimodule {Carrier : Set c} (_≈_ : Rel Carrier ℓ)
     1· : ∀ {u} → (1# · u) ≈ u
     0· : ∀ {u} → (0# · u) ≈ 0m
   open IsMonoid isMonoid public
+
+-- For Algebra.Bundles
+
+record RawSemimodule : Set (suc c ⊔ suc ℓ) where
+  infixl 7 _·_
+  infixl 6 _+m_
+  infix  4 _≈_
+  field
+    Carrier  : Set c
+    _≈_      : Rel Carrier ℓ
+    _+m_     : Op₂ Carrier
+    0m       : Carrier
+    _·_      : Scalar → Op₁ Carrier
 
 -- Left semimodule
 record Semimodule : Set (suc c ⊔ suc ℓ) where
@@ -56,44 +77,19 @@ SemiringAsSemimodule = record
       }
   }
 
--- Semimodule constructions, starting with products and functions
+-- For Algebra.Construct.DirectProduct
 
-_×m_ : ∀ {c} → Op₂ (Monoid c ℓ)
-record  { Carrier = Carrier₁ ; _≈_ = _≈₁_ ; _∙_ = _∙₁_ ; ε = ε₁
-        ; isMonoid = isMonoid₁ }
-  ×m
- record { Carrier = Carrier₂ ; _≈_ = _≈₂_ ; _∙_ = _∙₂_ ; ε = ε₂
-  ; isMonoid = isMonoid₂ }
- = record
-     { Carrier = Carrier₁ × Carrier₂
-     ; _≈_ = λ { (a₁ , a₂) (b₁ , b₂) → (a₁ ≈₁ b₁) × (a₂ ≈₂ b₂) }
-     ; _∙_ = λ { (a₁ , a₂) (b₁ , b₂) → (a₁ ∙₁ b₁) , (a₂ ∙₂ b₂) }
-     ; ε = ε₁ , ε₂
-     ; isMonoid = {!!}
-     }
+open import Data.Product.Relation.Binary.Pointwise.NonDependent
 
-_×sm_ : Op₂ Semimodule
-record  { Carrier = Carrier₁ ; _≈_ = _≈₁_ ; _+m_ = _+m₁_
-        ; 0m = 0m₁ ; _·_ = _·₁_ ; isSemimodule = isSemimodule₁ }
-  ×sm
- record { Carrier = Carrier₂ ; _≈_ = _≈₂_ ; _+m_ = _+m₂_
-        ; 0m = 0m₂ ; _·_ = _·₂_ ; isSemimodule = isSemimodule₂ }
- = record
-     { Carrier = Carrier₁ × Carrier₂
-     ; _≈_ = λ { (a₁ , b₁) (a₂ , b₂) → (a₁ ≈₁ a₁) × (b₂ ≈₂ b₂) }
-     ; _+m_ = λ { (a₁ , b₁) (a₂ , b₂) → (a₁ +m₁ a₂) , (b₁ +m₂ b₂) }
-     ; 0m = 0m₁ , 0m₂
-     ; _·_ = λ { s (a₁ , a₂) → (s ·₁ a₁) , (s ·₂ a₂) }
-     ; isSemimodule = record
-         { isMonoid = {!!}
-         ; ·-distribˡ = {!!}
-         ; ·-distribʳ = {!!}
-         ; ·-· = {!!}
-         ; 1· = {!!}
-         ; 0· = {!!}
-         }
-     }
+private
+  variable
+    a b ℓ₁ ℓ₂ : Level
 
--- Dang. There's a lot of work to be done here.
--- Are they in Agda's standard library and I'm just not seeing them?
--- TODO: post an issue.
+rawSemimodule : Op₂ RawSemimodule
+rawSemimodule M N = record
+  { Carrier = M.Carrier × N.Carrier
+  ; _≈_     = Pointwise M._≈_ N._≈_
+  ; _+m_    = zip M._+m_ N._+m_
+  ; 0m      = M.0m , N.0m
+  ; _·_     = λ s → map (s M.·_) (s N.·_)
+  } where module M = RawSemimodule M; module N = RawSemimodule N
