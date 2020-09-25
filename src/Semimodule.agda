@@ -56,8 +56,7 @@ SemiringAsSemimodule = record
       }
   }
 
--- _×im_ : ∀ {c} → IsMonoid ∙₁ ε₁ → IsMonoid ∙₂ ε₂ → IsMonoid ∙ ε
-
+-- Semimodule constructions, starting with products
 
 _×m_ : ∀ {c} → Op₂ (Monoid c ℓ)
 record { Carrier = Carrier₁ ; _≈_ = _≈₁_ ; _∙_ = _∙₁_ ; ε = ε₁ ; isMonoid = isMonoid₁ }
@@ -89,3 +88,7 @@ record { Carrier = Carrier₁ ; _≈_ = _≈₁_ ; _+m_ = _+m₁_ ; 0m = 0m₁ ;
         ; 0· = {!!}
         }
     }
+
+-- Dang. There's a lot of work to be done here.
+-- Are they in Agda's standard library and I'm just not seeing them?
+-- TODO: post an issue.
