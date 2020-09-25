@@ -39,9 +39,6 @@ record Preadditive : Set (levelOfTerm 𝒞) where
     isPreadditive : IsPreadditive _⊹_ 𝟎
   open IsPreadditive isPreadditive public
 
--- TODO: Try replacing _⊹_, 𝟎, and ⊹-zero-isMonoid with a single polymorphic
--- Monoid field in Preadditive.
-
 -- A bicartesian category is cartesian and cocartesian
 record Bicartesian : Set (levelOfTerm 𝒞) where
   field
