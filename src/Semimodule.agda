@@ -59,40 +59,41 @@ SemiringAsSemimodule = record
 -- Semimodule constructions, starting with products and functions
 
 _×m_ : ∀ {c} → Op₂ (Monoid c ℓ)
-record { Carrier = Carrier₁ ; _≈_ = _≈₁_ ; _∙_ = _∙₁_ ; ε = ε₁ ; isMonoid = isMonoid₁ }
-  ×m record { Carrier = Carrier₂ ; _≈_ = _≈₂_ ; _∙_ = _∙₂_ ; ε = ε₂ ; isMonoid = isMonoid₂ } =
- record
-   { Carrier = Carrier₁ × Carrier₂
-   ; _≈_ = λ { (a₁ , a₂) (b₁ , b₂) → (a₁ ≈₁ b₁) × (a₂ ≈₂ b₂) }
-   ; _∙_ = λ { (a₁ , a₂) (b₁ , b₂) → (a₁ ∙₁ b₁) , (a₂ ∙₂ b₂) }
-   ; ε = ε₁ , ε₂
-   ; isMonoid = {!!}
-   }
+record  { Carrier = Carrier₁ ; _≈_ = _≈₁_ ; _∙_ = _∙₁_ ; ε = ε₁
+        ; isMonoid = isMonoid₁ }
+  ×m
+ record { Carrier = Carrier₂ ; _≈_ = _≈₂_ ; _∙_ = _∙₂_ ; ε = ε₂
+  ; isMonoid = isMonoid₂ }
+ = record
+     { Carrier = Carrier₁ × Carrier₂
+     ; _≈_ = λ { (a₁ , a₂) (b₁ , b₂) → (a₁ ≈₁ b₁) × (a₂ ≈₂ b₂) }
+     ; _∙_ = λ { (a₁ , a₂) (b₁ , b₂) → (a₁ ∙₁ b₁) , (a₂ ∙₂ b₂) }
+     ; ε = ε₁ , ε₂
+     ; isMonoid = {!!}
+     }
 
 _×sm_ : Op₂ Semimodule
-record { Carrier = Carrier₁ ; _≈_ = _≈₁_ ; _+m_ = _+m₁_ ; 0m = 0m₁ ; _·_ = _·₁_ ; isSemimodule = isSemimodule₁ }
+record  { Carrier = Carrier₁ ; _≈_ = _≈₁_ ; _+m_ = _+m₁_
+        ; 0m = 0m₁ ; _·_ = _·₁_ ; isSemimodule = isSemimodule₁ }
   ×sm
- record { Carrier = Carrier₂ ; _≈_ = _≈₂_ ; _+m_ = _+m₂_ ; 0m = 0m₂ ; _·_ = _·₂_ ; isSemimodule = isSemimodule₂ } =
-  record
-    { Carrier = Carrier₁ × Carrier₂
-    ; _≈_ = λ { (a₁ , b₁) (a₂ , b₂) → (a₁ ≈₁ a₁) × (b₂ ≈₂ b₂) }
-    ; _+m_ = λ { (a₁ , b₁) (a₂ , b₂) → (a₁ +m₁ a₂) , (b₁ +m₂ b₂) }
-    ; 0m = 0m₁ , 0m₂
-    ; _·_ = λ { s (a₁ , a₂) → (s ·₁ a₁) , (s ·₂ a₂) }
-    ; isSemimodule = record
-        { isMonoid = {!!}
-        ; ·-distribˡ = {!!}
-        ; ·-distribʳ = {!!}
-        ; ·-· = {!!}
-        ; 1· = {!!}
-        ; 0· = {!!}
-        }
-    }
+ record { Carrier = Carrier₂ ; _≈_ = _≈₂_ ; _+m_ = _+m₂_
+        ; 0m = 0m₂ ; _·_ = _·₂_ ; isSemimodule = isSemimodule₂ }
+ = record
+     { Carrier = Carrier₁ × Carrier₂
+     ; _≈_ = λ { (a₁ , b₁) (a₂ , b₂) → (a₁ ≈₁ a₁) × (b₂ ≈₂ b₂) }
+     ; _+m_ = λ { (a₁ , b₁) (a₂ , b₂) → (a₁ +m₁ a₂) , (b₁ +m₂ b₂) }
+     ; 0m = 0m₁ , 0m₂
+     ; _·_ = λ { s (a₁ , a₂) → (s ·₁ a₁) , (s ·₂ a₂) }
+     ; isSemimodule = record
+         { isMonoid = {!!}
+         ; ·-distribˡ = {!!}
+         ; ·-distribʳ = {!!}
+         ; ·-· = {!!}
+         ; 1· = {!!}
+         ; 0· = {!!}
+         }
+     }
 
 -- Dang. There's a lot of work to be done here.
 -- Are they in Agda's standard library and I'm just not seeing them?
 -- TODO: post an issue.
-
-{-
-
--}
