@@ -5,6 +5,7 @@ open import Level
 module MorphismBundles {c ℓ : Level} where
 
 open import Function
+open import Function.Equality renaming (id to ⟶-id; _∘_ to _⟶-∘_ )
 open import Relation.Binary.Definitions
 open import Relation.Binary.Core using (Rel)
 open import Relation.Binary.Bundles using (Setoid)
@@ -17,29 +18,32 @@ import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 record SemigroupMorphism (From : Semigroup c ℓ) (To : Semigroup c ℓ)
         : Set (suc (c ⊔ ℓ)) where
   field
-    ⟦_⟧ : Semigroup.Carrier From → Semigroup.Carrier To
+    -- ⟦_⟧ : Semigroup.Carrier From → Semigroup.Carrier To
+    -- isSemigroupMorphism : IsSemigroupMorphism From To ⟦_⟧
+
+    setoidM : Semigroup.setoid From ⟶ Semigroup.setoid To
+  ⟦_⟧ : Semigroup.Carrier From → Semigroup.Carrier To
+  ⟦_⟧ = setoidM ⟨$⟩_
+  field
     isSemigroupMorphism : IsSemigroupMorphism From To ⟦_⟧
-
   open IsSemigroupMorphism isSemigroupMorphism public
-
--- TODO: maybe make ⟦_⟧ be a setoid morphism rather than a regular function.
 
 open SemigroupMorphism
 
 idᴴ : {A : Semigroup c ℓ} → SemigroupMorphism A A
 idᴴ {A} = record
-  { ⟦_⟧ = id
+  { setoidM = ⟶-id
   ; isSemigroupMorphism = record
-      { ⟦⟧-cong = id
-      ; ∙-homo = λ _ _ → Semigroup.refl A
-      }
+     { ⟦⟧-cong = id
+     ; ∙-homo = λ _ _ → Semigroup.refl A
+     }
   }
 
 infixr 9 _∘ᴴ_
 _∘ᴴ_ : ∀ {A B C : Semigroup c ℓ}
          → SemigroupMorphism B C → SemigroupMorphism A B → SemigroupMorphism A C
 _∘ᴴ_ {A} {B} {C} G F = record
-  { ⟦_⟧ = G.⟦_⟧ ∘ F.⟦_⟧
+  { setoidM = G.setoidM ⟶-∘ F.setoidM
   ; isSemigroupMorphism = record
       { ⟦⟧-cong = G.⟦⟧-cong ∘ F.⟦⟧-cong
       ; ∙-homo = λ x y →
@@ -63,6 +67,14 @@ _≈ᴴ_ {A} {B} f g = ∀ x y → x A.≈ y → ⟦ f ⟧ x B.≈ ⟦ g ⟧ y
  where module A = Semigroup A
        module B = Semigroup B
 
+-- -- Equivalently? Not quite.
+-- _≈ᴴ_ {A} {B} f g = Setoid._≈_ (A.setoid ⇨ B.setoid) F.setoidM G.setoidM
+--  where
+--    module A = Semigroup A
+--    module B = Semigroup B
+--    module F = SemigroupMorphism f
+--    module G = SemigroupMorphism g
+
 -- ≈ᴴ-refl : ∀ {A B : Semigroup c ℓ} → {f : SemigroupMorphism A B} → f ≈ᴴ f
 ≈ᴴ-refl : ∀ {A B : Semigroup c ℓ} → Reflexive {A = SemigroupMorphism A B} _≈ᴴ_
 ≈ᴴ-refl {_} {_} {f} = λ _ _ → F.⟦⟧-cong
@@ -70,59 +82,37 @@ _≈ᴴ_ {A} {B} f g = ∀ x y → x A.≈ y → ⟦ f ⟧ x B.≈ ⟦ g ⟧ y
 
 ≈ᴴ-sym : ∀ {A B : Semigroup c ℓ} → {f g : SemigroupMorphism A B}
        → f ≈ᴴ g → g ≈ᴴ f
-≈ᴴ-sym {A} {B} {f} {g} f≈g x y x≈y =
-  {!!}
-  -- begin
-  --   G.⟦ x ⟧   ≈⟨ {!!} ⟩  -- f≈g x≈y
-  --   G.⟦ y ⟧   ≈⟨ {!!} ⟩
-  --   F.⟦ y ⟧   ∎
-
-  -- -- Goal: G.⟦ x ⟧ B.≈ F.⟦ y ⟧
-  -- begin
-  --   G.⟦ x ⟧   ≈⟨ {!!} ⟩  -- f≈g x≈y
-  --   G.⟦ y ⟧   ≈⟨ {!!} ⟩
-  --   F.⟦ y ⟧   ∎
-
+≈ᴴ-sym {A} {B} {f} {g} f≈g x y x≈y = B.sym (f≈g y x (A.sym x≈y))
  where
    module A = Semigroup A
    module B = Semigroup B
    module F = SemigroupMorphism f
    module G = SemigroupMorphism g
-   -- open B.setoid
-   open SetoidReasoning B.setoid
-
--- record IsEquivalence : Set (a ⊔ ℓ) where
---   field
---     refl  : Reflexive _≈_
---     sym   : Symmetric _≈_
---     trans : Transitive _≈_
-
--- Sym : REL A B ℓ₁ → REL B A ℓ₂ → Set _
--- Sym P Q = P ⇒ flip Q
 
 
-setoidᴴ : ∀ {A B : Semigroup c ℓ} → Setoid _ _
-setoidᴴ {A} {B} = record
-  { Carrier = SemigroupMorphism A B
-  ; _≈_ = _≈ᴴ_
-  ; isEquivalence = record
-     { refl = λ x y q → {!!}
-     ; sym = {!!}
-     ; trans = {!!}
-     }
-  } where module A = Semigroup A
-          module B = Semigroup B
+∘-assoc : ∀ {A B C D : Semigroup c ℓ}
+        → {h : SemigroupMorphism C D} → {g : SemigroupMorphism B C} → {f : SemigroupMorphism A B}
+        → (h ∘ᴴ g) ∘ᴴ f ≈ᴴ h ∘ᴴ (g ∘ᴴ f)
+∘-assoc {A} {B} {C} {D} {h} {g} {f} =
+  λ x y x~y →
+  -- ⟦ ((h ∘ᴴ g) ∘ᴴ f) ⟧ x D.≈ ⟦ h ∘ᴴ (g ∘ᴴ f) ⟧ y
+  begin
+    ⟦ (h ∘ᴴ g) ∘ᴴ f ⟧ x  ≈⟨ {!!} ⟩
+    ⟦ (h ∘ᴴ g) ∘ᴴ f ⟧ x  ≈⟨ {!!} ⟩
+    ⟦ h ∘ᴴ (g ∘ᴴ f) ⟧ y    ∎
 
+ -- begin
+ --    (h ∘ᴴ g) ∘ᴴ f   ≈⟨ ? ⟩
+ --    h ∘ᴴ (g ∘ᴴ f)      ∎
 
-
--- record Setoid c ℓ : Set (suc (c ⊔ ℓ)) where
---   infix 4 _≈_
---   field
---     Carrier       : Set c
---     _≈_           : Rel Carrier ℓ
---     isEquivalence : IsEquivalence _≈_
-
-
+  where
+    module F = SemigroupMorphism f
+    module G = SemigroupMorphism g
+    module A = Semigroup A
+    module B = Semigroup B
+    module C = Semigroup C
+    module D = Semigroup D
+    open SetoidReasoning D.setoid
 
 -- ∘-assoc : ∀ {A B C D : Semigroup c ℓ}
 --         → {h : SemigroupMorphism C D} → {g : SemigroupMorphism B C} → {f : SemigroupMorphism A B}
@@ -140,9 +130,6 @@ setoidᴴ {A} {B} = record
 --     module D = Semigroup D
 --     open SetoidReasoning D.setoid
 
-
-
-----------
 
 open import Categories.Category.Core
 
