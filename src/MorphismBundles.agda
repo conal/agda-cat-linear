@@ -36,11 +36,16 @@ module _ (M₁ M₂ : Magma a ℓ) where
     field magmaHomomorphism : MagmaHomomorphism
     open MagmaHomomorphism magmaHomomorphism public
     field injective : Injective ⟦_⟧
+    homomorphism : MagmaHomomorphism
+    homomorphism = record { isMagmaHomomorphism = isMagmaHomomorphism }
 
   record MagmaIsomorphism : Set (a ⊔ ℓ) where
     field magmaMonomorphism : MagmaMonomorphism
     open MagmaMonomorphism magmaMonomorphism public
     field surjective : Surjective ⟦_⟧
+    monomorphism : MagmaMonomorphism
+    monomorphism = record
+     { magmaHomomorphism = magmaHomomorphism ; injective = injective }
 
 module _ (G₁ G₂ : Semigroup a ℓ) where
   module G₁ = Semigroup G₁
@@ -54,8 +59,6 @@ module _ (G₁ G₂ : Semigroup a ℓ) where
 
   SemigroupIsomorphism  : Set (a ⊔ ℓ)
   SemigroupIsomorphism  = MagmaIsomorphism  G₁.magma G₂.magma
-
--- TODO: maybe provide 
 
 {-
 
