@@ -49,6 +49,32 @@ module _ (M₁ M₂ : Magma a ℓ) where
     open MagmaMonomorphism magmaMonomorphism public
     field surjective : F.Surjective ⟦_⟧
 
+-- infix 4 _≈-homo_
+-- _≈-homo_ : ∀ {a ℓ} → {A B : Magma a ℓ} → Rel (MagmaHomomorphism A B) {!!}
+-- _≈-homo_ {_} {_} {A} {B} F G = ∀ {x y} → x A.≈ y → F.⟦ x ⟧ B.≈ G.⟦ y ⟧
+--  where
+--    module A = Magma A
+--    module B = Magma B
+--    module F = MagmaHomomorphism F
+--    module G = MagmaHomomorphism G
+
+-- I don't think we really need y here, given ⟦_⟧-cong.
+
+infix 4 _≈-homo_
+_≈-homo_ : ∀ {a ℓ} → {A B : Magma a ℓ} → Rel (MagmaHomomorphism A B) (a ⊔ ℓ)
+_≈-homo_ {_} {_} {A} {B} F G = ∀ {x} → F.⟦ x ⟧ B.≈ G.⟦ x ⟧
+ where
+   module A = Magma A
+   module B = Magma B
+   module F = MagmaHomomorphism F
+   module G = MagmaHomomorphism G
+
+≈-homo-refl : ∀ {a ℓ} → {A B : Magma a ℓ} → Reflexive {A = MagmaHomomorphism A B} _≈-homo_
+≈-homo-refl {B = B} = Magma.refl B
+
+≈-homo-sym : ∀ {a ℓ} → {A B : Magma a ℓ} → {F G : MagmaHomomorphism A B}
+           → (F ≈-homo G) → (G ≈-homo F)
+≈-homo-sym {B = B} f≈g = Magma.sym B f≈g
 
 id-homo : {A : Magma a ℓ} → MagmaHomomorphism A A
 id-homo {A = A} = record
@@ -79,12 +105,17 @@ _∘-homo_ {_} {_} {A} {B} {C} G F = record
       module F = MagmaHomomorphism F ; f = F.⟦_⟧
       module G = MagmaHomomorphism G ; g = G.⟦_⟧
 
+∘-assoc : ∀ {a ℓ} {A B C D : Magma a ℓ}
+        → {h : MagmaHomomorphism C D} → {g : MagmaHomomorphism B C} → {f : MagmaHomomorphism A B}
+        → (h ∘-homo g) ∘-homo f ≈-homo h ∘-homo (g ∘-homo f)
+∘-assoc {D = D} = Magma.refl D
 
 -- Injective f = ∀ {x y} → f x ≈₂ f y → x ≈₁ y
 
 id-mono : {A : Magma a ℓ} → MagmaMonomorphism A A
 id-mono = record { magmaHomomorphism = id-homo ; injective = id }
 
+infixr 9 _∘-mono_
 _∘-mono_ : ∀ {a ℓ} {A B C : Magma a ℓ}
          → MagmaMonomorphism B C → MagmaMonomorphism A B → MagmaMonomorphism A C
 G ∘-mono F = record
@@ -101,6 +132,7 @@ id-iso : {A : Magma a ℓ} → MagmaIsomorphism A A
 id-iso {A = A} = record { magmaMonomorphism = id-mono ; surjective = _, refl }
   where open Magma A
 
+infixr 9 _∘-iso_
 _∘-iso_ : ∀ {a ℓ} {A B C : Magma a ℓ}
         → MagmaIsomorphism B C → MagmaIsomorphism A B → MagmaIsomorphism A C
 _∘-iso_ {_} {_} {A} {B} {C} G F = record
@@ -122,12 +154,10 @@ _∘-iso_ {_} {_} {A} {B} {C} G F = record
       module G = MagmaIsomorphism G ; g = G.⟦_⟧
 
 
--- The id and _∘_ for surjectived closely resemble the corresponding
+-- The id and _∘_ for surjective closely resemble the corresponding
 -- definitions in generalized automatic differentiation. TODO: investigate!
 
 -- Maybe injectivity and surjectivity are more easily defined via setoid.
-
-{-
 
 -- Next, identity and composition for magma homomorphism, monomorphism, and isomorphism.
 -- Also associativity and whatever else we need for a Category instance.
@@ -135,78 +165,22 @@ _∘-iso_ {_} {_} {A} {B} {C} G F = record
 -- Refactor so we can add injective and surjective to these definitions more succinctly.
 -- Then Monoid, Group, etc.
 
--- ≈ᴴ-refl : ∀ {A B : Semigroup c ℓ} → {f : SemigroupMorphism A B} → f ≈ᴴ f
-≈ᴴ-refl : ∀ {A B : Semigroup c ℓ} → Reflexive {A = SemigroupMorphism A B} _≈ᴴ_
-≈ᴴ-refl {_} {_} {f} = λ _ _ → F.⟦⟧-cong
- where module F = SemigroupMorphism f
-
-≈ᴴ-sym : ∀ {A B : Semigroup c ℓ} → {f g : SemigroupMorphism A B}
-       → f ≈ᴴ g → g ≈ᴴ f
-≈ᴴ-sym {A} {B} {f} {g} f≈g x y x≈y = B.sym (f≈g y x (A.sym x≈y))
- where
-   module A = Semigroup A
-   module B = Semigroup B
-   module F = SemigroupMorphism f
-   module G = SemigroupMorphism g
-
-
-∘-assoc : ∀ {A B C D : Semigroup c ℓ}
-        → {h : SemigroupMorphism C D} → {g : SemigroupMorphism B C} → {f : SemigroupMorphism A B}
-        → (h ∘-homo g) ∘-homo f ≈ᴴ h ∘-homo (g ∘-homo f)
-∘-assoc {A} {B} {C} {D} {h} {g} {f} =
-  λ x y x~y →
-  -- ⟦ ((h ∘-homo g) ∘-homo f) ⟧ x D.≈ ⟦ h ∘-homo (g ∘-homo f) ⟧ y
-  begin
-    ⟦ (h ∘-homo g) ∘-homo f ⟧ x  ≈⟨ {!!} ⟩
-    ⟦ (h ∘-homo g) ∘-homo f ⟧ x  ≈⟨ {!!} ⟩
-    ⟦ h ∘-homo (g ∘-homo f) ⟧ y    ∎
-
- -- begin
- --    (h ∘-homo g) ∘-homo f   ≈⟨ ? ⟩
- --    h ∘-homo (g ∘-homo f)      ∎
-
-  where
-    module F = SemigroupMorphism f
-    module G = SemigroupMorphism g
-    module A = Semigroup A
-    module B = Semigroup B
-    module C = Semigroup C
-    module D = Semigroup D
-    open SetoidReasoning D.setoid
-
--- ∘-assoc : ∀ {A B C D : Semigroup c ℓ}
---         → {h : SemigroupMorphism C D} → {g : SemigroupMorphism B C} → {f : SemigroupMorphism A B}
---         → (h ∘-homo g) ∘-homo f ≈ᴴ h ∘-homo (g ∘-homo f)
--- ∘-assoc {A} {B} {C} {D} {h} {g} {f} =
---  begin
---     (h ∘-homo g) ∘-homo f   ≈⟨ ? ⟩
---     h ∘-homo (g ∘-homo f)      ∎
---   where
---     module F = SemigroupMorphism f
---     module G = SemigroupMorphism g
---     module A = Semigroup A
---     module B = Semigroup B
---     module C = Semigroup C
---     module D = Semigroup D
---     open SetoidReasoning D.setoid
-
-
 open import Categories.Category.Core
 
-Semigroups : Category (suc c ⊔ suc ℓ) (suc c ⊔ suc ℓ) (c ⊔ ℓ)
-Semigroups = record
-  { Obj = Semigroup c ℓ
-  ; _⇒_ = SemigroupMorphism
-  ; _≈_ = _≈ᴴ_
+-- Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (suc a ⊔ suc ℓ) (a ⊔ ℓ)
+Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (a ⊔ ℓ) (a ⊔ ℓ)
+Magmas {a} {ℓ} = record
+  { Obj = Magma a ℓ
+  ; _⇒_ = MagmaHomomorphism
+  ; _≈_ = _≈-homo_
   ; id = id-homo
   ; _∘_ = _∘-homo_
-  ; assoc = {!!}
-  ; sym-assoc = {!!}
-  ; identityˡ = {!!}
-  ; identityʳ = {!!}
-  ; identity² = {!!}
+  ; assoc = ∘-assoc
+  ; sym-assoc = λ {A} {B} {C} {D} {f} {g} {h} {x} → Magma.refl D
+  ; identityˡ = λ {A} {B} {f} {x} → Magma.refl B
+  ; identityʳ = λ {A} {B} {f} {x} → Magma.refl B
+  ; identity² = λ {A} {x} → Magma.refl A
   ; equiv = {!!}
   ; ∘-resp-≈ = {!!}
   }
 
--}
