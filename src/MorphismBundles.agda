@@ -24,7 +24,7 @@ private
 module _ (M₁ M₂ : Magma a ℓ) where
   module M₁ = Magma M₁
   module M₂ = Magma M₂
-  open FunctionDefinitions M₁._≈_ M₂._≈_ using (Injective; Surjective)
+  module F = FunctionDefinitions M₁._≈_ M₂._≈_
 
   record MagmaHomomorphism : Set (a ⊔ ℓ) where
     field
@@ -35,14 +35,14 @@ module _ (M₁ M₂ : Magma a ℓ) where
   record MagmaMonomorphism : Set (a ⊔ ℓ) where
     field magmaHomomorphism : MagmaHomomorphism
     open MagmaHomomorphism magmaHomomorphism public
-    field injective : Injective ⟦_⟧
+    field injective : F.Injective ⟦_⟧
     homomorphism : MagmaHomomorphism
     homomorphism = record { isMagmaHomomorphism = isMagmaHomomorphism }
 
   record MagmaIsomorphism : Set (a ⊔ ℓ) where
     field magmaMonomorphism : MagmaMonomorphism
     open MagmaMonomorphism magmaMonomorphism public
-    field surjective : Surjective ⟦_⟧
+    field surjective : F.Surjective ⟦_⟧
     monomorphism : MagmaMonomorphism
     monomorphism = record
      { magmaHomomorphism = magmaHomomorphism ; injective = injective }
@@ -67,6 +67,7 @@ module _ (G₁ G₂ : Semigroup a ℓ) where
 -- Next, identity and composition for magma homomorphism, monomorphism, and isomorphism.
 -- Also associativity and whatever else we need for a Category instance.
 -- We'll use these morphisms for Semigroup as well as Magma.
+-- Refactor so we can add injective and surjective to these definitions more succinctly.
 -- Then Monoid, Group, etc.
 
 {-
