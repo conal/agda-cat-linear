@@ -158,20 +158,20 @@ _∘-iso_ {_} {_} {A} {B} {C} G F = record
 
 open import Categories.Category.Core
 
--- Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (suc a ⊔ suc ℓ) (a ⊔ ℓ)
-Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (a ⊔ ℓ) (a ⊔ ℓ)
-Magmas {a} {ℓ} = record
-  { Obj = Magma a ℓ
-  ; _⇒_ = MagmaHomomorphism
-  ; _≈_ = _≈-homo_
-  ; id = id-homo
-  ; _∘_ = _∘-homo_
-  ; assoc = ∘-assoc
-  ; sym-assoc = λ {A} {B} {C} {D} {f} {g} {h} {x} → Magma.refl D
-  ; identityˡ = λ {A} {B} {f} {x} → Magma.refl B
-  ; identityʳ = λ {A} {B} {f} {x} → Magma.refl B
-  ; identity² = λ {A} {x} → Magma.refl A
-  ; equiv = {!!}
-  ; ∘-resp-≈ = {!!}
-  }
+-- -- Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (suc a ⊔ suc ℓ) (a ⊔ ℓ)
+-- Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (a ⊔ ℓ) (a ⊔ ℓ)
+-- Magmas {a} {ℓ} = record
+--   { Obj = Magma a ℓ
+--   ; _⇒_ = MagmaHomomorphism
+--   ; _≈_ = _≈-homo_
+--   ; id = id-homo
+--   ; _∘_ = _∘-homo_
+--   ; assoc = ∘-assoc
+--   ; sym-assoc = λ {A} {B} {C} {D} {f} {g} {h} {x} → Magma.refl D
+--   ; identityˡ = λ {A} {B} {f} {x} → Magma.refl B
+--   ; identityʳ = λ {A} {B} {f} {x} → Magma.refl B
+--   ; identity² = λ {A} {x} → Magma.refl A
+--   ; equiv = {!!}
+--   ; ∘-resp-≈ = {!!}
+--   }
 
