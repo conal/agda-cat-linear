@@ -67,20 +67,18 @@ _∘-homo_ {a} {ℓ} {A} {B} {C} G F = record
   ; isMagmaHomomorphism = record
     { isRelHomomorphism = record { cong = G.⟦⟧-cong ∘ F.⟦⟧-cong }
     ; homo = λ x y →
-      -- G.⟦ F.⟦ x A.∙ y ⟧ ⟧ C.≈ G.⟦ F.⟦ x ⟧ ⟧ C.∙ G.⟦ F.⟦ y ⟧ ⟧
       let open SetoidReasoning C.setoid in
       begin
-        G.⟦ F.⟦ x A.∙ y ⟧ ⟧             ≈⟨ G.⟦⟧-cong (F.homo x y) ⟩
-        G.⟦ F.⟦ x ⟧ B.∙ F.⟦ y ⟧ ⟧       ≈⟨ G.homo (F.⟦ x ⟧) (F.⟦ y ⟧) ⟩
-        G.⟦ F.⟦ x ⟧ ⟧ C.∙ G.⟦ F.⟦ y ⟧ ⟧ ∎
+        g (f (x A.∙ y))     ≈⟨ G.⟦⟧-cong (F.homo x y) ⟩
+        g (f x B.∙ f y)     ≈⟨ G.homo (f x) (f y) ⟩
+        g (f x) C.∙ g (f y) ∎
     }
   } where
-      module F = MagmaHomomorphism F
-      module G = MagmaHomomorphism G
       module A = Magma A
       module B = Magma B
       module C = Magma C
-
+      module F = MagmaHomomorphism F ; f = F.⟦_⟧
+      module G = MagmaHomomorphism G ; g = G.⟦_⟧
 
 -- Injective f = ∀ {x y} → f x ≈₂ f y → x ≈₁ y
 
@@ -108,23 +106,23 @@ _∘-iso_ : ∀ {a ℓ} {A B C : Magma a ℓ}
 _∘-iso_ {a} {ℓ} {A} {B} {C} G F = record
   { magmaMonomorphism = G.magmaMonomorphism ∘-mono F.magmaMonomorphism
   ; surjective = -- G.surjective ∘ F.surjective  -- in an appropriate sense
-                 λ (z : C.Carrier) →
-                   let (y , gy≈z) = G.surjective z
-                       (x , fx≈y) = F.surjective y
-                       open SetoidReasoning C.setoid
-                       gfx≈z : G.⟦ F.⟦ x ⟧ ⟧ C.≈ z
-                       gfx≈z = begin
-                                 G.⟦ F.⟦ x ⟧ ⟧ ≈⟨ G.⟦⟧-cong fx≈y ⟩
-                                 G.⟦ y ⟧       ≈⟨ gy≈z ⟩
-                                 z             ∎
-                    in
-                       (x , gfx≈z)
+                 λ z → let (y , gy≈z) = G.surjective z
+                           (x , fx≈y) = F.surjective y
+                           open SetoidReasoning C.setoid
+                           gfx≈z : g (f x) C.≈ z
+                           gfx≈z = begin
+                                     g (f x) ≈⟨ G.⟦⟧-cong fx≈y ⟩
+                                     g y     ≈⟨ gy≈z ⟩
+                                     z       ∎
+                        in
+                           (x , gfx≈z)
   } where
-      module F = MagmaIsomorphism F
-      module G = MagmaIsomorphism G
       module C = Magma C
+      module F = MagmaIsomorphism F ; f = F.⟦_⟧
+      module G = MagmaIsomorphism G ; g = G.⟦_⟧
 
--- The id and _∘_ for surjectived closely resembles the corresponding
+
+-- The id and _∘_ for surjectived closely resemble the corresponding
 -- definitions in generalized automatic differentiation. TODO: investigate!
 
 -- Maybe injectivity and surjectivity are more easily defined via setoid.
