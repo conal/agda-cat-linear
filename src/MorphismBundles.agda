@@ -49,15 +49,6 @@ module _ (M₁ M₂ : Magma a ℓ) where
     open MagmaMonomorphism magmaMonomorphism public
     field surjective : F.Surjective ⟦_⟧
 
--- infix 4 _≈-homo_
--- _≈-homo_ : ∀ {a ℓ} → {A B : Magma a ℓ} → Rel (MagmaHomomorphism A B) {!!}
--- _≈-homo_ {_} {_} {A} {B} F G = ∀ {x y} → x A.≈ y → F.⟦ x ⟧ B.≈ G.⟦ y ⟧
---  where
---    module A = Magma A
---    module B = Magma B
---    module F = MagmaHomomorphism F
---    module G = MagmaHomomorphism G
-
 -- I don't think we really need y here, given ⟦_⟧-cong.
 
 infix 4 _≈-homo_
