@@ -22,14 +22,14 @@ private
     a ℓ : Level
 
 module _ (M₁ M₂ : Magma a ℓ) where
-  open Magma M₁ renaming (Carrier to C₁; rawMagma to raw₁; _≈_ to _≈₁_)
-  open Magma M₂ renaming (Carrier to C₂; rawMagma to raw₂; _≈_ to _≈₂_)
-  open FunctionDefinitions _≈₁_ _≈₂_
+  module M₁ = Magma M₁
+  module M₂ = Magma M₂
+  open FunctionDefinitions M₁._≈_ M₂._≈_ using (Injective; Surjective)
 
   record MagmaHomomorphism : Set (a ⊔ ℓ) where
     field
-      ⟦_⟧ : C₁ → C₂
-      isMagmaHomomorphism : IsMagmaHomomorphism raw₁ raw₂ ⟦_⟧
+      ⟦_⟧ : M₁.Carrier → M₂.Carrier
+      isMagmaHomomorphism : IsMagmaHomomorphism M₁.rawMagma M₂.rawMagma ⟦_⟧
     open IsMagmaHomomorphism isMagmaHomomorphism public
 
   record MagmaMonomorphism : Set (a ⊔ ℓ) where
@@ -41,8 +41,6 @@ module _ (M₁ M₂ : Magma a ℓ) where
     field magmaMonomorphism : MagmaMonomorphism
     open MagmaMonomorphism magmaMonomorphism public
     field surjective : Surjective ⟦_⟧
-
--- TODO: I'm only using C₁, C₂, raw₁, and raw₂ one each, so don't bother.
 
 module _ (G₁ G₂ : Semigroup a ℓ) where
   open Semigroup G₁ using () renaming (magma to magma₁)
