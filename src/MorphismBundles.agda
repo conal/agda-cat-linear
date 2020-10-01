@@ -62,16 +62,15 @@ id-homo {A = A} = record
 infixr 9 _∘-homo_
 _∘-homo_ : ∀ {a ℓ} {A B C : Magma a ℓ}
          → MagmaHomomorphism B C → MagmaHomomorphism A B → MagmaHomomorphism A C
-_∘-homo_ {a} {ℓ} {A} {B} {C} G F = record
+_∘-homo_ {_} {_} {A} {B} {C} G F = record
   { setoidM = G.setoidM ⟶-∘ F.setoidM
   ; isMagmaHomomorphism = record
     { isRelHomomorphism = record { cong = G.⟦⟧-cong ∘ F.⟦⟧-cong }
-    ; homo = λ x y →
-      let open SetoidReasoning C.setoid in
-      begin
-        g (f (x A.∙ y))     ≈⟨ G.⟦⟧-cong (F.homo x y) ⟩
-        g (f x B.∙ f y)     ≈⟨ G.homo (f x) (f y) ⟩
-        g (f x) C.∙ g (f y) ∎
+    ; homo = λ x y → let open SetoidReasoning C.setoid in
+                     begin
+                       g (f (x A.∙ y))     ≈⟨ G.⟦⟧-cong (F.homo x y) ⟩
+                       g (f x B.∙ f y)     ≈⟨ G.homo (f x) (f y) ⟩
+                       g (f x) C.∙ g (f y) ∎
     }
   } where
       module A = Magma A
@@ -79,6 +78,7 @@ _∘-homo_ {a} {ℓ} {A} {B} {C} G F = record
       module C = Magma C
       module F = MagmaHomomorphism F ; f = F.⟦_⟧
       module G = MagmaHomomorphism G ; g = G.⟦_⟧
+
 
 -- Injective f = ∀ {x y} → f x ≈₂ f y → x ≈₁ y
 
@@ -103,7 +103,7 @@ id-iso {A = A} = record { magmaMonomorphism = id-mono ; surjective = _, refl }
 
 _∘-iso_ : ∀ {a ℓ} {A B C : Magma a ℓ}
         → MagmaIsomorphism B C → MagmaIsomorphism A B → MagmaIsomorphism A C
-_∘-iso_ {a} {ℓ} {A} {B} {C} G F = record
+_∘-iso_ {_} {_} {A} {B} {C} G F = record
   { magmaMonomorphism = G.magmaMonomorphism ∘-mono F.magmaMonomorphism
   ; surjective = -- G.surjective ∘ F.surjective  -- in an appropriate sense
                  λ z → let (y , gy≈z) = G.surjective z
@@ -134,51 +134,6 @@ _∘-iso_ {a} {ℓ} {A} {B} {C} G F = record
 -- We'll use these morphisms for Semigroup as well as Magma.
 -- Refactor so we can add injective and surjective to these definitions more succinctly.
 -- Then Monoid, Group, etc.
-
-id-homo : {A : Semigroup c ℓ} → SemigroupMorphism A A
-id-homo {A} = record
-  { setoidM = ⟶-id
-  ; isSemigroupMorphism = record
-     { ⟦⟧-cong = id
-     ; ∙-homo = λ _ _ → Semigroup.refl A
-     }
-  }
-
-infixr 9 _∘-homo_
-_∘-homo_ : ∀ {A B C : Semigroup c ℓ}
-         → SemigroupMorphism B C → SemigroupMorphism A B → SemigroupMorphism A C
-_∘-homo_ {A} {B} {C} G F = record
-  { setoidM = G.setoidM ⟶-∘ F.setoidM
-  ; isSemigroupMorphism = record
-      { ⟦⟧-cong = G.⟦⟧-cong ∘ F.⟦⟧-cong
-      ; ∙-homo = λ x y →
-        -- G.⟦ F.⟦ x A.∙ y ⟧ ⟧ C.≈ G.⟦ F.⟦ x ⟧ ⟧ C.∙ G.⟦ F.⟦ y ⟧ ⟧
-        begin
-          G.⟦ F.⟦ x A.∙ y ⟧ ⟧              ≈⟨ G.⟦⟧-cong (F.∙-homo x y) ⟩
-          G.⟦ F.⟦ x ⟧ B.∙ F.⟦ y ⟧ ⟧        ≈⟨ G.∙-homo (F.⟦ x ⟧) (F.⟦ y ⟧) ⟩
-          G.⟦ F.⟦ x ⟧ ⟧ C.∙ G.⟦ F.⟦ y ⟧ ⟧  ∎
-      }
-  } where
-      module F = SemigroupMorphism F
-      module G = SemigroupMorphism G
-      module A = Semigroup A
-      module B = Semigroup B
-      module C = Semigroup C
-      open SetoidReasoning C.setoid
-
-infix 4 _≈ᴴ_
-_≈ᴴ_ : ∀ {A B : Semigroup c ℓ} → Rel (SemigroupMorphism A B) (c ⊔ ℓ)
-_≈ᴴ_ {A} {B} f g = ∀ x y → x A.≈ y → ⟦ f ⟧ x B.≈ ⟦ g ⟧ y
- where module A = Semigroup A
-       module B = Semigroup B
-
--- -- Equivalently? Not quite.
--- _≈ᴴ_ {A} {B} f g = Setoid._≈_ (A.setoid ⇨ B.setoid) F.setoidM G.setoidM
---  where
---    module A = Semigroup A
---    module B = Semigroup B
---    module F = SemigroupMorphism f
---    module G = SemigroupMorphism g
 
 -- ≈ᴴ-refl : ∀ {A B : Semigroup c ℓ} → {f : SemigroupMorphism A B} → f ≈ᴴ f
 ≈ᴴ-refl : ∀ {A B : Semigroup c ℓ} → Reflexive {A = SemigroupMorphism A B} _≈ᴴ_
