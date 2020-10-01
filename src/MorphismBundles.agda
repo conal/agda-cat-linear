@@ -43,34 +43,21 @@ module _ (M₁ M₂ : Magma a ℓ) where
     field surjective : Surjective ⟦_⟧
 
 module _ (G₁ G₂ : Semigroup a ℓ) where
-  open Semigroup G₁ using () renaming (magma to magma₁)
-  open Semigroup G₂ using () renaming (magma to magma₂)
+  module G₁ = Semigroup G₁
+  module G₂ = Semigroup G₂
 
   SemigroupHomomorphism : Set (a ⊔ ℓ)
-  SemigroupHomomorphism = MagmaHomomorphism magma₁ magma₂
+  SemigroupHomomorphism = MagmaHomomorphism G₁.magma G₂.magma
 
   SemigroupMonomorphism : Set (a ⊔ ℓ)
-  SemigroupMonomorphism = MagmaMonomorphism magma₁ magma₂
+  SemigroupMonomorphism = MagmaMonomorphism G₁.magma G₂.magma
 
   SemigroupIsomorphism  : Set (a ⊔ ℓ)
-  SemigroupIsomorphism  = MagmaIsomorphism  magma₁ magma₂
+  SemigroupIsomorphism  = MagmaIsomorphism  G₁.magma G₂.magma
+
+-- TODO: maybe provide 
 
 {-
-
-record SemigroupMorphism (From : Semigroup c ℓ) (To : Semigroup c ℓ)
-        : Set (suc (c ⊔ ℓ)) where
-  field
-    -- ⟦_⟧ : Semigroup.Carrier From → Semigroup.Carrier To
-    -- isSemigroupMorphism : IsSemigroupMorphism From To ⟦_⟧
-
-    setoidM : Semigroup.setoid From ⟶ Semigroup.setoid To
-  ⟦_⟧ : Semigroup.Carrier From → Semigroup.Carrier To
-  ⟦_⟧ = setoidM ⟨$⟩_
-  field
-    isSemigroupMorphism : IsSemigroupMorphism From To ⟦_⟧
-  open IsSemigroupMorphism isSemigroupMorphism public
-
-open SemigroupMorphism
 
 idᴴ : {A : Semigroup c ℓ} → SemigroupMorphism A A
 idᴴ {A} = record
