@@ -70,9 +70,9 @@ _∘-homo_ {a} {ℓ} {A} {B} {C} G F = record
       -- G.⟦ F.⟦ x A.∙ y ⟧ ⟧ C.≈ G.⟦ F.⟦ x ⟧ ⟧ C.∙ G.⟦ F.⟦ y ⟧ ⟧
       let open SetoidReasoning C.setoid in
       begin
-        G.⟦ F.⟦ x A.∙ y ⟧ ⟧              ≈⟨ G.⟦⟧-cong (F.homo x y) ⟩
-        G.⟦ F.⟦ x ⟧ B.∙ F.⟦ y ⟧ ⟧        ≈⟨ G.homo (F.⟦ x ⟧) (F.⟦ y ⟧) ⟩
-        G.⟦ F.⟦ x ⟧ ⟧ C.∙ G.⟦ F.⟦ y ⟧ ⟧  ∎
+        G.⟦ F.⟦ x A.∙ y ⟧ ⟧             ≈⟨ G.⟦⟧-cong (F.homo x y) ⟩
+        G.⟦ F.⟦ x ⟧ B.∙ F.⟦ y ⟧ ⟧       ≈⟨ G.homo (F.⟦ x ⟧) (F.⟦ y ⟧) ⟩
+        G.⟦ F.⟦ x ⟧ ⟧ C.∙ G.⟦ F.⟦ y ⟧ ⟧ ∎
     }
   } where
       module F = MagmaHomomorphism F
@@ -112,26 +112,20 @@ _∘-iso_ {a} {ℓ} {A} {B} {C} G F = record
                    let (y , gy≈z) = G.surjective z
                        (x , fx≈y) = F.surjective y
                        open SetoidReasoning C.setoid
-                       gfx≈z : (⟦ G′ ⟧ ∘ ⟦ F′ ⟧) x C.≈ z
+                       gfx≈z : G.⟦ F.⟦ x ⟧ ⟧ C.≈ z
                        gfx≈z = begin
-                                 ⟦ G′ ⟧ (⟦ F′ ⟧ x)   ≈⟨ G.⟦⟧-cong fx≈y ⟩
-                                 ⟦ G′ ⟧ y            ≈⟨ gy≈z ⟩
-                                 z                   ∎
+                                 G.⟦ F.⟦ x ⟧ ⟧ ≈⟨ G.⟦⟧-cong fx≈y ⟩
+                                 G.⟦ y ⟧       ≈⟨ gy≈z ⟩
+                                 z             ∎
                     in
                        (x , gfx≈z)
   } where
-      open MagmaMonomorphism
       module F = MagmaIsomorphism F
       module G = MagmaIsomorphism G
-      module A = Magma A
-      module B = Magma B
       module C = Magma C
-      open G using () renaming (magmaMonomorphism to G′)
-      open F using () renaming (magmaMonomorphism to F′)
-      module FD = FunctionDefinitions A._≈_ C._≈_
 
--- This surjective definition closely resembles the chain rule in differential
--- calculus, particularly in the context of AD. TODO: investigate!
+-- The id and _∘_ for surjectived closely resembles the corresponding
+-- definitions in generalized automatic differentiation. TODO: investigate!
 
 -- Maybe injectivity and surjectivity are more easily defined via setoid.
 
