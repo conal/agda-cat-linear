@@ -2,18 +2,62 @@
 
 open import Level
 
-module MorphismBundles {c ℓ : Level} where
+module MorphismBundles where
 
-open import Function
 open import Function.Equality renaming (id to ⟶-id; _∘_ to _⟶-∘_ )
 open import Relation.Binary.Definitions
 open import Relation.Binary.Core using (Rel)
 open import Relation.Binary.Bundles using (Setoid)
 open import Algebra.Core
 open import Algebra.Bundles
-open import Algebra.Morphism
+open import Algebra.Structures
+open import Algebra.Morphism.Structures
+
+import Function.Definitions as FunctionDefinitions
 
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
+
+private
+  variable
+    a ℓ : Level
+
+module _ (M₁ M₂ : Magma a ℓ) where
+  open Magma M₁ renaming (Carrier to C₁; rawMagma to raw₁; _≈_ to _≈₁_)
+  open Magma M₂ renaming (Carrier to C₂; rawMagma to raw₂; _≈_ to _≈₂_)
+  open FunctionDefinitions _≈₁_ _≈₂_
+
+  record MagmaHomomorphism : Set (a ⊔ ℓ) where
+    field
+      ⟦_⟧ : C₁ → C₂
+      isMagmaHomomorphism : IsMagmaHomomorphism raw₁ raw₂ ⟦_⟧
+    open IsMagmaHomomorphism isMagmaHomomorphism public
+
+  record MagmaMonomorphism : Set (a ⊔ ℓ) where
+    field magmaHomomorphism : MagmaHomomorphism
+    open MagmaHomomorphism magmaHomomorphism public
+    field injective : Injective ⟦_⟧
+
+  record MagmaIsomorphism : Set (a ⊔ ℓ) where
+    field magmaMonomorphism : MagmaMonomorphism
+    open MagmaMonomorphism magmaMonomorphism public
+    field surjective : Surjective ⟦_⟧
+
+-- TODO: I'm only using C₁, C₂, raw₁, and raw₂ one each, so don't bother.
+
+module _ (G₁ G₂ : Semigroup a ℓ) where
+  open Semigroup G₁ using () renaming (magma to magma₁)
+  open Semigroup G₂ using () renaming (magma to magma₂)
+
+  SemigroupHomomorphism : Set (a ⊔ ℓ)
+  SemigroupHomomorphism = MagmaHomomorphism magma₁ magma₂
+
+  SemigroupMonomorphism : Set (a ⊔ ℓ)
+  SemigroupMonomorphism = MagmaMonomorphism magma₁ magma₂
+
+  SemigroupIsomorphism  : Set (a ⊔ ℓ)
+  SemigroupIsomorphism  = MagmaIsomorphism  magma₁ magma₂
+
+{-
 
 record SemigroupMorphism (From : Semigroup c ℓ) (To : Semigroup c ℓ)
         : Set (suc (c ⊔ ℓ)) where
@@ -148,3 +192,5 @@ Semigroups = record
   ; equiv = {!!}
   ; ∘-resp-≈ = {!!}
   }
+
+-}
