@@ -4,6 +4,7 @@ open import Level
 
 module MorphismBundles where
 
+open import Function using (id ; _∘_)
 open import Function.Equality renaming (id to ⟶-id; _∘_ to _⟶-∘_ )
 open import Relation.Binary.Definitions
 open import Relation.Binary.Core using (Rel)
@@ -21,15 +22,15 @@ private
   variable
     a ℓ : Level
 
-module _ (M₁ M₂ : Magma a ℓ) where
-  module M₁ = Magma M₁
-  module M₂ = Magma M₂
+module _ (M₁ M₂ : RawMagma a ℓ) where
+  module M₁ = RawMagma M₁
+  module M₂ = RawMagma M₂
   module F = FunctionDefinitions M₁._≈_ M₂._≈_
 
   record MagmaHomomorphism : Set (a ⊔ ℓ) where
     field
       ⟦_⟧ : M₁.Carrier → M₂.Carrier
-      isMagmaHomomorphism : IsMagmaHomomorphism M₁.rawMagma M₂.rawMagma ⟦_⟧
+      isMagmaHomomorphism : IsMagmaHomomorphism M₁ M₂ ⟦_⟧
     open IsMagmaHomomorphism isMagmaHomomorphism public
 
   record MagmaMonomorphism : Set (a ⊔ ℓ) where
@@ -47,28 +48,20 @@ module _ (M₁ M₂ : Magma a ℓ) where
     monomorphism = record
      { magmaHomomorphism = magmaHomomorphism ; injective = injective }
 
--- TODO: maybe refactor so we're taking just RawMagma and then define
--- MagmaHomomorphism etc as SemigroupHomomorphism etc below. Might be more
--- verbose but more consistent.
-
-module _ (G₁ G₂ : Semigroup a ℓ) where
-  module G₁ = Semigroup G₁
-  module G₂ = Semigroup G₂
-
-  SemigroupHomomorphism : Set (a ⊔ ℓ)
-  SemigroupHomomorphism = MagmaHomomorphism G₁.magma G₂.magma
-
-  SemigroupMonomorphism : Set (a ⊔ ℓ)
-  SemigroupMonomorphism = MagmaMonomorphism G₁.magma G₂.magma
-
-  SemigroupIsomorphism  : Set (a ⊔ ℓ)
-  SemigroupIsomorphism  = MagmaIsomorphism  G₁.magma G₂.magma
-
 -- Next, identity and composition for magma homomorphism, monomorphism, and isomorphism.
 -- Also associativity and whatever else we need for a Category instance.
 -- We'll use these morphisms for Semigroup as well as Magma.
 -- Refactor so we can add injective and surjective to these definitions more succinctly.
 -- Then Monoid, Group, etc.
+
+-- open import Algebra.Morphism.Definitions
+
+open import Relation.Binary.Structures using (IsEquivalence)
+
+id-homo : ∀ {c ℓ} {A : RawMagma c ℓ} → IsEquivalence (RawMagma._≈_ A) → MagmaHomomorphism A A
+id-homo {A = A} isEq = record
+  { isMagmaHomomorphism = record
+    { isRelHomomorphism = record { cong = id } ; homo = λ _ _ → IsEquivalence.refl isEq } }
 
 {-
 
