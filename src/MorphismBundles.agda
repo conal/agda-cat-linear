@@ -2,7 +2,7 @@
 
 open import Level
 
-module MorphismBundles where
+module MorphismBundles {a ℓ : Level} where
 
 open import Function using (id ; _∘_)
 open import Function.Equality renaming (id to ⟶-id; _∘_ to _⟶-∘_ )
@@ -18,10 +18,6 @@ open import Algebra.Morphism.Structures
 import Function.Definitions as FunctionDefinitions
 
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
-
-private
-  variable
-    a ℓ : Level
 
 module _ (M₁ M₂ : Magma a ℓ) where
   private
@@ -48,17 +44,17 @@ module _ (M₁ M₂ : Magma a ℓ) where
 -- I don't think we really need y here, given ⟦_⟧-cong.
 
 infix 4 _≈-homo_
-_≈-homo_ : ∀ {a ℓ} → {A B : Magma a ℓ} → Rel (MagmaHomomorphism A B) (a ⊔ ℓ)
-_≈-homo_ {_} {_} {A} {B} F G = ∀ {x} → F.⟦ x ⟧ B.≈ G.⟦ x ⟧
+_≈-homo_ : ∀ {A B : Magma a ℓ} → Rel (MagmaHomomorphism A B) (a ⊔ ℓ)
+_≈-homo_ {A} {B} F G = ∀ {x} → F.⟦ x ⟧ B.≈ G.⟦ x ⟧
  where
    module A = Magma A
    module B = Magma B
    module F = MagmaHomomorphism F
    module G = MagmaHomomorphism G
 
--- ≈-homo-refl : ∀ {a ℓ} {A B : Magma a ℓ} → Reflexive {A = MagmaHomomorphism A B} (_≈-homo_ {a} {ℓ} {A} {B})
--- ≈-homo-refl : ∀ {a ℓ} {A B : Magma a ℓ} → ∀ {F : MagmaHomomorphism A B} → F ≈-homo F
-≈-homo-refl : ∀ {a ℓ} {A B : Magma a ℓ} → ∀ {F : MagmaHomomorphism A B} →
+-- ≈-homo-refl : ∀ {A B : Magma a ℓ} → Reflexive {A = MagmaHomomorphism A B} (_≈-homo_ {A} {B})
+-- ≈-homo-refl : ∀ {A B : Magma a ℓ} → ∀ {F : MagmaHomomorphism A B} → F ≈-homo F
+≈-homo-refl : ∀ {A B : Magma a ℓ} → ∀ {F : MagmaHomomorphism A B} →
   let module A = Magma A
       module B = Magma B
       module F = MagmaHomomorphism F
@@ -69,13 +65,13 @@ _≈-homo_ {_} {_} {A} {B} F G = ∀ {x} → F.⟦ x ⟧ B.≈ G.⟦ x ⟧
 ≈-homo-sym : ∀ {A B : Magma a ℓ} → Symmetric {A = MagmaHomomorphism A B} _≈-homo_
 ≈-homo-sym {B = B} f≈g = Magma.sym B f≈g
 
-≈-homo-trans : ∀ {a ℓ} → {A B : Magma a ℓ} → Transitive {A = MagmaHomomorphism A B} _≈-homo_
+≈-homo-trans : ∀ {A B : Magma a ℓ} → Transitive {A = MagmaHomomorphism A B} _≈-homo_
 ≈-homo-trans {B = B} f≈g g≈h = Magma.trans B f≈g g≈h
 
--- ≈-homo-equiv : ∀ {a ℓ} → {A B : Magma a ℓ} → IsEquivalence {a ⊔ ℓ} {a ⊔ ℓ} {A = MagmaHomomorphism A B} _≈-homo_
-≈-homo-equiv : ∀ {a ℓ} → {A B : Magma a ℓ} → IsEquivalence {a ⊔ ℓ} {a ⊔ ℓ} (_≈-homo_ {a} {ℓ} {A} {B})
-≈-homo-equiv {a} {ℓ} {A} {B} =
-  -- record { refl = ≈-homo-refl {a} {ℓ} {A} {B} {{!!}} {{!!}} ; sym = {!!} ; trans = {!!} }
+-- ≈-homo-equiv : ∀ {A B : Magma a ℓ} → IsEquivalence {a ⊔ ℓ} {a ⊔ ℓ} {A = MagmaHomomorphism A B} _≈-homo_
+≈-homo-equiv : ∀ {A B : Magma a ℓ} → IsEquivalence {a ⊔ ℓ} {a ⊔ ℓ} (_≈-homo_ {A} {B})
+≈-homo-equiv {A} {B} =
+  -- record { refl = ≈-homo-refl {A} {B} {{!!}} {{!!}} ; sym = {!!} ; trans = {!!} }
   record { refl = ≈-homo-refl ; sym = ≈-homo-sym ; trans = ≈-homo-trans }
 
 
@@ -89,9 +85,9 @@ id-homo {A = A} = record
   }
 
 infixr 9 _∘-homo_
-_∘-homo_ : ∀ {a ℓ} {A B C : Magma a ℓ}
+_∘-homo_ : ∀ {A B C : Magma a ℓ}
          → MagmaHomomorphism B C → MagmaHomomorphism A B → MagmaHomomorphism A C
-_∘-homo_ {_} {_} {A} {B} {C} G F = record
+_∘-homo_ {A} {B} {C} G F = record
   { ⟦_⟧ = G.⟦_⟧ ∘ F.⟦_⟧
   ; isMagmaHomomorphism = record
     { isRelHomomorphism = record { cong = G.⟦⟧-cong ∘ F.⟦⟧-cong }
@@ -108,7 +104,7 @@ _∘-homo_ {_} {_} {A} {B} {C} G F = record
       module F = MagmaHomomorphism F ; f = F.⟦_⟧
       module G = MagmaHomomorphism G ; g = G.⟦_⟧
 
-∘-assoc : ∀ {a ℓ} {A B C D : Magma a ℓ}
+∘-assoc : ∀ {A B C D : Magma a ℓ}
         → {f : MagmaHomomorphism A B} → {g : MagmaHomomorphism B C} → {h : MagmaHomomorphism C D}
         → (h ∘-homo g) ∘-homo f ≈-homo h ∘-homo (g ∘-homo f)
 ∘-assoc {D = D} = Magma.refl D
@@ -119,7 +115,7 @@ id-mono : {A : Magma a ℓ} → MagmaMonomorphism A A
 id-mono = record { magmaHomomorphism = id-homo ; injective = id }
 
 infixr 9 _∘-mono_
-_∘-mono_ : ∀ {a ℓ} {A B C : Magma a ℓ}
+_∘-mono_ : ∀ {A B C : Magma a ℓ}
          → MagmaMonomorphism B C → MagmaMonomorphism A B → MagmaMonomorphism A C
 G ∘-mono F = record
   { magmaHomomorphism = G.magmaHomomorphism ∘-homo F.magmaHomomorphism
@@ -136,9 +132,9 @@ id-iso {A = A} = record { magmaMonomorphism = id-mono ; surjective = _, refl }
   where open Magma A
 
 infixr 9 _∘-iso_
-_∘-iso_ : ∀ {a ℓ} {A B C : Magma a ℓ}
+_∘-iso_ : ∀ {A B C : Magma a ℓ}
         → MagmaIsomorphism B C → MagmaIsomorphism A B → MagmaIsomorphism A C
-_∘-iso_ {_} {_} {A} {B} {C} G F = record
+_∘-iso_ {A} {B} {C} G F = record
   { magmaMonomorphism = G.magmaMonomorphism ∘-mono F.magmaMonomorphism
   ; surjective = -- G.surjective ∘ F.surjective  -- in an appropriate sense
                  λ z → let (y , gy≈z) = G.surjective z
@@ -170,15 +166,15 @@ _∘-iso_ {_} {_} {A} {B} {C} G F = record
 
 open import Categories.Category.Core
 
--- Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (suc a ⊔ suc ℓ) (a ⊔ ℓ)
-Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (a ⊔ ℓ) (a ⊔ ℓ)
-Magmas {a} {ℓ} = record
+-- Magmas : ∀ Category (suc a ⊔ suc ℓ) (suc a ⊔ suc ℓ) (a ⊔ ℓ)
+Magmas : Category (suc a ⊔ suc ℓ) (a ⊔ ℓ) (a ⊔ ℓ)
+Magmas = record
   { Obj = Magma a ℓ
   ; _⇒_ = MagmaHomomorphism
   ; _≈_ = _≈-homo_
   ; id = id-homo
   ; _∘_ = _∘-homo_
-  ; assoc = λ {A B C D} {f g h} → ∘-assoc {a} {ℓ} {A} {B} {C} {D} {f} {g} {h}
+  ; assoc = λ {A B C D} {f g h} → ∘-assoc {A} {B} {C} {D} {f} {g} {h}
   -- ; assoc = ∘-assoc
   ; sym-assoc = λ {A B C D} → Magma.refl D
   ; identityˡ = λ {A B} → Magma.refl B
