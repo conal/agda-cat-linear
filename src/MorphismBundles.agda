@@ -10,7 +10,6 @@ open import Agda.Builtin.Sigma
 open import Relation.Binary
 open import Relation.Binary.Definitions
 open import Relation.Binary.Core using (Rel)
-open import Relation.Binary.Bundles using (Setoid)
 open import Algebra.Core
 open import Algebra.Bundles
 open import Algebra.Structures
@@ -32,10 +31,7 @@ module _ (M₁ M₂ : Magma a ℓ) where
 
   record MagmaHomomorphism : Set (a ⊔ ℓ) where
     field
-      setoidM : M₁.setoid ⟶ M₂.setoid
-    ⟦_⟧ : M₁.Carrier → M₂.Carrier
-    ⟦ x ⟧ = setoidM ⟨$⟩ x
-    field
+      ⟦_⟧ : M₁.Carrier → M₂.Carrier
       isMagmaHomomorphism : IsMagmaHomomorphism M₁.rawMagma M₂.rawMagma ⟦_⟧
     open IsMagmaHomomorphism isMagmaHomomorphism public
 
@@ -60,16 +56,32 @@ _≈-homo_ {_} {_} {A} {B} F G = ∀ {x} → F.⟦ x ⟧ B.≈ G.⟦ x ⟧
    module F = MagmaHomomorphism F
    module G = MagmaHomomorphism G
 
-≈-homo-refl : ∀ {a ℓ} → {A B : Magma a ℓ} → Reflexive {A = MagmaHomomorphism A B} _≈-homo_
+-- ≈-homo-refl : ∀ {a ℓ} {A B : Magma a ℓ} → Reflexive {A = MagmaHomomorphism A B} (_≈-homo_ {a} {ℓ} {A} {B})
+-- ≈-homo-refl : ∀ {a ℓ} {A B : Magma a ℓ} → ∀ {F : MagmaHomomorphism A B} → F ≈-homo F
+≈-homo-refl : ∀ {a ℓ} {A B : Magma a ℓ} → ∀ {F : MagmaHomomorphism A B} →
+  let module A = Magma A
+      module B = Magma B
+      module F = MagmaHomomorphism F
+  in
+      ∀ {x} → F.⟦ x ⟧ B.≈ F.⟦ x ⟧
 ≈-homo-refl {B = B} = Magma.refl B
 
-≈-homo-sym : ∀ {a ℓ} → {A B : Magma a ℓ} → {F G : MagmaHomomorphism A B}
-           → (F ≈-homo G) → (G ≈-homo F)
+≈-homo-sym : ∀ {A B : Magma a ℓ} → Symmetric {A = MagmaHomomorphism A B} _≈-homo_
 ≈-homo-sym {B = B} f≈g = Magma.sym B f≈g
+
+≈-homo-trans : ∀ {a ℓ} → {A B : Magma a ℓ} → Transitive {A = MagmaHomomorphism A B} _≈-homo_
+≈-homo-trans {B = B} f≈g g≈h = Magma.trans B f≈g g≈h
+
+-- ≈-homo-equiv : ∀ {a ℓ} → {A B : Magma a ℓ} → IsEquivalence {a ⊔ ℓ} {a ⊔ ℓ} {A = MagmaHomomorphism A B} _≈-homo_
+≈-homo-equiv : ∀ {a ℓ} → {A B : Magma a ℓ} → IsEquivalence {a ⊔ ℓ} {a ⊔ ℓ} (_≈-homo_ {a} {ℓ} {A} {B})
+≈-homo-equiv {a} {ℓ} {A} {B} =
+  -- record { refl = ≈-homo-refl {a} {ℓ} {A} {B} {{!!}} {{!!}} ; sym = {!!} ; trans = {!!} }
+  record { refl = ≈-homo-refl ; sym = ≈-homo-sym ; trans = ≈-homo-trans }
+
 
 id-homo : {A : Magma a ℓ} → MagmaHomomorphism A A
 id-homo {A = A} = record
-  { setoidM = ⟶-id
+  { ⟦_⟧ = id
   ; isMagmaHomomorphism = record
      { isRelHomomorphism = record { cong = id }
      ; homo = λ _ _ → Magma.refl A
@@ -80,7 +92,7 @@ infixr 9 _∘-homo_
 _∘-homo_ : ∀ {a ℓ} {A B C : Magma a ℓ}
          → MagmaHomomorphism B C → MagmaHomomorphism A B → MagmaHomomorphism A C
 _∘-homo_ {_} {_} {A} {B} {C} G F = record
-  { setoidM = G.setoidM ⟶-∘ F.setoidM
+  { ⟦_⟧ = G.⟦_⟧ ∘ F.⟦_⟧
   ; isMagmaHomomorphism = record
     { isRelHomomorphism = record { cong = G.⟦⟧-cong ∘ F.⟦⟧-cong }
     ; homo = λ x y → let open SetoidReasoning C.setoid in
@@ -97,7 +109,7 @@ _∘-homo_ {_} {_} {A} {B} {C} G F = record
       module G = MagmaHomomorphism G ; g = G.⟦_⟧
 
 ∘-assoc : ∀ {a ℓ} {A B C D : Magma a ℓ}
-        → {h : MagmaHomomorphism C D} → {g : MagmaHomomorphism B C} → {f : MagmaHomomorphism A B}
+        → {f : MagmaHomomorphism A B} → {g : MagmaHomomorphism B C} → {h : MagmaHomomorphism C D}
         → (h ∘-homo g) ∘-homo f ≈-homo h ∘-homo (g ∘-homo f)
 ∘-assoc {D = D} = Magma.refl D
 
@@ -158,20 +170,32 @@ _∘-iso_ {_} {_} {A} {B} {C} G F = record
 
 open import Categories.Category.Core
 
--- -- Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (suc a ⊔ suc ℓ) (a ⊔ ℓ)
--- Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (a ⊔ ℓ) (a ⊔ ℓ)
--- Magmas {a} {ℓ} = record
---   { Obj = Magma a ℓ
---   ; _⇒_ = MagmaHomomorphism
---   ; _≈_ = _≈-homo_
---   ; id = id-homo
---   ; _∘_ = _∘-homo_
---   ; assoc = ∘-assoc
---   ; sym-assoc = λ {A} {B} {C} {D} {f} {g} {h} {x} → Magma.refl D
---   ; identityˡ = λ {A} {B} {f} {x} → Magma.refl B
---   ; identityʳ = λ {A} {B} {f} {x} → Magma.refl B
---   ; identity² = λ {A} {x} → Magma.refl A
---   ; equiv = {!!}
---   ; ∘-resp-≈ = {!!}
---   }
+-- Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (suc a ⊔ suc ℓ) (a ⊔ ℓ)
+Magmas : ∀ {a ℓ} → Category (suc a ⊔ suc ℓ) (a ⊔ ℓ) (a ⊔ ℓ)
+Magmas {a} {ℓ} = record
+  { Obj = Magma a ℓ
+  ; _⇒_ = MagmaHomomorphism
+  ; _≈_ = _≈-homo_
+  ; id = id-homo
+  ; _∘_ = _∘-homo_
+  ; assoc = λ {A B C D} {f g h} → ∘-assoc {a} {ℓ} {A} {B} {C} {D} {f} {g} {h}
+  -- ; assoc = ∘-assoc
+  ; sym-assoc = λ {A B C D} → Magma.refl D
+  ; identityˡ = λ {A B} → Magma.refl B
+  ; identityʳ = λ {A B} → Magma.refl B
+  ; identity² = λ {A} → Magma.refl A
+  ; equiv = ≈-homo-equiv
+  ; ∘-resp-≈ = λ {A B C} {F H} {G I} f≈h g≈i → λ {x} →
+      let module C = Magma C
+          module F = MagmaHomomorphism F ; f = F.⟦_⟧
+          module G = MagmaHomomorphism G ; g = G.⟦_⟧
+          module H = MagmaHomomorphism H ; h = H.⟦_⟧
+          module I = MagmaHomomorphism I ; i = I.⟦_⟧
+          open SetoidReasoning C.setoid
+      in
+        begin
+          f (g x)  ≈⟨ F.⟦⟧-cong g≈i ⟩
+          f (i x)  ≈⟨ f≈h ⟩
+          h (i x)  ∎
+  }
 
