@@ -19,16 +19,16 @@ import Function.Definitions as FunctionDefinitions
 
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 
-module _ (M₁ M₂ : Magma a ℓ) where
+module _ (A B : Magma a ℓ) where
   private
-    module M₁ = Magma M₁
-    module M₂ = Magma M₂
-    module F = FunctionDefinitions M₁._≈_ M₂._≈_
+    module A = Magma A
+    module B = Magma B
+    module F = FunctionDefinitions A._≈_ B._≈_
 
   record MagmaHomomorphism : Set (a ⊔ ℓ) where
     field
-      ⟦_⟧ : M₁.Carrier → M₂.Carrier
-      isMagmaHomomorphism : IsMagmaHomomorphism M₁.rawMagma M₂.rawMagma ⟦_⟧
+      ⟦_⟧ : A.Carrier → B.Carrier
+      isMagmaHomomorphism : IsMagmaHomomorphism A.rawMagma B.rawMagma ⟦_⟧
     open IsMagmaHomomorphism isMagmaHomomorphism public
 
   record MagmaMonomorphism : Set (a ⊔ ℓ) where
@@ -52,14 +52,7 @@ _≈-homo_ {A} {B} F G = ∀ {x} → F.⟦ x ⟧ B.≈ G.⟦ x ⟧
    module F = MagmaHomomorphism F
    module G = MagmaHomomorphism G
 
--- ≈-homo-refl : ∀ {A B : Magma a ℓ} → Reflexive {A = MagmaHomomorphism A B} (_≈-homo_ {A} {B})
--- ≈-homo-refl : ∀ {A B : Magma a ℓ} → ∀ {F : MagmaHomomorphism A B} → F ≈-homo F
-≈-homo-refl : ∀ {A B : Magma a ℓ} → ∀ {F : MagmaHomomorphism A B} →
-  let module A = Magma A
-      module B = Magma B
-      module F = MagmaHomomorphism F
-  in
-      ∀ {x} → F.⟦ x ⟧ B.≈ F.⟦ x ⟧
+≈-homo-refl : ∀ {A B : Magma a ℓ} → Reflexive {A = MagmaHomomorphism A B} _≈-homo_
 ≈-homo-refl {B = B} = Magma.refl B
 
 ≈-homo-sym : ∀ {A B : Magma a ℓ} → Symmetric {A = MagmaHomomorphism A B} _≈-homo_
@@ -68,12 +61,10 @@ _≈-homo_ {A} {B} F G = ∀ {x} → F.⟦ x ⟧ B.≈ G.⟦ x ⟧
 ≈-homo-trans : ∀ {A B : Magma a ℓ} → Transitive {A = MagmaHomomorphism A B} _≈-homo_
 ≈-homo-trans {B = B} f≈g g≈h = Magma.trans B f≈g g≈h
 
--- ≈-homo-equiv : ∀ {A B : Magma a ℓ} → IsEquivalence {a ⊔ ℓ} {a ⊔ ℓ} {A = MagmaHomomorphism A B} _≈-homo_
-≈-homo-equiv : ∀ {A B : Magma a ℓ} → IsEquivalence {a ⊔ ℓ} {a ⊔ ℓ} (_≈-homo_ {A} {B})
-≈-homo-equiv {A} {B} =
-  -- record { refl = ≈-homo-refl {A} {B} {{!!}} {{!!}} ; sym = {!!} ; trans = {!!} }
-  record { refl = ≈-homo-refl ; sym = ≈-homo-sym ; trans = ≈-homo-trans }
+≈-homo-equiv : ∀ {A B : Magma a ℓ} → IsEquivalence {a ⊔ ℓ} {a ⊔ ℓ} {A = MagmaHomomorphism A B} _≈-homo_
+≈-homo-equiv = record { refl = ≈-homo-refl ; sym = ≈-homo-sym ; trans = ≈-homo-trans }
 
+-- TODO: There are unsolved variables in this ≈-homo-equiv definition. I'm stumped.
 
 id-homo : {A : Magma a ℓ} → MagmaHomomorphism A A
 id-homo {A = A} = record
@@ -164,7 +155,7 @@ _∘-iso_ {A} {B} {C} G F = record
 -- Refactor so we can add injective and surjective to these definitions more succinctly.
 -- Then Monoid, Group, etc.
 
-open import Categories.Category.Core
+open import Categories.Category.Core 
 
 -- Magmas : ∀ Category (suc a ⊔ suc ℓ) (suc a ⊔ suc ℓ) (a ⊔ ℓ)
 Magmas : Category (suc a ⊔ suc ℓ) (a ⊔ ℓ) (a ⊔ ℓ)
@@ -175,7 +166,6 @@ Magmas = record
   ; id = id-homo
   ; _∘_ = _∘-homo_
   ; assoc = λ {A B C D} {f g h} → ∘-assoc {A} {B} {C} {D} {f} {g} {h}
-  -- ; assoc = ∘-assoc
   ; sym-assoc = λ {A B C D} → Magma.refl D
   ; identityˡ = λ {A B} → Magma.refl B
   ; identityʳ = λ {A B} → Magma.refl B
