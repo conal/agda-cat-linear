@@ -54,8 +54,8 @@ _≈-homo_ {A} {B} F G = ∀ {x} → F.⟦ x ⟧ B.≈ G.⟦ x ⟧
 
 ≈-homo-equiv : ∀ {A B : Magma a ℓ} → IsEquivalence (_≈-homo_ {A} {B})
 ≈-homo-equiv {A} {B} = record
-  { refl = refl
-  ; sym = λ f≈g → sym f≈g
+  { refl  = refl
+  ; sym   = λ f≈g → sym f≈g
   ; trans = λ f≈g g≈h → trans f≈g g≈h
   } where open Magma B
 
