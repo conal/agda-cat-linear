@@ -52,19 +52,14 @@ _≈-homo_ {A} {B} F G = ∀ {x} → F.⟦ x ⟧ B.≈ G.⟦ x ⟧
    module F = MagmaHomomorphism F
    module G = MagmaHomomorphism G
 
-≈-homo-refl : ∀ {A B : Magma a ℓ} → Reflexive {A = MagmaHomomorphism A B} _≈-homo_
-≈-homo-refl {B = B} = Magma.refl B
+≈-homo-equiv : ∀ {A B : Magma a ℓ} → IsEquivalence (_≈-homo_ {A} {B})
+≈-homo-equiv {A} {B} = record
+  { refl = refl
+  ; sym = λ f≈g → sym f≈g
+  ; trans = λ f≈g g≈h → trans f≈g g≈h
+  } where open Magma B
 
-≈-homo-sym : ∀ {A B : Magma a ℓ} → Symmetric {A = MagmaHomomorphism A B} _≈-homo_
-≈-homo-sym {B = B} f≈g = Magma.sym B f≈g
-
-≈-homo-trans : ∀ {A B : Magma a ℓ} → Transitive {A = MagmaHomomorphism A B} _≈-homo_
-≈-homo-trans {B = B} f≈g g≈h = Magma.trans B f≈g g≈h
-
-≈-homo-equiv : ∀ {A B : Magma a ℓ} → IsEquivalence {a ⊔ ℓ} {a ⊔ ℓ} {A = MagmaHomomorphism A B} _≈-homo_
-≈-homo-equiv = record { refl = ≈-homo-refl ; sym = ≈-homo-sym ; trans = ≈-homo-trans }
-
--- TODO: There are unsolved variables in this ≈-homo-equiv definition. I'm stumped.
+-- Eta-reduced versions of sym and trans don't type-check.  
 
 id-homo : {A : Magma a ℓ} → MagmaHomomorphism A A
 id-homo {A = A} = record
