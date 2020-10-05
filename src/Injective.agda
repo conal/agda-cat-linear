@@ -7,7 +7,7 @@ open import Level
 module Injective (a ℓ : Level) where
 
 open import Relation.Binary
-open import Function
+open import Function hiding (_↣_)
 open import Function.Definitions
 open import Function.Equality hiding (setoid) renaming (id to ⟶-id; _∘_ to _⟶-∘_)
 
