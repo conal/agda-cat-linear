@@ -48,25 +48,43 @@ RelativelyConcrete {U = U} {V} F = record
   ; _≈_ = λ f g → F₁ f ≈ F₁ g
   ; id = id'
   ; _∘_ = _∘'_
-  ; assoc = λ {A} {B} {C} {D} {f} {g} {h} →
-              let open SetoidReasoning hom-setoid in
-              begin
-                F₁ ((h ∘' g) ∘' f)   ≈⟨ homomorphism ⟩
-                F₁ (h ∘' g) ∘ F₁ f   ≈⟨ ∘-resp-≈ˡ homomorphism ⟩
-                (F₁ h ∘ F₁ g) ∘ F₁ f ≈⟨ assoc ⟩
-                F₁ h ∘ (F₁ g ∘ F₁ f) ≈˘⟨ ∘-resp-≈ʳ homomorphism ⟩
-                F₁ h ∘ F₁ (g ∘' f)   ≈˘⟨ homomorphism ⟩
-                F₁ (h ∘' (g ∘' f))   ∎
-  ; sym-assoc = ? -- Equiv.sym assoc
-  ; identityˡ = {!!}
-  ; identityʳ = {!!}
-  ; identity² = {!!}
+  ; assoc = assoc'
+  ; sym-assoc = Equiv.sym assoc'
+  ; identityˡ = identityˡ'
+  ; identityʳ = identityʳ'
+  ; identity² = λ {A} → identityˡ' {A} {A} {id'}
   ; equiv = {!!}
   ; ∘-resp-≈ = {!!}
   } where
       open RawCategory U
       open    Category V
       open RawFunctor  F
+      assoc' : ∀ {A B C D} {f : A ⇒' B} {g : B ⇒' C} {h : C ⇒' D} → F₁ ((h ∘' g) ∘' f) ≈ F₁ (h ∘' (g ∘' f))
+      assoc' {f = f} {g} {h} =
+        let open SetoidReasoning hom-setoid in
+        begin
+          F₁ ((h ∘' g) ∘' f)   ≈⟨ homomorphism ⟩
+          F₁ (h ∘' g) ∘ F₁ f   ≈⟨ ∘-resp-≈ˡ homomorphism ⟩
+          (F₁ h ∘ F₁ g) ∘ F₁ f ≈⟨ assoc ⟩
+          F₁ h ∘ (F₁ g ∘ F₁ f) ≈˘⟨ ∘-resp-≈ʳ homomorphism ⟩
+          F₁ h ∘ F₁ (g ∘' f)   ≈˘⟨ homomorphism ⟩
+          F₁ (h ∘' (g ∘' f))   ∎
+      identityˡ' : ∀ {A B} {f : A ⇒' B} → F₁ (id' ∘' f) ≈ F₁ f
+      identityˡ' {A} {B} {f} =
+        let open SetoidReasoning hom-setoid in
+        begin
+          F₁ (id' ∘' f) ≈⟨ homomorphism ⟩
+          F₁ id' ∘ F₁ f ≈⟨ ∘-resp-≈ˡ identity ⟩
+          id ∘ F₁ f     ≈⟨ identityˡ ⟩
+          F₁ f          ∎
+      identityʳ' : ∀ {A B} {f : A ⇒' B} → F₁ (f ∘' id') ≈ F₁ f
+      identityʳ' {A} {B} {f} =
+        let open SetoidReasoning hom-setoid in
+        begin
+          F₁ (f ∘' id') ≈⟨ homomorphism ⟩
+          F₁ f ∘ F₁ id' ≈⟨ ∘-resp-≈ʳ identity ⟩
+          F₁ f ∘ id     ≈⟨ identityʳ ⟩
+          F₁ f          ∎
 
 -- private
 --   variable
