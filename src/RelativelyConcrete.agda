@@ -25,10 +25,10 @@ private
   variable
     o ℓ e o′ ℓ′ e′ : Level
 
-record RawFunctor (C : RawCategory o ℓ e) (D : Category o′ ℓ′ e′) : Set (o ⊔ ℓ ⊔ e ⊔ o′ ⊔ ℓ′ ⊔ e′) where
+record RawFunctor (U : RawCategory o ℓ e) (V : Category o′ ℓ′ e′) : Set (o ⊔ ℓ ⊔ e ⊔ o′ ⊔ ℓ′ ⊔ e′) where
   eta-equality
-  private module C = RawCategory C ; open C
-  private module D =    Category D ; open D
+  private module U = RawCategory U ; open U
+  private module V =    Category V ; open V
 
   field
     F₀ : Objᴿ → Obj
@@ -95,9 +95,13 @@ RelativelyConcrete {U = U} {V} F = record
 open import Categories.Category.Concrete
 open import Categories.Functor.Properties using (Faithful)
 
-forget : ∀ {U : RawCategory o ℓ e} {V : Category o′ ℓ′ e′}
-       → (F : RawFunctor U V) → Functor (RelativelyConcrete F) V
-forget {U = U} {V} F = record
+private
+  variable
+    U : RawCategory o ℓ e
+    V : Category o′ ℓ′ e′
+
+Forget : (F : RawFunctor U V) → Functor (RelativelyConcrete F) V
+Forget F = record
   { F₀ = F₀
   ; F₁ = F₁
   ; identity = identity
@@ -105,8 +109,7 @@ forget {U = U} {V} F = record
   ; F-resp-≈ = id′
   } where open RawFunctor F
 
-faithful : ∀ {U : RawCategory o ℓ e} {V : Category o′ ℓ′ e′}
-       → (F : RawFunctor U V) → Faithful (forget F)
+faithful : (F : RawFunctor U V) → Faithful (Forget F)
 faithful F _ _ = id′
 
 -- private
