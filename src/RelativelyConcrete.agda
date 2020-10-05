@@ -2,11 +2,12 @@
 -- Inspired by <https://github.com/JacquesCarette/TheoriesAndDataStructures/>.
 
 open import Level
-open import Function using (_on_)
+open import Function using (_on_) renaming (id to id′)
 open import Relation.Binary using (Rel;IsEquivalence)
 import Relation.Binary.Reasoning.Setoid as SetoidReasoning
 
 open import Categories.Category.Core
+open import Categories.Functor using (Functor)
 
 record RawCategory (o ℓ e : Level) : Set (suc (o ⊔ ℓ ⊔ e)) where
   infix  4 _≈ᴿ_ _⇒ᴿ_
@@ -38,12 +39,11 @@ record RawFunctor (C : RawCategory o ℓ e) (D : Category o′ ℓ′ e′) : Se
                      F₁ (g ∘ᴿ f) ≈ F₁ g ∘ F₁ f
     F-resp-≈     : ∀ {A B} {f g : A ⇒ᴿ B} → f ≈ᴿ g → F₁ f ≈ F₁ g
 
-RelativelyConcrete : ∀ {U : RawCategory o ℓ e} {V : Category o′ ℓ′ e′} → RawFunctor U V → Category _ _ _
+RelativelyConcrete : ∀ {U : RawCategory o ℓ e} {V : Category o′ ℓ′ e′} → RawFunctor U V → Category o ℓ e′
 RelativelyConcrete {U = U} {V} F = record
   { Obj = Objᴿ
   ; _⇒_ = _⇒ᴿ_
   ; _≈_ = _≈_ on F₁
-          -- λ f g → F₁ f ≈ F₁ g
   ; id = idᴿ
   ; _∘_ = _∘ᴿ_
   ; assoc = assoc'
@@ -92,6 +92,23 @@ RelativelyConcrete {U = U} {V} F = record
           F₁ f ∘ id     ≈⟨ identityʳ ⟩
           F₁ f          ∎
 
+open import Categories.Category.Concrete
+open import Categories.Functor.Properties using (Faithful)
+
+forget : ∀ {U : RawCategory o ℓ e} {V : Category o′ ℓ′ e′}
+       → (F : RawFunctor U V) → Functor (RelativelyConcrete F) V
+forget {U = U} {V} F = record
+  { F₀ = F₀
+  ; F₁ = F₁
+  ; identity = identity
+  ; homomorphism = homomorphism
+  ; F-resp-≈ = id′
+  } where open RawFunctor F
+
+faithful : ∀ {U : RawCategory o ℓ e} {V : Category o′ ℓ′ e′}
+       → (F : RawFunctor U V) → Faithful (forget F)
+faithful F _ _ = id′
+
 -- private
 --   variable
 --     o ℓ e : Level
@@ -100,3 +117,6 @@ RelativelyConcrete {U = U} {V} F = record
 --   field
 --     concretize : Functor C (Setoids ℓ′ e′)
 --     conc-faithful : Faithful concretize
+
+-- TODO: rename RelativelyConcrete, and recycle the old name for a record
+-- generalizing Concerte.
