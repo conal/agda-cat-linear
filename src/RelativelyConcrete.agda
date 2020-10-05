@@ -54,7 +54,7 @@ RawFunctorCategory {U = U} {V} F = record
   ; identityˡ = identityˡ'
   ; identityʳ = identityʳ'
   ; identity² = λ {A} → identityˡ' {A} {A} {idᴿ}
-  ; equiv = λ {A} {B} → isEquivalence F₁ equiv
+  ; equiv = isEquivalence F₁ equiv
   ; ∘-resp-≈ = λ {A} {B} {C} {f} {h} {g} {i} f≈h g≈i →
      begin⟨ hom-setoid ⟩
        F₁ (f ∘ᴿ g)   ≈⟨ homomorphism ⟩
@@ -70,25 +70,25 @@ RawFunctorCategory {U = U} {V} F = record
       assoc' : ∀ {A B C D} {f : A ⇒ᴿ B} {g : B ⇒ᴿ C} {h : C ⇒ᴿ D} → F₁ ((h ∘ᴿ g) ∘ᴿ f) ≈ F₁ (h ∘ᴿ (g ∘ᴿ f))
       assoc' {f = f} {g} {h} =
         begin⟨ hom-setoid ⟩
-          F₁ ((h ∘ᴿ g) ∘ᴿ f)   ≈⟨ homomorphism ⟩
-          F₁ (h ∘ᴿ g) ∘ F₁ f   ≈⟨ ∘-resp-≈ˡ homomorphism ⟩
-          (F₁ h ∘ F₁ g) ∘ F₁ f ≈⟨ assoc ⟩
-          F₁ h ∘ (F₁ g ∘ F₁ f) ≈˘⟨ ∘-resp-≈ʳ homomorphism ⟩
-          F₁ h ∘ F₁ (g ∘ᴿ f)   ≈˘⟨ homomorphism ⟩
+          F₁ ((h ∘ᴿ g) ∘ᴿ f)    ≈⟨ homomorphism ⟩
+          F₁ (h ∘ᴿ g) ∘ F₁ f    ≈⟨ ∘-resp-≈ˡ homomorphism ⟩
+          (F₁ h ∘ F₁ g) ∘ F₁ f  ≈⟨ assoc ⟩
+          F₁ h ∘ (F₁ g ∘ F₁ f)  ≈˘⟨ ∘-resp-≈ʳ homomorphism ⟩
+          F₁ h ∘ F₁ (g ∘ᴿ f)    ≈˘⟨ homomorphism ⟩
           F₁ (h ∘ᴿ (g ∘ᴿ f))   ∎
       identityˡ' : ∀ {A B} {f : A ⇒ᴿ B} → F₁ (idᴿ ∘ᴿ f) ≈ F₁ f
       identityˡ' {A} {B} {f} =
         begin⟨ hom-setoid ⟩
-          F₁ (idᴿ ∘ᴿ f) ≈⟨ homomorphism ⟩
-          F₁ idᴿ ∘ F₁ f ≈⟨ ∘-resp-≈ˡ identity ⟩
-          id ∘ F₁ f     ≈⟨ identityˡ ⟩
+          F₁ (idᴿ ∘ᴿ f)         ≈⟨ homomorphism ⟩
+          F₁ idᴿ ∘ F₁ f         ≈⟨ ∘-resp-≈ˡ identity ⟩
+          id ∘ F₁ f             ≈⟨ identityˡ ⟩
           F₁ f          ∎
       identityʳ' : ∀ {A B} {f : A ⇒ᴿ B} → F₁ (f ∘ᴿ idᴿ) ≈ F₁ f
       identityʳ' {A} {B} {f} =
         begin⟨ hom-setoid ⟩
-          F₁ (f ∘ᴿ idᴿ) ≈⟨ homomorphism ⟩
-          F₁ f ∘ F₁ idᴿ ≈⟨ ∘-resp-≈ʳ identity ⟩
-          F₁ f ∘ id     ≈⟨ identityʳ ⟩
+          F₁ (f ∘ᴿ idᴿ)         ≈⟨ homomorphism ⟩
+          F₁ f ∘ F₁ idᴿ         ≈⟨ ∘-resp-≈ʳ identity ⟩
+          F₁ f ∘ id             ≈⟨ identityʳ ⟩
           F₁ f          ∎
 
 open import Categories.Category.Concrete
@@ -120,5 +120,7 @@ record RelativelyConcrete (C : Category o ℓ e) (D : Category o′ ℓ′ e′)
     concretize : Functor C D
     conc-faithful : Faithful concretize
 
-relativelyConcrete : ∀ {F : RawFunctor U V} → RelativelyConcrete (RawFunctorCategory F) V
-relativelyConcrete {F = F} = record { concretize = Forget F ; conc-faithful = faithful F }
+relativelyConcrete : ∀ {F : RawFunctor U V}
+                   → RelativelyConcrete (RawFunctorCategory F) V
+relativelyConcrete {F = F} = record
+  { concretize = Forget F ; conc-faithful = faithful F }
