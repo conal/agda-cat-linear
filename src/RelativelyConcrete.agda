@@ -39,8 +39,8 @@ record RawFunctor (U : RawCategory o ℓ e) (V : Category o′ ℓ′ e′) : Se
                      F₁ (g ∘ᴿ f) ≈ F₁ g ∘ F₁ f
     F-resp-≈     : ∀ {A B} {f g : A ⇒ᴿ B} → f ≈ᴿ g → F₁ f ≈ F₁ g
 
-RelativelyConcrete : ∀ {U : RawCategory o ℓ e} {V : Category o′ ℓ′ e′} → RawFunctor U V → Category o ℓ e′
-RelativelyConcrete {U = U} {V} F = record
+RawFunctorCategory : ∀ {U : RawCategory o ℓ e} {V : Category o′ ℓ′ e′} → RawFunctor U V → Category o ℓ e′
+RawFunctorCategory {U = U} {V} F = record
   { Obj = Objᴿ
   ; _⇒_ = _⇒ᴿ_
   ; _≈_ = _≈_ on F₁
@@ -100,7 +100,7 @@ private
     U : RawCategory o ℓ e
     V : Category o′ ℓ′ e′
 
-Forget : (F : RawFunctor U V) → Functor (RelativelyConcrete F) V
+Forget : (F : RawFunctor U V) → Functor (RawFunctorCategory F) V
 Forget F = record
   { F₀ = F₀
   ; F₁ = F₁
@@ -121,5 +121,4 @@ faithful F _ _ = id′
 --     concretize : Functor C (Setoids ℓ′ e′)
 --     conc-faithful : Faithful concretize
 
--- TODO: rename RelativelyConcrete, and recycle the old name for a record
--- generalizing Concerte.
+-- TODO: generalize Concerte to RelativelyConcrete
