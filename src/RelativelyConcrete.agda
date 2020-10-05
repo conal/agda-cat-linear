@@ -1,3 +1,6 @@
+{-# OPTIONS --without-K --safe #-}
+module RelativelyConcrete where
+
 -- Relatively concrete categories, i.e., defined by a forgetful functor to a known category.
 -- Inspired by <https://github.com/JacquesCarette/TheoriesAndDataStructures/>.
 
@@ -99,6 +102,7 @@ private
   variable
     U : RawCategory o ℓ e
     V : Category o′ ℓ′ e′
+    F : RawFunctor U V
 
 Forget : (F : RawFunctor U V) → Functor (RawFunctorCategory F) V
 Forget F = record
@@ -110,15 +114,15 @@ Forget F = record
   } where open RawFunctor F
 
 faithful : (F : RawFunctor U V) → Faithful (Forget F)
-faithful F _ _ = id′
+faithful F _ _ = id′  -- trivial from definition of _≈_ for RawFunctorCategory.
 
--- private
---   variable
---     o ℓ e : Level
+-- Generalization of Concrete from Categories.Category.Concrete.
+-- Maybe move into agda-categories.
+record RelativelyConcrete (C : Category o ℓ e) (D : Category o′ ℓ′ e′)
+        : Set (o ⊔ ℓ ⊔ e ⊔ o′ ⊔ ℓ′ ⊔ e′) where
+  field
+    concretize : Functor C D
+    conc-faithful : Faithful concretize
 
--- record Concrete (C : Category o ℓ e) (ℓ′ e′ : Level) : Set (o ⊔ ℓ ⊔ e ⊔ suc (ℓ′ ⊔ e′)) where
---   field
---     concretize : Functor C (Setoids ℓ′ e′)
---     conc-faithful : Faithful concretize
-
--- TODO: generalize Concerte to RelativelyConcrete
+relativelyConcrete : ∀ {F : RawFunctor U V} → RelativelyConcrete (RawFunctorCategory F) V
+relativelyConcrete {F = F} = record { concretize = Forget F ; conc-faithful = faithful F }
