@@ -1,5 +1,5 @@
 {-# OPTIONS --without-K --safe #-}
-module RelativelyConcrete where
+module Concrete where
 
 -- Relatively concrete categories, i.e., defined by a forgetful functor to a known category.
 -- Inspired by <https://github.com/JacquesCarette/TheoriesAndDataStructures/>.
