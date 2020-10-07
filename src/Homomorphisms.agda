@@ -27,7 +27,8 @@ private
 
 IsMagmaHomomorphism′ : ∀ (M₁ : Magma a ℓ₁) (M₂ : Magma b ℓ₂)
                      → (Magma.setoid M₁ ⟶ Magma.setoid M₂) → Set (a ⊔ ℓ₁ ⊔ ℓ₂)
-IsMagmaHomomorphism′ M₁ M₂ f = IsMagmaHomomorphism (Magma.rawMagma M₁) (Magma.rawMagma M₂) (f ⟨$⟩_)
+IsMagmaHomomorphism′ M₁ M₂ f =
+  IsMagmaHomomorphism (Magma.rawMagma M₁) (Magma.rawMagma M₂) (f ⟨$⟩_)
 
 idIsMagmaHomomorphism : ∀ (M : Magma a ℓ₁) → IsMagmaHomomorphism′ M M id
 idIsMagmaHomomorphism M = record
@@ -37,11 +38,13 @@ idIsMagmaHomomorphism M = record
       open Magma M using (refl)
 
 infixr 9 _∘IsMagmaHomomorphism_
-_∘IsMagmaHomomorphism_ : ∀ {M₁ : Magma a ℓ₁} {M₂ : Magma b ℓ₂} {M₃ : Magma c ℓ₃}
-                           {f : Magma.setoid M₁ ⟶ Magma.setoid M₂}
-                           {g : Magma.setoid M₂ ⟶ Magma.setoid M₃}
-                         → IsMagmaHomomorphism′ M₂ M₃ g → IsMagmaHomomorphism′ M₁ M₂ f
-                         → IsMagmaHomomorphism′ M₁ M₃ (g ∘ f)
+_∘IsMagmaHomomorphism_
+  : ∀ {M₁ : Magma a ℓ₁} {M₂ : Magma b ℓ₂} {M₃ : Magma c ℓ₃}
+      {f : Magma.setoid M₁ ⟶ Magma.setoid M₂}
+      {g : Magma.setoid M₂ ⟶ Magma.setoid M₃}
+    → IsMagmaHomomorphism′ M₂ M₃ g
+    → IsMagmaHomomorphism′ M₁ M₂ f
+    → IsMagmaHomomorphism′ M₁ M₃ (g ∘ f)
 _∘IsMagmaHomomorphism_ {M₁ = M₁} {M₂} {M₃} {f} {g} gᴴ fᴴ = record
   { isRelHomomorphism = record { cong = Π.cong (g ∘ f) }
   ; homo = λ (x y : Magma.Carrier M₁) →
@@ -58,19 +61,24 @@ _∘IsMagmaHomomorphism_ {M₁ = M₁} {M₂} {M₃} {f} {g} gᴴ fᴴ = record
    open IsMagmaHomomorphism gᴴ renaming (homo to homo-g)
 
 IsSemigroupHomomorphism′ : ∀ (M₁ : Semigroup a ℓ₁) (M₂ : Semigroup b ℓ₂)
-                         → (Semigroup.setoid M₁ ⟶ Semigroup.setoid  M₂) → Set (a ⊔ ℓ₁ ⊔ ℓ₂)
-IsSemigroupHomomorphism′ M₁ M₂ = IsMagmaHomomorphism′ (Semigroup.magma M₁) (Semigroup.magma M₂)
+                         → (Semigroup.setoid M₁ ⟶ Semigroup.setoid  M₂)
+                         → Set (a ⊔ ℓ₁ ⊔ ℓ₂)
+IsSemigroupHomomorphism′ M₁ M₂ =
+  IsMagmaHomomorphism′ (Semigroup.magma M₁) (Semigroup.magma M₂)
 
--- Try making do with magma homomorphisms instead of adding semigroup homomorphisms.
+-- Try making do with magma homomorphisms instead of adding semigroup
+-- homomorphisms.
 
 
 ------------------------------------------------------------------------
 -- Morphisms over monoid-like structures
 ------------------------------------------------------------------------
 
-IsMonoidHomomorphism′ : ∀ (M₁ : Monoid a ℓ₁) (M₂ : Monoid b ℓ₂)
-                     → (Monoid.setoid M₁ ⟶ Monoid.setoid M₂) → Set (a ⊔ ℓ₁ ⊔ ℓ₂)
-IsMonoidHomomorphism′ M₁ M₂ f = IsMonoidHomomorphism (Monoid.rawMonoid M₁) (Monoid.rawMonoid M₂) (f ⟨$⟩_)
+IsMonoidHomomorphism′
+  : ∀ (M₁ : Monoid a ℓ₁) (M₂ : Monoid b ℓ₂)
+    → (Monoid.setoid M₁ ⟶ Monoid.setoid M₂) → Set (a ⊔ ℓ₁ ⊔ ℓ₂)
+IsMonoidHomomorphism′ M₁ M₂ f =
+  IsMonoidHomomorphism (Monoid.rawMonoid M₁) (Monoid.rawMonoid M₂) (f ⟨$⟩_)
 
 idIsMonoidHomomorphism : ∀ (M : Monoid a ℓ₁) → IsMonoidHomomorphism′ M M id
 idIsMonoidHomomorphism M = record
@@ -79,14 +87,15 @@ idIsMonoidHomomorphism M = record
   } where open Monoid M
 
 infixr 9 _∘IsMonoidHomomorphism′_
-_∘IsMonoidHomomorphism′_ : ∀ {M₁ : Monoid a ℓ₁} {M₂ : Monoid b ℓ₂} {M₃ : Monoid c ℓ₃}
-                             {f : Monoid.setoid M₁ ⟶ Monoid.setoid M₂}
-                             {g : Monoid.setoid M₂ ⟶ Monoid.setoid M₃}
-                           → IsMonoidHomomorphism′ M₂ M₃ g → IsMonoidHomomorphism′ M₁ M₂ f
-                           → IsMonoidHomomorphism′ M₁ M₃ (g ∘ f)
+_∘IsMonoidHomomorphism′_
+  : ∀ {M₁ : Monoid a ℓ₁} {M₂ : Monoid b ℓ₂} {M₃ : Monoid c ℓ₃}
+      {f : Monoid.setoid M₁ ⟶ Monoid.setoid M₂}
+      {g : Monoid.setoid M₂ ⟶ Monoid.setoid M₃}
+    → IsMonoidHomomorphism′ M₂ M₃ g
+    → IsMonoidHomomorphism′ M₁ M₂ f
+    → IsMonoidHomomorphism′ M₁ M₃ (g ∘ f)
 _∘IsMonoidHomomorphism′_ {M₁ = M₁} {M₂} {M₃} {f} {g} gᴴ fᴴ = record
   { isMagmaHomomorphism =
-      -- isMagmaHomo-g ∘IsMagmaHomomorphism isMagmaHomo-f
       _∘IsMagmaHomomorphism_ {M₁ = magma₁} {magma₂} {magma₃} {f} {g}
                              isMagmaHomo-g isMagmaHomo-f
   ; ε-homo =
