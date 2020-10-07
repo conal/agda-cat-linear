@@ -40,18 +40,18 @@ idIsMagmaHomomorphism M = record
 infixr 9 _∘IsMagmaHomomorphism_
 _∘IsMagmaHomomorphism_
   : ∀ {M₁ : Magma a ℓ₁} {M₂ : Magma b ℓ₂} {M₃ : Magma c ℓ₃}
-      {f : Magma.setoid M₁ ⟶ Magma.setoid M₂}
-      {g : Magma.setoid M₂ ⟶ Magma.setoid M₃}
-    → IsMagmaHomomorphism′ M₂ M₃ g
-    → IsMagmaHomomorphism′ M₁ M₂ f
-    → IsMagmaHomomorphism′ M₁ M₃ (g ∘ f)
-_∘IsMagmaHomomorphism_ {M₁ = M₁} {M₂} {M₃} {f} {g} gᴴ fᴴ = record
-  { isRelHomomorphism = record { cong = Π.cong (g ∘ f) }
+      {f : Magma.setoid M₂ ⟶ Magma.setoid M₃}
+      {g : Magma.setoid M₁ ⟶ Magma.setoid M₂}
+    → IsMagmaHomomorphism′ M₂ M₃ f
+    → IsMagmaHomomorphism′ M₁ M₂ g
+    → IsMagmaHomomorphism′ M₁ M₃ (f ∘ g)
+_∘IsMagmaHomomorphism_ {M₁ = M₁} {M₂} {M₃} {f} {g} fᴴ gᴴ = record
+  { isRelHomomorphism = record { cong = Π.cong (f ∘ g) }
   ; homo = λ (x y : Magma.Carrier M₁) →
       begin⟨ Magma.setoid M₃ ⟩
-        g ⟨$⟩ (f ⟨$⟩ (x ∙₁ y))                 ≈⟨ Π.cong g (homo-f x y) ⟩
-        g ⟨$⟩ ((f ⟨$⟩ x) ∙₂ (f ⟨$⟩ y))         ≈⟨ homo-g (f ⟨$⟩ x) (f ⟨$⟩ y) ⟩
-        (g ⟨$⟩ (f ⟨$⟩ x)) ∙₃ (g ⟨$⟩ (f ⟨$⟩ y)) ∎
+        f ⟨$⟩ (g ⟨$⟩ (x ∙₁ y))                 ≈⟨ Π.cong f (homo-g x y) ⟩
+        f ⟨$⟩ ((g ⟨$⟩ x) ∙₂ (g ⟨$⟩ y))         ≈⟨ homo-f (g ⟨$⟩ x) (g ⟨$⟩ y) ⟩
+        (f ⟨$⟩ (g ⟨$⟩ x)) ∙₃ (f ⟨$⟩ (g ⟨$⟩ y)) ∎
   }
  where
    open Magma M₁ renaming (_∙_ to _∙₁_)
@@ -89,20 +89,20 @@ idIsMonoidHomomorphism M = record
 infixr 9 _∘IsMonoidHomomorphism_
 _∘IsMonoidHomomorphism_
   : ∀ {M₁ : Monoid a ℓ₁} {M₂ : Monoid b ℓ₂} {M₃ : Monoid c ℓ₃}
-      {f : Monoid.setoid M₁ ⟶ Monoid.setoid M₂}
-      {g : Monoid.setoid M₂ ⟶ Monoid.setoid M₃}
-    → IsMonoidHomomorphism′ M₂ M₃ g
-    → IsMonoidHomomorphism′ M₁ M₂ f
-    → IsMonoidHomomorphism′ M₁ M₃ (g ∘ f)
-_∘IsMonoidHomomorphism_ {M₁ = M₁} {M₂} {M₃} {f} {g} gᴴ fᴴ = record
+      {f : Monoid.setoid M₂ ⟶ Monoid.setoid M₃}
+      {g : Monoid.setoid M₁ ⟶ Monoid.setoid M₂}
+    → IsMonoidHomomorphism′ M₂ M₃ f
+    → IsMonoidHomomorphism′ M₁ M₂ g
+    → IsMonoidHomomorphism′ M₁ M₃ (f ∘ g)
+_∘IsMonoidHomomorphism_ {M₁ = M₁} {M₂} {M₃} {f} {g} fᴴ gᴴ = record
   { isMagmaHomomorphism =
       _∘IsMagmaHomomorphism_ {M₁ = magma₁} {magma₂} {magma₃} {f} {g}
-                             isMagmaHomo-g isMagmaHomo-f
+                             isMagmaHomo-f isMagmaHomo-g
   ; ε-homo =
-      -- g ⟨$⟩ (f ⟨$⟩ ε₁) ≈ ε₃
+      -- f ⟨$⟩ (g ⟨$⟩ ε₁) ≈ ε₃
       begin⟨ Monoid.setoid M₃ ⟩
-        g ⟨$⟩ (f ⟨$⟩ ε₁) ≈⟨ Π.cong g ε-homo-f ⟩
-        g ⟨$⟩ ε₂         ≈⟨ ε-homo-g ⟩
+        f ⟨$⟩ (g ⟨$⟩ ε₁) ≈⟨ Π.cong f ε-homo-g ⟩
+        f ⟨$⟩ ε₂         ≈⟨ ε-homo-f ⟩
         ε₃               ∎
  } where
      open Monoid M₁ renaming (ε to ε₁; magma to magma₁)
@@ -113,8 +113,8 @@ _∘IsMonoidHomomorphism_ {M₁ = M₁} {M₂} {M₃} {f} {g} gᴴ fᴴ = record
      open IsMonoidHomomorphism gᴴ renaming
        (ε-homo to ε-homo-g; isMagmaHomomorphism to isMagmaHomo-g)
 
-------------------------------------------------------------------------
--- Morphisms over group-like structures
-------------------------------------------------------------------------
+-- ------------------------------------------------------------------------
+-- -- Morphisms over group-like structures
+-- ------------------------------------------------------------------------
 
--- ...
+-- -- ...
