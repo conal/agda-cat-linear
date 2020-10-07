@@ -86,15 +86,15 @@ idIsMonoidHomomorphism M = record
   ; ε-homo = refl
   } where open Monoid M
 
-infixr 9 _∘IsMonoidHomomorphism′_
-_∘IsMonoidHomomorphism′_
+infixr 9 _∘IsMonoidHomomorphism_
+_∘IsMonoidHomomorphism_
   : ∀ {M₁ : Monoid a ℓ₁} {M₂ : Monoid b ℓ₂} {M₃ : Monoid c ℓ₃}
       {f : Monoid.setoid M₁ ⟶ Monoid.setoid M₂}
       {g : Monoid.setoid M₂ ⟶ Monoid.setoid M₃}
     → IsMonoidHomomorphism′ M₂ M₃ g
     → IsMonoidHomomorphism′ M₁ M₂ f
     → IsMonoidHomomorphism′ M₁ M₃ (g ∘ f)
-_∘IsMonoidHomomorphism′_ {M₁ = M₁} {M₂} {M₃} {f} {g} gᴴ fᴴ = record
+_∘IsMonoidHomomorphism_ {M₁ = M₁} {M₂} {M₃} {f} {g} gᴴ fᴴ = record
   { isMagmaHomomorphism =
       _∘IsMagmaHomomorphism_ {M₁ = magma₁} {magma₂} {magma₃} {f} {g}
                              isMagmaHomo-g isMagmaHomo-f
