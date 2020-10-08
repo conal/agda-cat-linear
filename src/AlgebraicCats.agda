@@ -8,7 +8,7 @@ module AlgebraicCats (o ℓ : Level) where
 
 open import Data.Product using (_,_)
 open import Algebra.Bundles
-open import Function.Equality using (Π; _⟨$⟩_)
+open import Function.Equality using (Π)
 open import Relation.Binary.Reasoning.MultiSetoid
 
 open import Categories.Category using (Category)
