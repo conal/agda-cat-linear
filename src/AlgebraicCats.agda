@@ -16,7 +16,7 @@ open import Categories.Category.Instance.Setoids using (Setoids)
 open import Categories.Category.SubCategory using (SubCategory; FullSubCategory)
 
 ------------------------------------------------------------------------
--- SubCat structures for magma-like structures
+-- Magma-like structures
 ------------------------------------------------------------------------
 
 Magmas : Category _ _ _
@@ -50,7 +50,7 @@ SelectiveMagmas       = FullSubCategory Magmas SelectiveMagma.magma
 -- TODO: try redefining the `Setoids` category via `SubCategory Sets`.
 
 ------------------------------------------------------------------------
--- SubCat structures for monoid-like structures
+-- Monoid-like structures
 ------------------------------------------------------------------------
 
 Monoids : Category _ _ _
