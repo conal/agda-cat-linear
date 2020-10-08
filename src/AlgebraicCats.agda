@@ -29,15 +29,15 @@ Magmas = SubCategory (Setoids o ℓ) record
           in
             ∀ x y → f (x ∙₁ y) ≈₂ f x ∙₂ f y
   ; Rid  = λ {a} → λ _ _ → refl a
-  ; _∘R_ = λ {a b c} {g′} {f′} homo-g homo-f →
+  ; _∘R_ = λ {a b c} {g′} {f′} g∙ f∙ →
              let open Magma a using () renaming (_∙_ to _∙₁_)
                  open Magma b using () renaming (_∙_ to _∙₂_)
                  open Magma c using () renaming (_∙_ to _∙₃_)
                  open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f)
              in λ x y → begin⟨ setoid c ⟩
-                          g (f (x ∙₁ y))     ≈⟨ cong-g (homo-f x y) ⟩
-                          g (f x ∙₂ f y)     ≈⟨ homo-g (f x) (f y) ⟩
+                          g (f (x ∙₁ y))     ≈⟨ cong-g (f∙ x y) ⟩
+                          g (f x ∙₂ f y)     ≈⟨ g∙ (f x) (f y) ⟩
                           g (f x) ∙₃ g (f y) ∎
   } where open Magma
 
@@ -61,7 +61,7 @@ Monoids = SubCategory Semigroups record
           in
             f ε₁ ≈₂ ε₂
   ; Rid  = λ {a} → refl a
-  ; _∘R_ = λ {a b c} {(g′ , _)} {(f′ , _)} homo-g homo-f
+  ; _∘R_ = λ {a b c} {(g′ , _)} {(f′ , _)} gε fε
              → let open Monoid a using () renaming (ε to ε₁)
                    open Monoid b using () renaming (ε to ε₂)
                    open Monoid c using () renaming (ε to ε₃)
@@ -69,8 +69,8 @@ Monoids = SubCategory Semigroups record
                    open Π f′ renaming (_⟨$⟩_ to f)
                in 
                  begin⟨ setoid c ⟩
-                   g (f ε₁)  ≈⟨ cong-g homo-f ⟩
-                   g ε₂      ≈⟨ homo-g ⟩
+                   g (f ε₁)  ≈⟨ cong-g fε ⟩
+                   g ε₂      ≈⟨ gε ⟩
                    ε₃        ∎
   } where open Monoid
 
@@ -94,7 +94,7 @@ Groups = SubCategory Monoids record
           in
             ∀ a → f (a ⁻¹₁) ≈₂ f a ⁻¹₂
   ; Rid  = λ {a} _ → refl a
-  ; _∘R_ = λ {a b c} {((g′ , _) , _)} {((f′ , _) , _)} homo-g homo-f
+  ; _∘R_ = λ {a b c} {((g′ , _) , _)} {((f′ , _) , _)} g⁻¹ f⁻¹
              → let open Group a using () renaming (_⁻¹ to _⁻¹₁)
                    open Group b using () renaming (_⁻¹ to _⁻¹₂)
                    open Group c using () renaming (_⁻¹ to _⁻¹₃)
@@ -102,8 +102,8 @@ Groups = SubCategory Monoids record
                    open Π f′ renaming (_⟨$⟩_ to f)
                in 
                  λ x → begin⟨ setoid c ⟩
-                         g (f (x ⁻¹₁)) ≈⟨ cong-g (homo-f x) ⟩
-                         g (f x ⁻¹₂)   ≈⟨ homo-g (f x) ⟩
+                         g (f (x ⁻¹₁)) ≈⟨ cong-g (f⁻¹ x) ⟩
+                         g (f x ⁻¹₂)   ≈⟨ g⁻¹ (f x) ⟩
                          g (f x) ⁻¹₃   ∎
   } where
       open Group
@@ -126,19 +126,19 @@ Lattices = SubCategory (Setoids o ℓ) record
             (∀ x y → f (x ∧₁ y) ≈₂ f x ∧₂ f y) ×
             (∀ x y → f (x ∨₁ y) ≈₂ f x ∨₂ f y)
   ; Rid  = λ {a} → (λ _ _ → refl a) , (λ _ _ → refl a)
-  ; _∘R_ = λ {a b c} {g′} {f′} (homo-∧-g , homo-∨-g) (homo-∧-f , homo-∨-f) →
+  ; _∘R_ = λ {a b c} {g′} {f′} (g∧ , g∨) (f∧ , f∨) →
              let open Lattice a using () renaming (_∧_ to _∧₁_; _∨_ to _∨₁_)
                  open Lattice b using () renaming (_∧_ to _∧₂_; _∨_ to _∨₂_)
                  open Lattice c using () renaming (_∧_ to _∧₃_; _∨_ to _∨₃_)
                  open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f)
              in (λ x y → begin⟨ setoid c ⟩
-                           g (f (x ∧₁ y))     ≈⟨ cong-g (homo-∧-f x y) ⟩
-                           g (f x ∧₂ f y)     ≈⟨ homo-∧-g (f x) (f y) ⟩
+                           g (f (x ∧₁ y))     ≈⟨ cong-g (f∧ x y) ⟩
+                           g (f x ∧₂ f y)     ≈⟨ g∧ (f x) (f y) ⟩
                            g (f x) ∧₃ g (f y) ∎) ,
                 (λ x y → begin⟨ setoid c ⟩
-                           g (f (x ∨₁ y))     ≈⟨ cong-g (homo-∨-f x y) ⟩
-                           g (f x ∨₂ f y)     ≈⟨ homo-∨-g (f x) (f y) ⟩
+                           g (f (x ∨₁ y))     ≈⟨ cong-g (f∨ x y) ⟩
+                           g (f x ∨₂ f y)     ≈⟨ g∨ (f x) (f y) ⟩
                            g (f x) ∨₃ g (f y) ∎)
 
   } where open Lattice
