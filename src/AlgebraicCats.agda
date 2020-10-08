@@ -55,13 +55,13 @@ Monoids : Category _ _ _
 Monoids = SubCategory Semigroups record
   { U = semigroup
   ; R = λ {a b : Monoid o ℓ} (f′ , _) →
-          let open Monoid a renaming (_≈_ to _≈₁_; ε to ε₁)
-              open Monoid b renaming (_≈_ to _≈₂_; ε to ε₂)
+          let open Monoid a using () renaming (ε to ε₁)
+              open Monoid b using () renaming (ε to ε₂; _≈_ to _≈₂_)
               open Π f′ renaming (_⟨$⟩_ to f)
           in
             f ε₁ ≈₂ ε₂
   ; Rid  = λ {a} → refl a
-  ; _∘R_ = λ {a b c} {(g′ , _)} {(f′ , _)} gε≈ε fε≈ε
+  ; _∘R_ = λ {a b c} {(g′ , _)} {(f′ , _)} homo-g homo-f
              → let open Monoid a using () renaming (ε to ε₁)
                    open Monoid b using () renaming (ε to ε₂)
                    open Monoid c using () renaming (ε to ε₃)
@@ -69,8 +69,8 @@ Monoids = SubCategory Semigroups record
                    open Π f′ renaming (_⟨$⟩_ to f)
                in 
                  begin⟨ setoid c ⟩
-                   g (f ε₁)  ≈⟨ cong-g fε≈ε ⟩
-                   g ε₂      ≈⟨ gε≈ε ⟩
+                   g (f ε₁)  ≈⟨ cong-g homo-f ⟩
+                   g ε₂      ≈⟨ homo-g ⟩
                    ε₃        ∎
   } where open Monoid
 
@@ -88,13 +88,13 @@ Groups : Category _ _ _
 Groups = SubCategory Monoids record
   { U = monoid
   ; R = λ {a b : Group o ℓ} ((f′ , _) , _) →
-          let open Group a renaming (_≈_ to _≈₁_; _⁻¹ to _⁻¹₁)
-              open Group b renaming (_≈_ to _≈₂_; _⁻¹ to _⁻¹₂)
+          let open Group a renaming (_⁻¹ to _⁻¹₁)
+              open Group b renaming (_⁻¹ to _⁻¹₂; _≈_ to _≈₂_)
               open Π f′ renaming (_⟨$⟩_ to f)
           in
             ∀ a → f (a ⁻¹₁) ≈₂ f a ⁻¹₂
   ; Rid  = λ {a} _ → refl a
-  ; _∘R_ = λ {a b c} {((g′ , _) , _)} {((f′ , _) , _)} g⁻¹≈⁻¹ f⁻¹≈⁻¹
+  ; _∘R_ = λ {a b c} {((g′ , _) , _)} {((f′ , _) , _)} homo-g homo-f
              → let open Group a using () renaming (_⁻¹ to _⁻¹₁)
                    open Group b using () renaming (_⁻¹ to _⁻¹₂)
                    open Group c using () renaming (_⁻¹ to _⁻¹₃)
@@ -102,8 +102,8 @@ Groups = SubCategory Monoids record
                    open Π f′ renaming (_⟨$⟩_ to f)
                in 
                  λ x → begin⟨ setoid c ⟩
-                         g (f (x ⁻¹₁)) ≈⟨ cong-g (f⁻¹≈⁻¹ x) ⟩
-                         g (f x ⁻¹₂)   ≈⟨ g⁻¹≈⁻¹ (f x) ⟩
+                         g (f (x ⁻¹₁)) ≈⟨ cong-g (homo-f x) ⟩
+                         g (f x ⁻¹₂)   ≈⟨ homo-g (f x) ⟩
                          g (f x) ⁻¹₃   ∎
   } where
       open Group
@@ -113,17 +113,6 @@ AbelianGroups = FullSubCategory Groups AbelianGroup.group
 -------------------------------------------------------------------------------
 -- | Lattice-like structures
 -------------------------------------------------------------------------------
-
--- record Lattice c ℓ : Set (suc (c ⊔ ℓ)) where
---   infixr 7 _∧_
---   infixr 6 _∨_
---   infix  4 _≈_
---   field
---     Carrier   : Set c
---     _≈_       : Rel Carrier ℓ
---     _∨_       : Op₂ Carrier
---     _∧_       : Op₂ Carrier
---     isLattice : IsLattice _≈_ _∨_ _∧_
 
 Lattices : Category _ _ _
 Lattices = SubCategory (Setoids o ℓ) record
