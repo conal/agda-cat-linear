@@ -6,16 +6,14 @@ open import Level
 
 module AlgebraicCats (o ℓ : Level) where
 
-open import Algebra.Structures
+open import Data.Product using (_,_)
 open import Algebra.Bundles
-open import Function using () renaming (id to id→; _∘_ to _∘→_)
-open import Function.Equality renaming (id to id⟶; _∘_ to _∘⟶_)
+open import Function.Equality using (Π; _⟨$⟩_)
 open import Relation.Binary.Reasoning.MultiSetoid
 
-open import Categories.Category
-open import Categories.Category.Instance.Setoids
-open import Categories.Category.SubCategory
-open import Categories.Category.Instance.Setoids
+open import Categories.Category using (Category)
+open import Categories.Category.Instance.Setoids using (Setoids)
+open import Categories.Category.SubCategory using (SubCategory; FullSubCategory)
 
 ------------------------------------------------------------------------
 -- SubCat structures for magma-like structures
@@ -23,13 +21,13 @@ open import Categories.Category.Instance.Setoids
 
 Magmas : Category _ _ _
 Magmas = SubCategory (Setoids o ℓ) record
-  { U    = Magma.setoid
-  ; R    = λ {a} {b} f′ →
-             let open Magma a renaming (_∙_ to _∙₁_)
-                 open Magma b renaming (_∙_ to _∙₂_; _≈_ to _≈₂_)
-                 f = f′ ⟨$⟩_
-             in
-               ∀ x y → f (x ∙₁ y) ≈₂ f x ∙₂ f y
+  { U = Magma.setoid
+  ; R = λ {a} {b} f′ →
+          let open Magma a renaming (_∙_ to _∙₁_)
+              open Magma b renaming (_∙_ to _∙₂_; _≈_ to _≈₂_)
+              f = f′ ⟨$⟩_
+          in
+            ∀ x y → f (x ∙₁ y) ≈₂ f x ∙₂ f y
   ; Rid  = λ {a} → λ _ _ → Magma.refl a
   ; _∘R_ = λ {a b c} {g′} {f′} homo-g homo-f →
              let open Magma a renaming (_∙_ to _∙₁_)
@@ -51,7 +49,9 @@ SelectiveMagmas       = FullSubCategory Magmas SelectiveMagma.magma
 
 -- TODO: try redefining the `Setoids` category via `SubCategory Sets`.
 
-open import Data.Product
+------------------------------------------------------------------------
+-- SubCat structures for monoid-like structures
+------------------------------------------------------------------------
 
 Monoids : Category _ _ _
 Monoids = SubCategory Semigroups record
@@ -61,7 +61,7 @@ Monoids = SubCategory Semigroups record
               open Monoid b renaming (_≈_ to _≈₂_; ε to ε₂)
           in
             f ⟨$⟩ ε₁ ≈₂ ε₂
-  ; Rid = λ {a} → Monoid.refl a
+  ; Rid  = λ {a} → Monoid.refl a
   ; _∘R_ = λ {a b c : Monoid o ℓ}
              {(g′ , _) : semigroup b ⇒ semigroup c}
              {(f′ , _) : semigroup a ⇒ semigroup b}
@@ -82,3 +82,4 @@ Monoids = SubCategory Semigroups record
 CommutativeMonoids           = FullSubCategory Monoids CommutativeMonoid.monoid
 IdempotentCommutativeMonoids = FullSubCategory Monoids IdempotentCommutativeMonoid.monoid
 BoundedLattices              = FullSubCategory Monoids BoundedLattice.monoid
+
