@@ -6,7 +6,7 @@ open import Level
 
 module AlgebraicCats (o ℓ : Level) where
 
-open import Data.Product using (_,_)
+open import Data.Product using (_×_ ; _,_)
 open import Algebra.Bundles
 open import Function.Equality using (Π)
 open import Relation.Binary.Reasoning.MultiSetoid
@@ -109,3 +109,52 @@ Groups = SubCategory Monoids record
       open Group
 
 AbelianGroups = FullSubCategory Groups AbelianGroup.group
+
+-------------------------------------------------------------------------------
+-- | Lattice-like structures
+-------------------------------------------------------------------------------
+
+-- record Lattice c ℓ : Set (suc (c ⊔ ℓ)) where
+--   infixr 7 _∧_
+--   infixr 6 _∨_
+--   infix  4 _≈_
+--   field
+--     Carrier   : Set c
+--     _≈_       : Rel Carrier ℓ
+--     _∨_       : Op₂ Carrier
+--     _∧_       : Op₂ Carrier
+--     isLattice : IsLattice _≈_ _∨_ _∧_
+
+Lattices : Category _ _ _
+Lattices = SubCategory (Setoids o ℓ) record
+  { U = setoid
+  ; R = λ {a} {b} f′ →
+          let open Lattice a renaming (_∧_ to _∧₁_; _∨_ to _∨₁_)
+              open Lattice b renaming (_∧_ to _∧₂_; _∨_ to _∨₂_; _≈_ to _≈₂_)
+              open Π f′ renaming (_⟨$⟩_ to f)
+          in
+            -- Pair of relations. Also try as λ x y → f (x ∧₁ y) , f (x ∨₁ y).
+            (∀ x y → f (x ∧₁ y) ≈₂ f x ∧₂ f y) ×
+            (∀ x y → f (x ∨₁ y) ≈₂ f x ∨₂ f y)
+  ; Rid  = λ {a} → (λ _ _ → refl a) , (λ _ _ → refl a)
+  ; _∘R_ = λ {a b c} {g′} {f′} (homo-∧-g , homo-∨-g) (homo-∧-f , homo-∨-f) →
+             let open Lattice a using () renaming (_∧_ to _∧₁_; _∨_ to _∨₁_)
+                 open Lattice b using () renaming (_∧_ to _∧₂_; _∨_ to _∨₂_)
+                 open Lattice c using () renaming (_∧_ to _∧₃_; _∨_ to _∨₃_)
+                 open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                 open Π f′ renaming (_⟨$⟩_ to f)
+             in (λ x y → begin⟨ setoid c ⟩
+                           g (f (x ∧₁ y))     ≈⟨ cong-g (homo-∧-f x y) ⟩
+                           g (f x ∧₂ f y)     ≈⟨ homo-∧-g (f x) (f y) ⟩
+                           g (f x) ∧₃ g (f y) ∎) ,
+                (λ x y → begin⟨ setoid c ⟩
+                           g (f (x ∨₁ y))     ≈⟨ cong-g (homo-∨-f x y) ⟩
+                           g (f x ∨₂ f y)     ≈⟨ homo-∨-g (f x) (f y) ⟩
+                           g (f x) ∨₃ g (f y) ∎)
+
+  } where open Lattice
+
+DistributiveLattices = FullSubCategory Lattices DistributiveLattice.lattice
+
+
+-- To come: like near semirings, semirings, rings, boolean algebra. Then flavors of (semi)modules.
