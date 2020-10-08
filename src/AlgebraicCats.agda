@@ -122,7 +122,6 @@ Lattices = SubCategory (Setoids o ℓ) record
               open Lattice b renaming (_∧_ to _∧₂_; _∨_ to _∨₂_; _≈_ to _≈₂_)
               open Π f′ renaming (_⟨$⟩_ to f)
           in
-            -- Pair of relations. Also try as λ x y → f (x ∧₁ y) , f (x ∨₁ y).
             (∀ x y → f (x ∧₁ y) ≈₂ f x ∧₂ f y) ×
             (∀ x y → f (x ∨₁ y) ≈₂ f x ∨₂ f y)
   ; Rid  = λ {a} → (λ _ _ → refl a) , (λ _ _ → refl a)
