@@ -24,6 +24,7 @@ private
 ------------------------------------------------------------------------
 
 -- IsMagmaHomomorphism uses RawMagma, which lacks reflexivity of _≈_ and thus
+-- doesn't compose.
 
 IsMagmaHomomorphism′ : ∀ (M₁ : Magma a ℓ₁) (M₂ : Magma b ℓ₂)
                      → (Magma.setoid M₁ ⟶ Magma.setoid M₂) → Set (a ⊔ ℓ₁ ⊔ ℓ₂)
