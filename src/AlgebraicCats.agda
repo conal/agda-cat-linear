@@ -21,17 +21,15 @@ open import Categories.Category.Instance.Setoids
 -- SubCat structures for magma-like structures
 ------------------------------------------------------------------------
 
-import Algebra.Morphism.Definitions as MorphismDefinitions
-
 Magmas : Category _ _ _
 Magmas = SubCategory (Setoids o ℓ) record
   { U    = Magma.setoid
-  ; R    = λ {a} {b} f →
-             let open Magma a renaming (Carrier to A; _≈_ to _≈₁_; _∙_ to _∙₁_)
-                 open Magma b renaming (Carrier to B; _≈_ to _≈₂_; _∙_ to _∙₂_)
-                 open MorphismDefinitions A B _≈₂_
+  ; R    = λ {a} {b} f′ →
+             let open Magma a renaming (_∙_ to _∙₁_)
+                 open Magma b renaming (_∙_ to _∙₂_; _≈_ to _≈₂_)
+                 f = f′ ⟨$⟩_
              in
-               Homomorphic₂ (f ⟨$⟩_) _∙₁_ _∙₂_
+               ∀ x y → f (x ∙₁ y) ≈₂ f x ∙₂ f y
   ; Rid  = λ {a} → λ _ _ → Magma.refl a
   ; _∘R_ = λ {a b c} {f′} {g′} homo-f homo-g →
              let open Magma a renaming (_∙_ to _∙₁_)
