@@ -31,16 +31,16 @@ Magmas = SubCategory (Setoids o ℓ) record
              in
                ∀ x y → f (x ∙₁ y) ≈₂ f x ∙₂ f y
   ; Rid  = λ {a} → λ _ _ → Magma.refl a
-  ; _∘R_ = λ {a b c} {f′} {g′} homo-f homo-g →
+  ; _∘R_ = λ {a b c} {g′} {f′} homo-g homo-f →
              let open Magma a renaming (_∙_ to _∙₁_)
                  open Magma b renaming (_∙_ to _∙₂_)
                  open Magma c renaming (_∙_ to _∙₃_)
              in λ (x y : Magma.Carrier a) →
-                    let f = f′ ⟨$⟩_ ; g = g′ ⟨$⟩_ in
+                    let g = g′ ⟨$⟩_ ; f = f′ ⟨$⟩_ in
                     begin⟨ Magma.setoid c ⟩
-                      f (g (x ∙₁ y))     ≈⟨ Π.cong f′ (homo-g x y) ⟩
-                      f (g x ∙₂ g y)     ≈⟨ homo-f (g x) (g y) ⟩
-                      f (g x) ∙₃ f (g y) ∎
+                      g (f (x ∙₁ y))     ≈⟨ Π.cong g′ (homo-f x y) ⟩
+                      g (f x ∙₂ f y)     ≈⟨ homo-g (f x) (f y) ⟩
+                      g (f x) ∙₃ g (f y) ∎
   }
 
 Semigroups            = FullSubCategory Magmas Semigroup.magma
@@ -63,17 +63,17 @@ Monoids = SubCategory Semigroups record
             f ⟨$⟩ ε₁ ≈₂ ε₂
   ; Rid = λ {a} → Monoid.refl a
   ; _∘R_ = λ {a b c : Monoid o ℓ}
-             {(f′ , _) : semigroup b ⇒ semigroup c}
-             {(g′ , _) : semigroup a ⇒ semigroup b}
-             fε≈ε gε≈ε
+             {(g′ , _) : semigroup b ⇒ semigroup c}
+             {(f′ , _) : semigroup a ⇒ semigroup b}
+             gε≈ε fε≈ε
              → let open Monoid a renaming (ε to ε₁)
                    open Monoid b renaming (ε to ε₂)
                    open Monoid c renaming (ε to ε₃)
-                   f = f′ ⟨$⟩_ ; g = g′ ⟨$⟩_
+                   g = g′ ⟨$⟩_ ; f = f′ ⟨$⟩_
                in
                begin⟨ Monoid.setoid c ⟩
-                 f (g ε₁)  ≈⟨ Π.cong f′ gε≈ε ⟩
-                 f ε₂      ≈⟨ fε≈ε ⟩
+                 g (f ε₁)  ≈⟨ Π.cong g′ fε≈ε ⟩
+                 g ε₂      ≈⟨ gε≈ε ⟩
                  ε₃        ∎
   } where
       open Monoid
