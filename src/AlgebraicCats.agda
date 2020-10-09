@@ -61,17 +61,17 @@ Monoids = SubCategory Semigroups record
           in
             f ε₁ ≈₂ ε₂
   ; Rid  = λ {a} → refl a
-  ; _∘R_ = λ {a b c} {(g′ , _)} {(f′ , _)} gε fε
-             → let open Monoid a using () renaming (ε to ε₁)
-                   open Monoid b using () renaming (ε to ε₂)
-                   open Monoid c using () renaming (ε to ε₃)
-                   open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-                   open Π f′ renaming (_⟨$⟩_ to f)
-               in 
-                 begin⟨ setoid c ⟩
-                   g (f ε₁) ≈⟨ cong-g fε ⟩
-                   g ε₂     ≈⟨ gε ⟩
-                   ε₃       ∎
+  ; _∘R_ = λ {a b c} {(g′ , _)} {(f′ , _)} gε fε →
+             let open Monoid a using () renaming (ε to ε₁)
+                 open Monoid b using () renaming (ε to ε₂)
+                 open Monoid c using () renaming (ε to ε₃)
+                 open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                 open Π f′ renaming (_⟨$⟩_ to f)
+             in 
+               begin⟨ setoid c ⟩
+                 g (f ε₁) ≈⟨ cong-g fε ⟩
+                 g ε₂     ≈⟨ gε ⟩
+                 ε₃       ∎
   } where open Monoid
 
 CommutativeMonoids = FullSubCategory Monoids CommutativeMonoid.monoid
@@ -150,8 +150,10 @@ NearSemirings : Category _ _ _
 NearSemirings = SubCategory (Setoids o ℓ) record
   { U = setoid
   ; R = λ {a} {b} f′ →
-          let open NearSemiring a renaming (_+_ to _+₁_; _*_ to _*₁_; 0# to 0₁)
-              open NearSemiring b renaming (_+_ to _+₂_; _*_ to _*₂_; 0# to 0₂; _≈_ to _≈₂_)
+          let open NearSemiring a renaming
+                 (_+_ to _+₁_; _*_ to _*₁_; 0# to 0₁)
+              open NearSemiring b renaming
+                 (_+_ to _+₂_; _*_ to _*₂_; 0# to 0₂; _≈_ to _≈₂_)
               open Π f′ renaming (_⟨$⟩_ to f)
           in
             (∀ x y → f (x +₁ y) ≈₂ f x +₂ f y) ×
@@ -159,9 +161,12 @@ NearSemirings = SubCategory (Setoids o ℓ) record
             f 0₁ ≈₂ 0₂
   ; Rid  = λ {a} → (λ _ _ → refl a) , (λ _ _ → refl a) , refl a
   ; _∘R_ = λ {a b c} {g′} {f′} (g+ , g* , g0) (f+ , f* , f0) →
-             let open NearSemiring a using () renaming (_+_ to _+₁_; _*_ to _*₁_; 0# to 0₁)
-                 open NearSemiring b using () renaming (_+_ to _+₂_; _*_ to _*₂_; 0# to 0₂)
-                 open NearSemiring c using () renaming (_+_ to _+₃_; _*_ to _*₃_; 0# to 0₃)
+             let open NearSemiring a using () renaming
+                   (_+_ to _+₁_; _*_ to _*₁_; 0# to 0₁)
+                 open NearSemiring b using () renaming
+                   (_+_ to _+₂_; _*_ to _*₂_; 0# to 0₂)
+                 open NearSemiring c using () renaming
+                   (_+_ to _+₃_; _*_ to _*₃_; 0# to 0₃)
                  open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f)
              in (λ x y → begin⟨ setoid c ⟩
@@ -183,4 +188,53 @@ SemiringWithoutOnes =
 CommutativeSemiringWithoutOnes =
   FullSubCategory NearSemirings CommutativeSemiringWithoutOne.nearSemiring
 
--- To come: like near semirings, rings, boolean algebra. Then flavors of (semi)modules.
+-------------------------------------------------------------------------------
+-- | Semiring-like structures
+-------------------------------------------------------------------------------
+
+SemiringWithoutAnnihilatingZeros : Category _ _ _
+SemiringWithoutAnnihilatingZeros = SubCategory (Setoids o ℓ) record
+  { U = setoid
+  ; R = λ {a} {b} f′ →
+          let open SemiringWithoutAnnihilatingZero a renaming
+                 (_+_ to _+₁_; _*_ to _*₁_; 0# to 0₁; 1# to 1₁)
+              open SemiringWithoutAnnihilatingZero b renaming
+                 (_+_ to _+₂_; _*_ to _*₂_; 0# to 0₂; 1# to 1₂; _≈_ to _≈₂_)
+              open Π f′ renaming (_⟨$⟩_ to f)
+          in
+            (∀ x y → f (x +₁ y) ≈₂ f x +₂ f y) ×
+            (∀ x y → f (x *₁ y) ≈₂ f x *₂ f y) ×
+            f 0₁ ≈₂ 0₂ × f 1₁ ≈₂ 1₂
+  ; Rid  = λ {a} → (λ _ _ → refl a) , (λ _ _ → refl a) , refl a , refl a
+  ; _∘R_ = λ {a b c} {g′} {f′} (g+ , g* , g0 , g1) (f+ , f* , f0 , f1) →
+             let open SemiringWithoutAnnihilatingZero a using () renaming
+                   (_+_ to _+₁_; _*_ to _*₁_; 0# to 0₁; 1# to 1₁)
+                 open SemiringWithoutAnnihilatingZero b using () renaming
+                   (_+_ to _+₂_; _*_ to _*₂_; 0# to 0₂; 1# to 1₂)
+                 open SemiringWithoutAnnihilatingZero c using () renaming
+                   (_+_ to _+₃_; _*_ to _*₃_; 0# to 0₃; 1# to 1₃)
+                 open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                 open Π f′ renaming (_⟨$⟩_ to f)
+             in (λ x y → begin⟨ setoid c ⟩
+                           g (f (x +₁ y))     ≈⟨ cong-g (f+ x y) ⟩
+                           g (f x +₂ f y)     ≈⟨ g+ (f x) (f y) ⟩
+                           g (f x) +₃ g (f y) ∎) ,
+                (λ x y → begin⟨ setoid c ⟩
+                           g (f (x *₁ y))     ≈⟨ cong-g (f* x y) ⟩
+                           g (f x *₂ f y)     ≈⟨ g* (f x) (f y) ⟩
+                           g (f x) *₃ g (f y) ∎) ,
+                (begin⟨ setoid c ⟩
+                   g (f 0₁) ≈⟨ cong-g f0 ⟩
+                   g 0₂     ≈⟨ g0 ⟩
+                   0₃       ∎) ,
+                (begin⟨ setoid c ⟩
+                   g (f 1₁) ≈⟨ cong-g f1 ⟩
+                   g 1₂     ≈⟨ g1 ⟩
+                   1₃       ∎)
+  } where open SemiringWithoutAnnihilatingZero
+
+Semirings = FullSubCategory SemiringWithoutAnnihilatingZeros
+              Semiring.semiringWithoutAnnihilatingZero
+CommutativeSemirings = FullSubCategory SemiringWithoutAnnihilatingZeros
+                         CommutativeSemiring.semiringWithoutAnnihilatingZero
+-- To come: like rings, boolean algebra. Then flavors of (semi)modules.
