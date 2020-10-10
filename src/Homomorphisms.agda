@@ -6,7 +6,7 @@ open import Level
 module Homomorphisms (c ℓ : Level) where
 
 open import Data.Product
-open import Function using (_∘′_; _$_; _on_) -- renaming (id to idf)
+open import Function using (_∘′_; _$_; _on_) renaming (id to id′)
 open import Relation.Binary
 open import Function.Equality hiding (id; _∘_)
 open import Relation.Binary.Reasoning.MultiSetoid
@@ -16,100 +16,62 @@ open import Relation.Binary.Construct.On
 
 open import Categories.Category
 open import Categories.Category.Instance.Setoids
+open import Categories.Category.SubCategory
 
 open Setoid using (Carrier; refl)
 open Category (Setoids c ℓ)
 
 -- Nullary homomorphisms, i.e., "pointed setoids"
 H₀ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
-H₀ = record
-  { Obj = Σ (Setoid c ℓ) Carrier
-  ; _⇒_ = λ ( A , ε₁ ) ( B , ε₂ ) → let open Setoid B renaming (_≈_ to _≈₂_) in
-                                      Σ (A ⟶ B) (λ f → f ⟨$⟩ ε₁ ≈₂ ε₂)
-  ; _≈_ = _≈_ on proj₁
-  ; id = λ {(A , _)} → id , refl A
-  ; _∘_ = λ {(A , ε₁)} {(B , ε₂)} {(C , ε₃)} (g′ , gᴴ) (f′ , fᴴ) →
-              g′ ∘ f′ , let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-                            open Π f′ renaming (_⟨$⟩_ to f) in
-                          begin⟨ C ⟩
-                            g (f ε₁) ≈⟨ cong-g fᴴ ⟩
-                            g ε₂     ≈⟨ gᴴ ⟩
-                            ε₃       ∎
-  ; assoc = λ {_ _ _ _} {(f , _) (g , _) (h , _)} →
-              assoc {f = f} {g} {h}
-  ; sym-assoc = λ {_ _ _ _} {(f , _) (g , _) (h , _)} →
-              sym-assoc {f = f} {g} {h}
-  ; identityˡ = λ {_ _} {(f , _)} → identityˡ {f = f}
-  ; identityʳ = λ {_ _} {(f , _)} → identityʳ {f = f}
-  ; identity² = λ {(A , _)} → identity² {A}
-  ; equiv = isEquivalence proj₁ equiv 
-  ; ∘-resp-≈ = λ {(A , _)} {(B , _)} {(C , _)}
-                 {(f , _) (h , _)} {(g , _) (i , _)} →
-                 ∘-resp-≈ {A} {B} {C} {f} {h} {g} {i}
+H₀ = SubCategory (Setoids c ℓ) {I = Σ (Setoid c ℓ) Carrier} record
+  { U = proj₁
+  ; R = λ {(A , ε₁) (B , ε₂)} f′ → let open Π f′ renaming (_⟨$⟩_ to f)
+                                       open Setoid B renaming (_≈_ to _≈₂_) in
+                                    f ε₁ ≈₂ ε₂
+  ; Rid = λ {(A , _)} → refl A
+  ; _∘R_ = λ {(A , ε₁)} {(B , ε₂)} {(C , ε₃)} {g′ f′} gᴴ fᴴ →
+             let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                 open Π f′ renaming (_⟨$⟩_ to f) in
+               begin⟨ C ⟩
+                 g (f ε₁) ≈⟨ cong-g fᴴ ⟩
+                 g ε₂     ≈⟨ gᴴ ⟩
+                 ε₃       ∎
   }
 
 -- Unary homomorphisms
-H₁ : Category _ _ _
-H₁ = record
-  { Obj = Σ (Setoid c ℓ) (λ s → Op₁ (Carrier s))  -- (Op₁ ∘′ Carrier)
-  ; _⇒_ = λ ( A , μ₁ ) ( B , μ₂ ) →
-            let open Setoid A renaming (_≈_ to _≈₁_)
-                open Setoid B renaming (_≈_ to _≈₂_) in
-              Σ (A ⟶ B) (λ f′ → let open Π f′ renaming (_⟨$⟩_ to f) in ∀ x →
-                                  f (μ₁ x) ≈₂ μ₂ (f x))
-  ; _≈_ = _≈_ on proj₁
-  ; id = λ {(A , _)} → id , (λ _ → refl A)
-  ; _∘_ = λ {(A , μ₁)} {(B , μ₂)} {(C , μ₃)} (g′ , gᴴ) (f′ , fᴴ) →
-              g′ ∘ f′ , let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-                            open Π f′ renaming (_⟨$⟩_ to f) in λ x →
-                          begin⟨ C ⟩
-                            g (f (μ₁ x)) ≈⟨ cong-g (fᴴ x) ⟩
-                            g (μ₂ (f x)) ≈⟨ gᴴ (f x) ⟩
-                            μ₃ (g (f x)) ∎
-  ; assoc = λ {_ _ _ _} {(f , _) (g , _) (h , _)} →
-              assoc {f = f} {g} {h}
-  ; sym-assoc = λ {_ _ _ _} {(f , _) (g , _) (h , _)} →
-              sym-assoc {f = f} {g} {h}
-  ; identityˡ = λ {_ _} {(f , _)} → identityˡ {f = f}
-  ; identityʳ = λ {_ _} {(f , _)} → identityʳ {f = f}
-  ; identity² = λ {(A , _)} → identity² {A}
-  ; equiv = isEquivalence proj₁ equiv 
-  ; ∘-resp-≈ = λ {(A , _)} {(B , _)} {(C , _)}
-                 {(f , _) (h , _)} {(g , _) (i , _)} →
-                 ∘-resp-≈ {A} {B} {C} {f} {h} {g} {i}
+H₁ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
+H₁ = SubCategory (Setoids c ℓ) record
+  { U = proj₁ {B = Op₁ ∘′ Carrier}   -- {B = λ A → Op₁ (Carrier A)}
+  ; R = λ {( A , μ₁ ) ( B , μ₂ )} f′ →
+            let open Π f′ renaming (_⟨$⟩_ to f)
+                open Setoid A renaming (_≈_ to _≈₁_)
+                open Setoid B renaming (_≈_ to _≈₂_) in ∀ x →
+              f (μ₁ x) ≈₂ μ₂ (f x)
+  ; Rid = λ {(A , _)} _ → refl A
+  ; _∘R_ = λ {(A , μ₁)} {(B , μ₂)} {(C , μ₃)} {g′ f′} gᴴ fᴴ →
+             let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                 open Π f′ renaming (_⟨$⟩_ to f) in λ x →
+               begin⟨ C ⟩
+                 g (f (μ₁ x)) ≈⟨ cong-g (fᴴ x) ⟩
+                 g (μ₂ (f x)) ≈⟨ gᴴ (f x) ⟩
+                 μ₃ (g (f x)) ∎
   }
 
 -- Binary homomorphisms
-H₂ : Category _ _ _
-H₂ = record
-  { Obj = Σ (Setoid c ℓ) (λ s → Op₂ (Carrier s))  -- (Op₁ ∘′ Carrier)
-  ; _⇒_ = λ ( A , _∙₁_ ) ( B , _∙₂_ ) →
-            let open Setoid A renaming (_≈_ to _≈₁_)
-                open Setoid B renaming (_≈_ to _≈₂_) in
-              Σ (A ⟶ B) (λ f′ → let open Π f′ renaming (_⟨$⟩_ to f) in ∀ x y →
-                                  f (x ∙₁ y) ≈₂ f x ∙₂ f y)
-  ; _≈_ = _≈_ on proj₁
-  ; id = λ {(A , _)} → id , (λ _ _ → refl A)
-
-  ; _∘_ = λ {(A , _∙₁_)} {(B , _∙₂_)} {(C , _∙₃_)} (g′ , gᴴ) (f′ , fᴴ) →
-              g′ ∘ f′ , let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-                            open Π f′ renaming (_⟨$⟩_ to f) in λ x y →
-                          begin⟨ C ⟩
-                            g (f (x ∙₁ y))     ≈⟨ cong-g (fᴴ x y) ⟩
-                            g (f x ∙₂ f y)     ≈⟨ gᴴ (f x) (f y) ⟩
-                            g (f x) ∙₃ g (f y) ∎
-  ; assoc = λ {_ _ _ _} {(f , _) (g , _) (h , _)} →
-              assoc {f = f} {g} {h}
-  ; sym-assoc = λ {_ _ _ _} {(f , _) (g , _) (h , _)} →
-              sym-assoc {f = f} {g} {h}
-  ; identityˡ = λ {_ _} {(f , _)} → identityˡ {f = f}
-  ; identityʳ = λ {_ _} {(f , _)} → identityʳ {f = f}
-  ; identity² = λ {(A , _)} → identity² {A}
-  ; equiv = isEquivalence proj₁ equiv 
-  ; ∘-resp-≈ = λ {(A , _)} {(B , _)} {(C , _)}
-                 {(f , _) (h , _)} {(g , _) (i , _)} →
-                 ∘-resp-≈ {A} {B} {C} {f} {h} {g} {i}
+H₂ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
+H₂ = SubCategory (Setoids c ℓ) record
+  { U = proj₁ {B = Op₂ ∘′ Carrier}
+  ; R = λ {( A , _∙₁_ ) ( B , _∙₂_ )} f′ →
+            let open Π f′ renaming (_⟨$⟩_ to f)
+                open Setoid A renaming (_≈_ to _≈₁_)
+                open Setoid B renaming (_≈_ to _≈₂_) in ∀ x y →
+              f (x ∙₁ y) ≈₂ f x ∙₂ f y
+  ; Rid = λ {(A , _)} _ _ → refl A
+  ; _∘R_ = λ {(A , _∙₁_)} {(B , _∙₂_)} {(C , _∙₃_)} {g′ f′} gᴴ fᴴ →
+             let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                 open Π f′ renaming (_⟨$⟩_ to f) in λ x y →
+               begin⟨ C ⟩
+                 g (f (x ∙₁ y))     ≈⟨ cong-g (fᴴ x y) ⟩
+                 g (f x ∙₂ f y)     ≈⟨ gᴴ (f x) (f y) ⟩
+                 g (f x) ∙₃ g (f y) ∎
   }
-
-
--- TODO: redefine as subcategories of Setoid, eliminating repetition of assoc, etc.
