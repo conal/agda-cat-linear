@@ -5,19 +5,18 @@ open import Level
 
 module Homomorphisms (c ℓ : Level) where
 
-open import Data.Product
-open import Function using (_∘′_; _$_; _on_) renaming (id to id′)
-open import Relation.Binary
-open import Function.Equality hiding (id; _∘_)
+open import Data.Product using (Σ; proj₁; _,_)
+open import Function using (_∘_)
+open import Relation.Binary using (Setoid)
+open import Function.Equality using (Π;_⟨$⟩_)
 open import Relation.Binary.Reasoning.MultiSetoid
 open import Algebra using (Op₁; Op₂)
 
-open import Categories.Category
-open import Categories.Category.Instance.Setoids
+open import Categories.Category using (Category)
+open import Categories.Category.Instance.Setoids using (Setoids)
 open import Categories.Category.SubCategory
 
 open Setoid using (Carrier; refl)
-open Category (Setoids c ℓ)
 
 -- Nullary homomorphisms, i.e., "pointed setoids"
 H₀ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
@@ -39,7 +38,7 @@ H₀ = SubCategory (Setoids c ℓ) {I = Σ (Setoid c ℓ) Carrier} record
 -- Unary homomorphisms
 H₁ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
 H₁ = SubCategory (Setoids c ℓ) record
-  { U = proj₁ {B = Op₁ ∘′ Carrier}   -- {B = λ A → Op₁ (Carrier A)}
+  { U = proj₁ {B = Op₁ ∘ Carrier}   -- {B = λ A → Op₁ (Carrier A)}
   ; R = λ {( A , ∙₁_ ) ( B , ∙₂_ )} f′ →
             let open Π f′ renaming (_⟨$⟩_ to f)
                 open Setoid A renaming (_≈_ to _≈₁_)
@@ -58,7 +57,7 @@ H₁ = SubCategory (Setoids c ℓ) record
 -- Binary homomorphisms
 H₂ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
 H₂ = SubCategory (Setoids c ℓ) record
-  { U = proj₁ {B = Op₂ ∘′ Carrier}
+  { U = proj₁ {B = Op₂ ∘ Carrier}
   ; R = λ {( A , _∙₁_ ) ( B , _∙₂_ )} f′ →
             let open Π f′ renaming (_⟨$⟩_ to f)
                 open Setoid A renaming (_≈_ to _≈₁_)
