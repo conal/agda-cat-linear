@@ -237,4 +237,33 @@ Semirings = FullSubCategory SemiringWithoutAnnihilatingZeros
               Semiring.semiringWithoutAnnihilatingZero
 CommutativeSemirings = FullSubCategory SemiringWithoutAnnihilatingZeros
                          CommutativeSemiring.semiringWithoutAnnihilatingZero
--- To come: like rings, boolean algebra. Then flavors of (semi)modules.
+
+-------------------------------------------------------------------------------
+-- | Ring-like structures
+-------------------------------------------------------------------------------
+
+Rings : Category _ _ _
+Rings = SubCategory Semirings record
+  { U = semiring
+  ; R = λ {a b : Ring o ℓ} (f′ , _) →
+          let open Ring a renaming (-_ to -₁_)
+              open Ring b renaming (-_ to -₂_; _≈_ to _≈₂_)
+              open Π f′ renaming (_⟨$⟩_ to f)
+          in
+            ∀ a → f (-₁ a) ≈₂ -₂ f a
+  ; Rid  = λ {a} _ → refl a
+  ; _∘R_ = λ {a b c} {(g′ , _)} {(f′ , _)} -g -f
+             → let open Ring a using () renaming (-_ to -₁_)
+                   open Ring b using () renaming (-_ to -₂_)
+                   open Ring c using () renaming (-_ to -₃_)
+                   open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                   open Π f′ renaming (_⟨$⟩_ to f)
+               in 
+                 λ x → begin⟨ setoid c ⟩
+                         g (f (-₁ x)) ≈⟨ cong-g (-f x) ⟩
+                         g (-₂ f x)   ≈⟨ -g (f x) ⟩
+                         -₃ g (f x)   ∎
+  } where
+      open Ring
+
+CommutativeRings = FullSubCategory Rings CommutativeRing.ring
