@@ -11,8 +11,6 @@ open import Relation.Binary
 open import Function.Equality hiding (id; _∘_)
 open import Relation.Binary.Reasoning.MultiSetoid
 open import Algebra using (Op₁; Op₂)
-open import Algebra.Morphism.Definitions
-open import Relation.Binary.Construct.On
 
 open import Categories.Category
 open import Categories.Category.Instance.Setoids
