@@ -23,36 +23,36 @@ open Category (Setoids c ℓ)
 H₀ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
 H₀ = SubCategory (Setoids c ℓ) {I = Σ (Setoid c ℓ) Carrier} record
   { U = proj₁
-  ; R = λ {(A , ε₁) (B , ε₂)} f′ → let open Π f′ renaming (_⟨$⟩_ to f)
+  ; R = λ {(A , ∙₁) (B , ∙₂)} f′ → let open Π f′ renaming (_⟨$⟩_ to f)
                                        open Setoid B renaming (_≈_ to _≈₂_) in
-                                    f ε₁ ≈₂ ε₂
+                                    f ∙₁ ≈₂ ∙₂
   ; Rid = λ {(A , _)} → refl A
-  ; _∘R_ = λ {(A , ε₁)} {(B , ε₂)} {(C , ε₃)} {g′ f′} gᴴ fᴴ →
+  ; _∘R_ = λ {(A , ∙₁)} {(B , ∙₂)} {(C , ∙₃)} {g′ f′} gᴴ fᴴ →
              let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f) in
                begin⟨ C ⟩
-                 g (f ε₁) ≈⟨ cong-g fᴴ ⟩
-                 g ε₂     ≈⟨ gᴴ ⟩
-                 ε₃       ∎
+                 g (f ∙₁) ≈⟨ cong-g fᴴ ⟩
+                 g ∙₂     ≈⟨ gᴴ ⟩
+                 ∙₃       ∎
   }
 
 -- Unary homomorphisms
 H₁ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
 H₁ = SubCategory (Setoids c ℓ) record
   { U = proj₁ {B = Op₁ ∘′ Carrier}   -- {B = λ A → Op₁ (Carrier A)}
-  ; R = λ {( A , μ₁ ) ( B , μ₂ )} f′ →
+  ; R = λ {( A , ∙₁_ ) ( B , ∙₂_ )} f′ →
             let open Π f′ renaming (_⟨$⟩_ to f)
                 open Setoid A renaming (_≈_ to _≈₁_)
                 open Setoid B renaming (_≈_ to _≈₂_) in ∀ x →
-              f (μ₁ x) ≈₂ μ₂ (f x)
+              f (∙₁ x) ≈₂ ∙₂ (f x)
   ; Rid = λ {(A , _)} _ → refl A
-  ; _∘R_ = λ {(A , μ₁)} {(B , μ₂)} {(C , μ₃)} {g′ f′} gᴴ fᴴ →
+  ; _∘R_ = λ {(A , ∙₁_)} {(B , ∙₂_)} {(C , ∙₃_)} {g′ f′} gᴴ fᴴ →
              let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f) in λ x →
                begin⟨ C ⟩
-                 g (f (μ₁ x)) ≈⟨ cong-g (fᴴ x) ⟩
-                 g (μ₂ (f x)) ≈⟨ gᴴ (f x) ⟩
-                 μ₃ (g (f x)) ∎
+                 g (f (∙₁ x)) ≈⟨ cong-g (fᴴ x) ⟩
+                 g (∙₂ (f x)) ≈⟨ gᴴ (f x) ⟩
+                 ∙₃ (g (f x)) ∎
   }
 
 -- Binary homomorphisms
