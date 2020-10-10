@@ -17,6 +17,8 @@ open import Categories.Category.Instance.Setoids
 open Setoid using (Carrier; refl)
 open Category (Setoids c ℓ)
 
+import Relation.Binary.Construct.On as On
+
 H₀ : Category _ _ _
 H₀ = record
   { Obj = Σ (Setoid c ℓ) Carrier
@@ -38,16 +40,7 @@ H₀ = record
   ; identityˡ = λ {_ _} {(f , _)} → identityˡ {f = f}
   ; identityʳ = λ {_ _} {(f , _)} → identityʳ {f = f}
   ; identity² = λ {(A , _)} → identity² {A}
-  ; equiv = λ {(A , _) (B , _)} →
-              let module Eq = Equiv {A} {B} in record
-                { refl  = λ {(f , _)} → Eq.refl {f}
-                ; sym   = λ {(f , _) (g , _)} → Eq.sym {f} {g}
-                ; trans = λ {(f , _) (g , _) (h , _)} → Eq.trans {f} {g} {h}
-                }
-            -- Is there already a way to split an equivalence on pairs into a
-            -- pair of equivalence? Alternatively, some kind of congruence
-            -- operation on equivalences. Try Relation.Binary.Construct.On.
- 
+  ; equiv = On.isEquivalence proj₁ equiv 
   ; ∘-resp-≈ = λ {(A , a)} {(B , b)} {(C , c)}
                  {(f , _) (h , _)} {(g , _) (i , _)} →
                  ∘-resp-≈ {A} {B} {C} {f} {h} {g} {i}
