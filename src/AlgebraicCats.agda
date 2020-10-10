@@ -267,3 +267,40 @@ Rings = SubCategory Semirings record
       open Ring
 
 CommutativeRings = FullSubCategory Rings CommutativeRing.ring
+
+BooleanAlgebras : Category _ _ _
+BooleanAlgebras = SubCategory DistributiveLattices record
+  { U = distributiveLattice
+  ; R = λ {a b : BooleanAlgebra o ℓ} (f′ , _) →
+          let open BooleanAlgebra a using () renaming
+                (⊤ to ⊤₁; ⊥ to ⊥₁; ¬_ to ¬₁_)
+              open BooleanAlgebra b using () renaming
+                (⊤ to ⊤₂; ⊥ to ⊥₂; ¬_ to ¬₂_; _≈_ to _≈₂_)
+              open Π f′ renaming (_⟨$⟩_ to f)
+          in
+            f ⊤₁ ≈₂ ⊤₂ × f ⊥₁ ≈₂ ⊥₂ × (∀ x → f (¬₁ x) ≈₂ ¬₂ (f x))
+  ; Rid  = λ {a} → refl a , refl a , (λ _ → refl a)
+  ; _∘R_ = λ {a b c} {(g′ , _)} {(f′ , _)} (g⊤ , g⊥ , ¬g) (f⊤ , f⊥ , ¬f) →
+             let open BooleanAlgebra a using () renaming
+                   (⊤ to ⊤₁; ⊥ to ⊥₁; ¬_ to ¬₁_)
+                 open BooleanAlgebra b using () renaming
+                   (⊤ to ⊤₂; ⊥ to ⊥₂; ¬_ to ¬₂_)
+                 open BooleanAlgebra c using () renaming
+                   (⊤ to ⊤₃; ⊥ to ⊥₃; ¬_ to ¬₃_)
+                 open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                 open Π f′ renaming (_⟨$⟩_ to f)
+             in 
+               (begin⟨ setoid c ⟩
+                  g (f ⊤₁) ≈⟨ cong-g f⊤ ⟩
+                  g ⊤₂     ≈⟨ g⊤ ⟩
+                  ⊤₃       ∎) ,
+               (begin⟨ setoid c ⟩
+                  g (f ⊥₁) ≈⟨ cong-g f⊥ ⟩
+                  g ⊥₂     ≈⟨ g⊥ ⟩
+                  ⊥₃       ∎) ,
+               (λ x → begin⟨ setoid c ⟩
+                        g (f (¬₁ x)) ≈⟨ cong-g (¬f x) ⟩
+                        g (¬₂ f x)   ≈⟨ ¬g (f x) ⟩
+                        ¬₃ g (f x)   ∎)
+  } where open BooleanAlgebra
+
