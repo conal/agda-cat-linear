@@ -5,7 +5,7 @@ open import Level
 
 module Homomorphisms (c ℓ : Level) where
 
-open import Data.Product using (Σ; proj₁; _,_)
+open import Data.Product using (Σ; proj₁; _×_; _,_)
 open import Function using (_∘_)
 open import Relation.Binary using (Setoid)
 open import Function.Equality using (Π;_⟨$⟩_)
@@ -20,8 +20,8 @@ open Setoid using (Carrier; refl)
 
 -- Nullary homomorphisms, i.e., "pointed setoids"
 H₀ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
-H₀ = SubCategory (Setoids c ℓ) {I = Σ (Setoid c ℓ) Carrier} record
-  { U = proj₁
+H₀ = SubCategory (Setoids c ℓ) record
+  { U = proj₁ -- {B = Carrier}
   ; R = λ {(A , ∙₁) (B , ∙₂)} f′ → let open Π f′ renaming (_⟨$⟩_ to f)
                                        open Setoid B renaming (_≈_ to _≈₂_) in
                                     f ∙₁ ≈₂ ∙₂
@@ -72,3 +72,22 @@ H₂ = SubCategory (Setoids c ℓ) record
                  g (f x ∙₂ f y)     ≈⟨ gᴴ (f x) (f y) ⟩
                  g (f x) ∙₃ g (f y) ∎
   }
+
+
+-------------------------------------------------------------------------------
+-- | Experiments in usage
+-------------------------------------------------------------------------------
+
+open import Algebra.Bundles
+
+Magmas : Category _ _ _
+Magmas = FullSubCategory H₂ (λ M → let open Magma M in setoid , _∙_)
+
+Semigroups            = FullSubCategory Magmas Semigroup.magma
+Bands                 = FullSubCategory Magmas Band.magma
+CommutativeSemigroups = FullSubCategory Magmas CommutativeSemigroup.magma
+Semilattices          = FullSubCategory Magmas Semilattice.magma
+SelectiveMagmas       = FullSubCategory Magmas SelectiveMagma.magma
+
+
+
