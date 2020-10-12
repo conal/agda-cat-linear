@@ -6,6 +6,7 @@ open import Level
 open import Data.Product
 open import Relation.Unary using (Pred; _∩_)
 open import Data.Unit.Polymorphic
+open import Algebra using (Op₁; Op₂)
 
 open import Categories.Category.Core
 
@@ -28,17 +29,6 @@ module _ {o ℓ e} (C : Category o ℓ e) where
   IsFunctorial P = (∀ {X : Obj} → P (id {X}))
                  × (∀ {X Y Z} {g : Y ⇒ Z} {f : X ⇒ Y} → P g → P f → P (g ∘ f))
 
-  -- The U in Relation.Unary is limited to level 0
-  U : ArrProp
-  U = λ _ → ⊤
-
-  functorial-U : IsFunctorial U
-  functorial-U = tt , λ _ _ → tt
-
-  functorial-∩ : IsFunctorial P → IsFunctorial Q → IsFunctorial (P ∩ Q)
-  functorial-∩ (Pid , _P∘_) (Qid , _Q∘_) =
-    (Pid , Qid) , (λ (Pg , Qg) (Pf , Qf) → Pg P∘ Pf , Qg Q∘ Qf)
-
   -- Can I replace IsFunctorial with a category of some sort (or many)? Then
   -- functorial-∩ corresponds to product of categories and functorial-U to the
   -- terminal category (I think).
@@ -48,7 +38,17 @@ module _ {o ℓ e} (C : Category o ℓ e) where
       prop : ArrProp
       isFunctorial : IsFunctorial prop
 
-open import Algebra using (Op₁; Op₂)
+  UF : Functorial
+  UF = record { prop = λ _ → ⊤ ; isFunctorial = tt , λ _ _ → tt }
+
+  infixr 7 _∩_
+  _∩F_ : Op₂ Functorial
+  (record { prop = P ; isFunctorial = (Pid , _P∘_)})
+    ∩F (record { prop = Q ; isFunctorial = (Qid , _Q∘_) }) = 
+   record { prop = P ∩ Q
+          ; isFunctorial = (Pid , Qid) , (λ (Pg , Qg) (Pf , Qf) → Pg P∘ Pf , Qg Q∘ Qf)
+          }
+
 open import Function.Equality using (Π; _⟨$⟩_; _⟶_)
 open import Relation.Binary
 open import Function.Bundles
