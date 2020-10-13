@@ -16,9 +16,17 @@ open Setoid using (Carrier; refl)
 
 open import Categories.Category.SubCategory (Setoids o ℓ)
 
-H₀ : {q : Level} {Q : Set q} → (setoid : Q → Setoid o ℓ)
-   → ((A : Q) → Carrier (setoid A)) → SubCat Q
-H₀ {Q = Q} setoid op = record
+-------------------------------------------------------------------------------
+-- | Per-operation homomorphisms in nullary, unary, and binary flavors
+-------------------------------------------------------------------------------
+
+private
+  variable
+    q : Level
+    Q : Set q
+
+H₀ : (setoid : Q → Setoid o ℓ) → ((A : Q) → Carrier (setoid A)) → SubCat Q
+H₀ setoid op = record
   { U = setoid
   ; R = λ {a b} f′ →
           let ∙ = op a ; ∘ = op b
@@ -37,9 +45,8 @@ H₀ {Q = Q} setoid op = record
                     ⋆       ∎
   }
 
-H₁ : {q : Level} {Q : Set q} → (setoid : Q → Setoid o ℓ)
-   → ((A : Q) → Op₁ (Carrier (setoid A))) → SubCat Q
-H₁ {Q = Q} setoid op = record
+H₁ : (setoid : Q → Setoid o ℓ) → ((A : Q) → Op₁ (Carrier (setoid A))) → SubCat Q
+H₁ setoid op = record
   { U = setoid
   ; R = λ {a b} f′ →
           let ∙_ = op a ; ∘_ = op b
@@ -58,9 +65,8 @@ H₁ {Q = Q} setoid op = record
                           ⋆ g (f x)   ∎
   }
 
-H₂ : {q : Level} {Q : Set q} → (setoid : Q → Setoid o ℓ)
-   → ((A : Q) → Op₂ (Carrier (setoid A))) → SubCat Q
-H₂ {Q = Q} setoid op = record
+H₂ : (setoid : Q → Setoid o ℓ) → ((A : Q) → Op₂ (Carrier (setoid A))) → SubCat Q
+H₂ setoid op = record
   { U = setoid
   ; R = λ {a b} f′ →
           let _∙_ = op a ; _∘_ = op b
