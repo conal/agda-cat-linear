@@ -4,12 +4,10 @@ open import Level
 
 module H2 (o ℓ : Level) where
 
--- open import Data.Product
 open import Algebra using (Op₁; Op₂)
 
 open import Function.Equality using (Π; _⟨$⟩_; _⟶_)
 open import Relation.Binary
-open import Function.Bundles
 open import Relation.Binary.Reasoning.MultiSetoid
 
 open import Categories.Category.Instance.Setoids
@@ -26,7 +24,7 @@ module _ where
     { U = setoid
     ; R = λ {a b} f′ →
             let ∙ = op a ; ∘ = op b
-                _≈_ = Setoid._≈_ (setoid b) ; infix 4 _≈_
+                _≈_ = Setoid._≈_ (setoid b)
                 open Π f′ renaming (_⟨$⟩_ to f)
             in
               f ∙ ≈ ∘
@@ -87,42 +85,52 @@ module _ where
 -- | Homomorphisms on algebraic structures
 -------------------------------------------------------------------------------
 
-open import Algebra.Bundles
-
--- Subcategories of Setoids
-
 module _ where
 
-  open import Categories.Category.SubCategory (Setoids o ℓ)
+  open import Algebra.Bundles
   open import Relation.Binary.PropositionalEquality as ≡
     using (_≡_) renaming (refl to refl≡)
+
+  open import Categories.Category.SubCategory (Setoids o ℓ)
 
   MagmaSub : SubCat (Magma o ℓ)
   MagmaSub = H₂ setoid _∙_ where open Magma
 
-  Magmas = SubCategory MagmaSub
+  SemigroupSub            = map            Semigroup.magma MagmaSub
+  BandSub                 = map                 Band.magma MagmaSub
+  CommutativeSemigroupSub = map CommutativeSemigroup.magma MagmaSub
+  SemilatticeSub          = map          Semilattice.magma MagmaSub
+  SelectiveMagmaSub       = map       SelectiveMagma.magma MagmaSub
 
   MonoidSub : SubCat (Monoid o ℓ)
   MonoidSub = merge (map magma MagmaSub) (H₀ setoid ε) refl≡ where open Monoid
 
-  Monoids = SubCategory MonoidSub
+  CommutativeMonoidSub = map CommutativeMonoid.monoid MonoidSub
+  BoundedLatticeSub    = map    BoundedLattice.monoid MonoidSub
+  IdempotentCommutativeMonoidSub =
+    map IdempotentCommutativeMonoid.monoid MonoidSub
 
   GroupSub : SubCat (Group o ℓ)
   GroupSub = merge (map monoid MonoidSub) (H₁ setoid _⁻¹) refl≡ where open Group
 
-  Groups = SubCategory GroupSub
+  AbelianGroupSub = map AbelianGroup.group GroupSub
 
   LatticeSub : SubCat (Lattice o ℓ)
   LatticeSub = merge (H₂ setoid _∨_) (H₂ setoid _∧_) refl≡ where open Lattice
 
-  Lattices = SubCategory LatticeSub
+  DistributiveLatticeSub = map DistributiveLattice.lattice LatticeSub
 
   NearSemiringSub : SubCat (NearSemiring o ℓ)
-  NearSemiringSub = merge (H₂ setoid _*_) (H₂ setoid _+_) refl≡ where open NearSemiring
+  NearSemiringSub = merge (H₂ setoid _*_) (H₂ setoid _+_) refl≡
+    where open NearSemiring
 
-  NearSemirings = SubCategory NearSemiringSub
+  SemiringWithoutOneSub =
+     map           SemiringWithoutOne.nearSemiring NearSemiringSub
+  CommutativeSemiringWithoutOneSub =
+    map CommutativeSemiringWithoutOne.nearSemiring NearSemiringSub
 
-  SemiringWithoutAnnihilatingZeroSub : SubCat (SemiringWithoutAnnihilatingZero o ℓ)
+  SemiringWithoutAnnihilatingZeroSub
+   : SubCat (SemiringWithoutAnnihilatingZero o ℓ)
   SemiringWithoutAnnihilatingZeroSub =
     merge
       (merge (H₂ setoid _+_) (H₂ setoid _*_) refl≡)
@@ -130,40 +138,49 @@ module _ where
       refl≡
    where open SemiringWithoutAnnihilatingZero
 
-  SemiringSub =
-    map semiringWithoutAnnihilatingZero SemiringWithoutAnnihilatingZeroSub
-   where open Semiring
+  SemiringSub = map Semiring.semiringWithoutAnnihilatingZero
+                 SemiringWithoutAnnihilatingZeroSub
 
-  SemiringWithoutAnnihilatingZeros = SubCategory SemiringWithoutAnnihilatingZeroSub
+  CommutativeSemiringSub = map CommutativeSemiring.semiring SemiringSub
 
   RingSub : SubCat (Ring o ℓ)
-  RingSub = merge (map semiring SemiringSub) (H₁ setoid (-_)) refl≡ where open Ring
+  RingSub = merge (map semiring SemiringSub) (H₁ setoid (-_)) refl≡
+    where open Ring
 
-module _ where
+  CommutativeRingSub = map CommutativeRing.ring RingSub
 
-  open import Categories.Category.SubCategory
+  BooleanAlgebraSub : SubCat (BooleanAlgebra o ℓ)
+  BooleanAlgebraSub = merge (merge (H₂ setoid _∨_) (H₂ setoid _∧_) refl≡)
+                            (H₁ setoid ¬_)
+                            refl≡
+    where open BooleanAlgebra
 
-  Semigroups            = FullSubCategory Magmas Semigroup.magma
-  Bands                 = FullSubCategory Magmas Band.magma
-  CommutativeSemigroups = FullSubCategory Magmas CommutativeSemigroup.magma
-  Semilattices          = FullSubCategory Magmas Semilattice.magma
-  SelectiveMagmas       = FullSubCategory Magmas SelectiveMagma.magma
+  Magmas                = SubCategory                MagmaSub
+  Semigroups            = SubCategory            SemigroupSub
+  Bands                 = SubCategory                 BandSub
+  CommutativeSemigroups = SubCategory CommutativeSemigroupSub
+  Semilattices          = SubCategory          SemilatticeSub
+  SelectiveMagmas       = SubCategory       SelectiveMagmaSub
 
-  CommutativeMonoids = FullSubCategory Monoids CommutativeMonoid.monoid
-  BoundedLattices    = FullSubCategory Monoids BoundedLattice.monoid
-  IdempotentCommutativeMonoids =
-    FullSubCategory Monoids IdempotentCommutativeMonoid.monoid
+  Monoids                      = SubCategory                      MonoidSub
+  CommutativeMonoids           = SubCategory           CommutativeMonoidSub
+  BoundedLattices              = SubCategory              BoundedLatticeSub
+  IdempotentCommutativeMonoids = SubCategory IdempotentCommutativeMonoidSub
 
-  AbelianGroups = FullSubCategory Groups AbelianGroup.group
+  Groups        =    SubCategory GroupSub
+  AbelianGroups = SubCategory AbelianGroupSub
 
-  DistributiveLattices = FullSubCategory Lattices DistributiveLattice.lattice
+  Lattices             = SubCategory             LatticeSub
+  DistributiveLattices = SubCategory DistributiveLatticeSub
 
-  SemiringWithoutOnes =
-    FullSubCategory NearSemirings SemiringWithoutOne.nearSemiring
-  CommutativeSemiringWithoutOnes =
-    FullSubCategory NearSemirings CommutativeSemiringWithoutOne.nearSemiring
+  NearSemirings                  = SubCategory                  NearSemiringSub
+  SemiringWithoutOnes            = SubCategory            SemiringWithoutOneSub
+  CommutativeSemiringWithoutOnes = SubCategory CommutativeSemiringWithoutOneSub
 
-  Semirings = FullSubCategory SemiringWithoutAnnihilatingZeros
-                Semiring.semiringWithoutAnnihilatingZero
-  CommutativeSemirings = FullSubCategory SemiringWithoutAnnihilatingZeros
-                           CommutativeSemiring.semiringWithoutAnnihilatingZero
+  Semirings            = SubCategory            SemiringSub
+  CommutativeSemirings = SubCategory CommutativeSemiringSub
+
+  CommutativeRings = SubCategory CommutativeRingSub
+  BooleanAlgebras  = SubCategory  BooleanAlgebraSub
+  SemiringWithoutAnnihilatingZeros =
+    SubCategory SemiringWithoutAnnihilatingZeroSub
