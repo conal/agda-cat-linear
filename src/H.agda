@@ -41,14 +41,15 @@ module _ {o ℓ e} (C : Category o ℓ e) where
   -- corresponds to product of categories and UF to the terminal category (I
   -- think).
 
-  SubCategoryF : Functorial → Category o (ℓ ⊔ e) e
-  SubCategoryF F = SubCategory record
+  SubCategory : Functorial → Category o (ℓ ⊔ e) e
+  SubCategory F = SubCategory₀ record
     { U = λ A → A
     ; R = R
     ; Rid = Rid
     ; _∘R_ = _∘R_
     } where open Functorial F
             open import Categories.Category.SubCategory C
+              renaming (SubCategory to SubCategory₀)
 
 -------------------------------------------------------------------------------
 -- | Homomorphisms as functorial properties
