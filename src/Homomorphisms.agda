@@ -18,61 +18,76 @@ open import Categories.Category.SubCategory
 
 open Setoid using (Carrier; refl)
 
--- Nullary homomorphisms, i.e., "pointed setoids"
-H₀ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
-H₀ = SubCategory (Setoids c ℓ) record
-  { U = proj₁ -- {B = Carrier}
-  ; R = λ {(A , ∙₁) (B , ∙₂)} f′ → let open Π f′ renaming (_⟨$⟩_ to f)
-                                       open Setoid B renaming (_≈_ to _≈₂_) in
-                                    f ∙₁ ≈₂ ∙₂
+-------------------------------------------------------------------------------
+-- | Nullary homomorphisms, i.e., "pointed setoids"
+-------------------------------------------------------------------------------
+
+Sub₀ : SubCat (Setoids c ℓ) (Σ (Setoid c ℓ) Carrier)
+Sub₀ = record
+  { U = proj₁
+  ; R = λ {(A , ∙) (B , ∘)} f′ → let open Π f′ renaming (_⟨$⟩_ to f)
+                                     open Setoid B renaming (_≈_ to _≈₂_) in
+                                   f ∙ ≈₂ ∘
   ; Rid = λ {(A , _)} → refl A
-  ; _∘R_ = λ {(A , ∙₁)} {(B , ∙₂)} {(C , ∙₃)} {g′ f′} gᴴ fᴴ →
+  ; _∘R_ = λ {(A , ∙)} {(B , ∘)} {(C , ⋆)} {g′ f′} gᴴ fᴴ →
              let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f) in
                begin⟨ C ⟩
-                 g (f ∙₁) ≈⟨ cong-g fᴴ ⟩
-                 g ∙₂     ≈⟨ gᴴ ⟩
-                 ∙₃       ∎
+                 g (f ∙) ≈⟨ cong-g fᴴ ⟩
+                 g ∘     ≈⟨ gᴴ ⟩
+                 ⋆       ∎
   }
 
--- Unary homomorphisms
-H₁ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
-H₁ = SubCategory (Setoids c ℓ) record
-  { U = proj₁ {B = Op₁ ∘ Carrier}   -- {B = λ A → Op₁ (Carrier A)}
-  ; R = λ {( A , ∙₁_ ) ( B , ∙₂_ )} f′ →
+H₀ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
+H₀ = SubCategory (Setoids c ℓ) Sub₀
+
+-------------------------------------------------------------------------------
+-- | Unary homomorphisms
+-------------------------------------------------------------------------------
+
+Sub₁ : SubCat (Setoids c ℓ) (Σ (Setoid c ℓ) (Op₁ ∘ Carrier))
+Sub₁ = record
+  { U = proj₁
+  ; R = λ {( A , ∙_ ) ( B , ∘_ )} f′ →
             let open Π f′ renaming (_⟨$⟩_ to f)
-                open Setoid A renaming (_≈_ to _≈₁_)
-                open Setoid B renaming (_≈_ to _≈₂_) in ∀ x →
-              f (∙₁ x) ≈₂ ∙₂ (f x)
+                open Setoid B using (_≈_) in ∀ x →
+              f (∙ x) ≈ ∘ f x
   ; Rid = λ {(A , _)} _ → refl A
-  ; _∘R_ = λ {(A , ∙₁_)} {(B , ∙₂_)} {(C , ∙₃_)} {g′ f′} gᴴ fᴴ →
+  ; _∘R_ = λ {(A , ∙_)} {(B , ∘_)} {(C , ⋆_)} {g′ f′} gᴴ fᴴ →
              let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f) in λ x →
                begin⟨ C ⟩
-                 g (f (∙₁ x)) ≈⟨ cong-g (fᴴ x) ⟩
-                 g (∙₂ (f x)) ≈⟨ gᴴ (f x) ⟩
-                 ∙₃ (g (f x)) ∎
+                 g (f (∙ x)) ≈⟨ cong-g (fᴴ x) ⟩
+                 g (∘ f x)   ≈⟨ gᴴ (f x) ⟩
+                 ⋆ g (f x)   ∎
   }
 
--- Binary homomorphisms
-H₂ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
-H₂ = SubCategory (Setoids c ℓ) record
-  { U = proj₁ {B = Op₂ ∘ Carrier}
-  ; R = λ {( A , _∙₁_ ) ( B , _∙₂_ )} f′ →
+H₁ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
+H₁ = SubCategory (Setoids c ℓ) Sub₁
+
+-------------------------------------------------------------------------------
+-- | Binary homomorphisms
+-------------------------------------------------------------------------------
+
+Sub₂ : SubCat (Setoids c ℓ) (Σ (Setoid c ℓ) (Op₂ ∘ Carrier))
+Sub₂ = record
+  { U = proj₁
+  ; R = λ {( A , _∙_ ) ( B , _∘_ )} f′ →
             let open Π f′ renaming (_⟨$⟩_ to f)
-                open Setoid A renaming (_≈_ to _≈₁_)
-                open Setoid B renaming (_≈_ to _≈₂_) in ∀ x y →
-              f (x ∙₁ y) ≈₂ f x ∙₂ f y
+                open Setoid B using (_≈_) in ∀ x y →
+              f (x ∙ y) ≈ f x ∘ f y
   ; Rid = λ {(A , _)} _ _ → refl A
-  ; _∘R_ = λ {(A , _∙₁_)} {(B , _∙₂_)} {(C , _∙₃_)} {g′ f′} gᴴ fᴴ →
+  ; _∘R_ = λ {(A , _∙_)} {(B , _∘_)} {(C , _⋆_)} {g′ f′} gᴴ fᴴ →
              let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f) in λ x y →
                begin⟨ C ⟩
-                 g (f (x ∙₁ y))     ≈⟨ cong-g (fᴴ x y) ⟩
-                 g (f x ∙₂ f y)     ≈⟨ gᴴ (f x) (f y) ⟩
-                 g (f x) ∙₃ g (f y) ∎
+                 g (f (x ∙ y))     ≈⟨ cong-g (fᴴ x y) ⟩
+                 g (f x ∘ f y)     ≈⟨ gᴴ (f x) (f y) ⟩
+                 g (f x) ⋆ g (f y) ∎
   }
 
+H₂ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
+H₂ = SubCategory (Setoids c ℓ) Sub₂
 
 -------------------------------------------------------------------------------
 -- | Experiments in usage
@@ -90,4 +105,4 @@ Semilattices          = FullSubCategory Magmas Semilattice.magma
 SelectiveMagmas       = FullSubCategory Magmas SelectiveMagma.magma
 
 
-
+-- foo = merge (Setoids c ℓ) Sub₂ Sub₁ ?
