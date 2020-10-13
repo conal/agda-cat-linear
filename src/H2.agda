@@ -155,32 +155,33 @@ module _ where
                             refl≡
     where open BooleanAlgebra
 
-  Magmas                = SubCategory                MagmaSub
-  Semigroups            = SubCategory            SemigroupSub
-  Bands                 = SubCategory                 BandSub
-  CommutativeSemigroups = SubCategory CommutativeSemigroupSub
-  Semilattices          = SubCategory          SemilatticeSub
-  SelectiveMagmas       = SubCategory       SelectiveMagmaSub
+  Magmas                         = SubCategory                         MagmaSub
+  Semigroups                     = SubCategory                     SemigroupSub
+  Bands                          = SubCategory                          BandSub
+  CommutativeSemigroups          = SubCategory          CommutativeSemigroupSub
+  Semilattices                   = SubCategory                   SemilatticeSub
+  SelectiveMagmas                = SubCategory                SelectiveMagmaSub
 
-  Monoids                      = SubCategory                      MonoidSub
-  CommutativeMonoids           = SubCategory           CommutativeMonoidSub
-  BoundedLattices              = SubCategory              BoundedLatticeSub
-  IdempotentCommutativeMonoids = SubCategory IdempotentCommutativeMonoidSub
+  Monoids                        = SubCategory                        MonoidSub
+  CommutativeMonoids             = SubCategory             CommutativeMonoidSub
+  BoundedLattices                = SubCategory                BoundedLatticeSub
+  IdempotentCommutativeMonoids   = SubCategory   IdempotentCommutativeMonoidSub
 
-  Groups        =    SubCategory GroupSub
-  AbelianGroups = SubCategory AbelianGroupSub
+  Groups                         = SubCategory                         GroupSub
+  AbelianGroups                  = SubCategory                  AbelianGroupSub
 
-  Lattices             = SubCategory             LatticeSub
-  DistributiveLattices = SubCategory DistributiveLatticeSub
+  Lattices                       = SubCategory                       LatticeSub
+  DistributiveLattices           = SubCategory           DistributiveLatticeSub
 
   NearSemirings                  = SubCategory                  NearSemiringSub
   SemiringWithoutOnes            = SubCategory            SemiringWithoutOneSub
   CommutativeSemiringWithoutOnes = SubCategory CommutativeSemiringWithoutOneSub
 
-  Semirings            = SubCategory            SemiringSub
-  CommutativeSemirings = SubCategory CommutativeSemiringSub
+  Semirings                      = SubCategory                      SemiringSub
+  CommutativeSemirings           = SubCategory           CommutativeSemiringSub
 
-  CommutativeRings = SubCategory CommutativeRingSub
-  BooleanAlgebras  = SubCategory  BooleanAlgebraSub
+  CommutativeRings               = SubCategory               CommutativeRingSub
+  BooleanAlgebras                = SubCategory                BooleanAlgebraSub
+
   SemiringWithoutAnnihilatingZeros =
-    SubCategory SemiringWithoutAnnihilatingZeroSub
+                                 SubCategory SemiringWithoutAnnihilatingZeroSub
