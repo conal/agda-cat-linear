@@ -25,6 +25,8 @@ private
     q : Level
     Q : Set q
 
+-- Nullary homomorphism, given means of extracting a setoid and nullary
+-- operation on its carrier. For instance, Q = Monoid, and op = ε.
 H₀ : (setoid : Q → Setoid o ℓ) → ((A : Q) → Carrier (setoid A)) → SubCat Q
 H₀ setoid op = record
   { U = setoid
@@ -45,6 +47,8 @@ H₀ setoid op = record
                     ⋆       ∎
   }
 
+-- Unary homomorphism, given means of extracting a setoid and unary
+-- operation on its carrier. For instance, Q = Group and op = _⁻¹.
 H₁ : (setoid : Q → Setoid o ℓ) → ((A : Q) → Op₁ (Carrier (setoid A))) → SubCat Q
 H₁ setoid op = record
   { U = setoid
@@ -65,6 +69,8 @@ H₁ setoid op = record
                           ⋆ g (f x)   ∎
   }
 
+-- Binary homomorphism, given means of extracting a setoid and binary
+-- operation on its carrier. For instance, Q = Semigroup and op = _∙_.
 H₂ : (setoid : Q → Setoid o ℓ) → ((A : Q) → Op₂ (Carrier (setoid A))) → SubCat Q
 H₂ setoid op = record
   { U = setoid
@@ -85,15 +91,19 @@ H₂ setoid op = record
                           g (f x) ⋆ g (f y) ∎
   }
 
+
 -------------------------------------------------------------------------------
--- | Homomorphisms on algebraic structures
+-- | Homomorphisms on algebraic structures, embodied as SubCat structures
 -------------------------------------------------------------------------------
 
 open import Algebra.Bundles
 open import Relation.Binary.PropositionalEquality as ≡
   using (_≡_) renaming (refl to refl≡)
 
-MagmaS : SubCat (Magma o ℓ)
+-- Sample signatures. The rest all fit this pattern.
+MagmaS     : SubCat (Magma o ℓ)
+SemigroupS : SubCat (Semigroup o ℓ)
+
 MagmaS = H₂ setoid _∙_ where open Magma
 
 SemigroupS            = map            Semigroup.magma MagmaS
@@ -102,25 +112,21 @@ CommutativeSemigroupS = map CommutativeSemigroup.magma MagmaS
 SemilatticeS          = map          Semilattice.magma MagmaS
 SelectiveMagmaS       = map       SelectiveMagma.magma MagmaS
 
-MonoidS : SubCat (Monoid o ℓ)
-MonoidS = merge (map magma MagmaS) (H₀ setoid ε) refl≡ where open Monoid
+MonoidS = merge (map semigroup SemigroupS) (H₀ setoid ε) refl≡ where open Monoid
 
 CommutativeMonoidS = map CommutativeMonoid.monoid MonoidS
 BoundedLatticeS    = map    BoundedLattice.monoid MonoidS
 IdempotentCommutativeMonoidS =
   map IdempotentCommutativeMonoid.monoid MonoidS
 
-GroupS : SubCat (Group o ℓ)
 GroupS = merge (map monoid MonoidS) (H₁ setoid _⁻¹) refl≡ where open Group
 
 AbelianGroupS = map AbelianGroup.group GroupS
 
-LatticeS : SubCat (Lattice o ℓ)
 LatticeS = merge (H₂ setoid _∨_) (H₂ setoid _∧_) refl≡ where open Lattice
 
 DistributiveLatticeS = map DistributiveLattice.lattice LatticeS
 
-NearSemiringS : SubCat (NearSemiring o ℓ)
 NearSemiringS = merge (H₂ setoid _*_) (H₂ setoid _+_) refl≡
   where open NearSemiring
 
@@ -129,13 +135,10 @@ SemiringWithoutOneS =
 CommutativeSemiringWithoutOneS =
   map CommutativeSemiringWithoutOne.nearSemiring NearSemiringS
 
-SemiringWithoutAnnihilatingZeroS
- : SubCat (SemiringWithoutAnnihilatingZero o ℓ)
 SemiringWithoutAnnihilatingZeroS =
-  merge
-    (merge (H₂ setoid _+_) (H₂ setoid _*_) refl≡)
-    (merge (H₀ setoid  0#) (H₀ setoid  1#) refl≡)
-    refl≡
+  merge (merge (H₂ setoid _+_) (H₂ setoid _*_) refl≡)
+        (merge (H₀ setoid  0#) (H₀ setoid  1#) refl≡)
+        refl≡
  where open SemiringWithoutAnnihilatingZero
 
 SemiringS = map Semiring.semiringWithoutAnnihilatingZero
@@ -143,16 +146,13 @@ SemiringS = map Semiring.semiringWithoutAnnihilatingZero
 
 CommutativeSemiringS = map CommutativeSemiring.semiring SemiringS
 
-RingS : SubCat (Ring o ℓ)
-RingS = merge (map semiring SemiringS) (H₁ setoid (-_)) refl≡
-  where open Ring
+RingS = merge (map semiring SemiringS) (H₁ setoid (-_)) refl≡ where open Ring
 
 CommutativeRingS = map CommutativeRing.ring RingS
 
-BooleanAlgebraS : SubCat (BooleanAlgebra o ℓ)
 BooleanAlgebraS = merge (merge (H₂ setoid _∨_) (H₂ setoid _∧_) refl≡)
-                          (H₁ setoid ¬_)
-                          refl≡
+                        (H₁ setoid ¬_)
+                        refl≡
   where open BooleanAlgebra
 
 Magmas                           = SubCategory                           MagmaS
