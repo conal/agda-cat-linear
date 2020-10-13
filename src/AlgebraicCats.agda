@@ -91,7 +91,7 @@ Groups = SubCategory Monoids record
               open Group b renaming (_⁻¹ to _⁻¹₂; _≈_ to _≈₂_)
               open Π f′ renaming (_⟨$⟩_ to f)
           in
-            ∀ a → f (a ⁻¹₁) ≈₂ f a ⁻¹₂
+            ∀ x → f (x ⁻¹₁) ≈₂ f x ⁻¹₂
   ; Rid  = λ {a} _ → refl a
   ; _∘R_ = λ {a b c} {((g′ , _) , _)} {((f′ , _) , _)} g⁻¹ f⁻¹
              → let open Group a using () renaming (_⁻¹ to _⁻¹₁)
@@ -250,7 +250,7 @@ Rings = SubCategory Semirings record
               open Ring b renaming (-_ to -₂_; _≈_ to _≈₂_)
               open Π f′ renaming (_⟨$⟩_ to f)
           in
-            ∀ a → f (-₁ a) ≈₂ -₂ f a
+            ∀ x → f (-₁ x) ≈₂ -₂ f x
   ; Rid  = λ {a} _ → refl a
   ; _∘R_ = λ {a b c} {(g′ , _)} {(f′ , _)} -g -f
              → let open Ring a using () renaming (-_ to -₁_)
