@@ -2,7 +2,7 @@
 
 open import Level
 
-module H2 (o ℓ : Level) where
+module Homomorphisms (o ℓ : Level) where
 
 open import Algebra using (Op₁; Op₂)
 
