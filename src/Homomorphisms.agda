@@ -22,8 +22,7 @@ open import SubCat (Setoids o ℓ)
 
 module H {q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
 
-  -- Nullary homomorphism, given means of extracting a setoid and nullary
-  -- operation on its carrier. For instance, setoid = Monoid.setoid and op = ε.
+  -- Nullary homomorphism, given a nullary operation on its carrier.
   H₀ : ((A : Q) → Carrier (setoid A)) → SubCat setoid
   H₀ op = record
     { R = λ {a b} f′ →
@@ -43,8 +42,7 @@ module H {q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
                       ⋆       ∎
     }
 
-  -- Unary homomorphism, given means of extracting a setoid and unary
-  -- operation on its carrier. For instance, Q = Group and op = _⁻¹.
+  -- Unary homomorphism, given a unary operation on its carrier.
   H₁ : ((A : Q) → Op₁ (Carrier (setoid A))) → SubCat setoid
   H₁ op = record
     { R = λ {a b} f′ →
@@ -64,8 +62,7 @@ module H {q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
                             ⋆ g (f x)   ∎
     }
 
-  -- Binary homomorphism, given means of extracting a setoid and binary
-  -- operation on its carrier. For instance, Q = Semigroup and op = _∙_.
+  -- Binary homomorphism, given a binary operation on its carrier.
   H₂ : ((A : Q) → Op₂ (Carrier (setoid A))) → SubCat setoid
   H₂ op = record
     { R = λ {a b} f′ →
