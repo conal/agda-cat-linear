@@ -13,6 +13,10 @@ open Equiv
 open import Level
 open import Data.Product hiding (map)
 
+import Categories.Category.SubCategory C as Sub
+
+open import Categories.Category.SubCategory C using (FullSubCategory) public
+
 private
   variable
     ℓ′ i j : Level
@@ -28,48 +32,16 @@ record SubCat {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ i ⊔ suc ℓ′)
     _∘R_ : {a b c : I} {f : U b ⇒ U c} {g : U a ⇒ U b} → R f → R g → R (f ∘ g)
 
 SubCategory : SubCat {ℓ′ = ℓ′} {I} U → Category _ _ _
-SubCategory {I = I} {U} sc = let open SubCat sc in record
-  { Obj       = I
-  ; _⇒_       = λ a b → Σ (U a ⇒ U b) R
-  ; _≈_       = λ f g → proj₁ f ≈ proj₁ g
-  ; id        = id , Rid
-  ; _∘_       = zip _∘_ _∘R_
-  ; assoc     = assoc
-  ; sym-assoc = sym-assoc
-  ; identityˡ = identityˡ
-  ; identityʳ = identityʳ
-  ; identity² = identity²
-  ; equiv     = record -- need to expand this out, else the levels don't work out
-    { refl  = refl
-    ; sym   = sym
-    ; trans = trans
-    }
-  ; ∘-resp-≈  = ∘-resp-≈
-  }
-
-FullSubCategory : (U : I → Obj) → Category _ _ _
-FullSubCategory {I = I} U = record
-  { Obj       = I
-  ; _⇒_       = λ x y → U x ⇒ U y
-  ; _≈_       = _≈_
-  ; id        = id
-  ; _∘_       = _∘_
-  ; assoc     = assoc
-  ; sym-assoc = sym-assoc
-  ; identityˡ = identityˡ
-  ; identityʳ = identityʳ
-  ; identity² = identity²
-  ; equiv     = equiv
-  ; ∘-resp-≈  = ∘-resp-≈
-  }
+SubCategory {I = I} {U} sc = let open SubCat sc in
+  Sub.SubCategory record { U = U; R = R ; Rid = Rid ; _∘R_ = _∘R_ }
 
 map : (J→I : J → I) → SubCat {ℓ′ = ℓ′} U → SubCat {ℓ′ = ℓ′} (λ j → U (J→I j))
-map J→I subcat = record {R = R; Rid = Rid; _∘R_ = _∘R_}
-  where open SubCat subcat
+map J→I subcat = record {R = R; Rid = Rid; _∘R_ = _∘R_} where open SubCat subcat
 
 infixr 7 _∩_
 _∩_ : ∀ {ℓ₁ ℓ₂} {U : I → Obj}
-        (sub₁ : SubCat {ℓ′ = ℓ₁} U) → (sub₂ : SubCat {ℓ′ = ℓ₂} U)
+      → SubCat {ℓ′ = ℓ₁     } U
+      → SubCat {ℓ′ =      ℓ₂} U
       → SubCat {ℓ′ = ℓ₁ ⊔ ℓ₂} U
 record {R = R₁; Rid = Rid₁; _∘R_ = _∘R₁_}
  ∩ record {R = R₂; Rid = Rid₂; _∘R_ = _∘R₂_} = record
