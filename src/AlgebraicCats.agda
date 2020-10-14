@@ -7,16 +7,14 @@ open import Level
 module AlgebraicCats (o ℓ : Level) where
 
 open import Relation.Binary using (Setoid)
+open import Algebra.Bundles
 
 open import Categories.Category.Instance.Setoids using (Setoids)
 
 open import SubCat (Setoids o ℓ) using (_∩_) renaming (SubCategory to Sub)
-
 open import SubCat using () renaming (FullSubCategory to Full)
 
 import Homomorphisms as H
-
-open import Algebra.Bundles
 
 Magmas          = Sub (H₂ _∙_)                    where open Magma          ; open H setoid
 Monoids         = Sub (H₂ _∙_ ∩ H₀ ε)             where open Monoid         ; open H setoid
