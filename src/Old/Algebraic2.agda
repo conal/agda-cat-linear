@@ -4,7 +4,7 @@
 
 open import Level
 
-module AlgebraicCats (o ℓ : Level) where
+module Old.AlgebraicCats2 (o ℓ : Level) where
 
 open import Relation.Binary using (Setoid)
 
