@@ -20,73 +20,70 @@ open import SubCat (Setoids o ℓ)
 -- | Per-operation homomorphisms in nullary, unary, and binary flavors
 -------------------------------------------------------------------------------
 
-private
-  variable
-    q : Level
-    Q : Set q
+module H {q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
 
--- Nullary homomorphism, given means of extracting a setoid and nullary
--- operation on its carrier. For instance, S = Monoid.setoid and op = ε.
-H₀ : (S : Q → Setoid o ℓ) → ((A : Q) → Carrier (S A)) → SubCat S
-H₀ setoid op = record
-  { R = λ {a b} f′ →
-          let ∙ = op a ; ∘ = op b
-              _≈_ = Setoid._≈_ (setoid b)
-              open Π f′ renaming (_⟨$⟩_ to f)
-          in
-            f ∙ ≈ ∘
-  ; Rid  = λ {a} → refl (setoid a)
-  ; _∘R_ = λ {a b c} {g′} {f′} gᴴ fᴴ →
-             let ∙ = op a ; ∘ = op b ; ⋆ = op c
-                 open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-                 open Π f′ renaming (_⟨$⟩_ to f)
-             in begin⟨ setoid c ⟩
-                    g (f ∙) ≈⟨ cong-g fᴴ ⟩
-                    g ∘     ≈⟨ gᴴ ⟩
-                    ⋆       ∎
-  }
+  -- Nullary homomorphism, given means of extracting a setoid and nullary
+  -- operation on its carrier. For instance, setoid = Monoid.setoid and op = ε.
+  H₀ : ((A : Q) → Carrier (setoid A)) → SubCat setoid
+  H₀ op = record
+    { R = λ {a b} f′ →
+            let ∙ = op a ; ∘ = op b
+                _≈_ = Setoid._≈_ (setoid b)
+                open Π f′ renaming (_⟨$⟩_ to f)
+            in
+              f ∙ ≈ ∘
+    ; Rid  = λ {a} → refl (setoid a)
+    ; _∘R_ = λ {a b c} {g′} {f′} gᴴ fᴴ →
+               let ∙ = op a ; ∘ = op b ; ⋆ = op c
+                   open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                   open Π f′ renaming (_⟨$⟩_ to f)
+               in begin⟨ setoid c ⟩
+                      g (f ∙) ≈⟨ cong-g fᴴ ⟩
+                      g ∘     ≈⟨ gᴴ ⟩
+                      ⋆       ∎
+    }
 
--- Unary homomorphism, given means of extracting a setoid and unary
--- operation on its carrier. For instance, Q = Group and op = _⁻¹.
-H₁ : (S : Q → Setoid o ℓ) → ((A : Q) → Op₁ (Carrier (S A))) → SubCat S
-H₁ setoid op = record
-  { R = λ {a b} f′ →
-          let ∙_ = op a ; ∘_ = op b
-              _≈_ = Setoid._≈_ (setoid b) ; infix 4 _≈_
-              open Π f′ renaming (_⟨$⟩_ to f)
-          in
-            ∀ x → f (∙ x) ≈ ∘ f x
-  ; Rid  = λ {a} → λ _ → refl (setoid a)
-  ; _∘R_ = λ {a b c} {g′} {f′} gᴴ fᴴ →
-             let ∙_ = op a ; ∘_ = op b ; ⋆_ = op c
-                 open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-                 open Π f′ renaming (_⟨$⟩_ to f)
-             in λ x → begin⟨ setoid c ⟩
-                          g (f (∙ x)) ≈⟨ cong-g (fᴴ x) ⟩
-                          g (∘ f x)   ≈⟨ gᴴ (f x) ⟩
-                          ⋆ g (f x)   ∎
-  }
+  -- Unary homomorphism, given means of extracting a setoid and unary
+  -- operation on its carrier. For instance, Q = Group and op = _⁻¹.
+  H₁ : ((A : Q) → Op₁ (Carrier (setoid A))) → SubCat setoid
+  H₁ op = record
+    { R = λ {a b} f′ →
+            let ∙_ = op a ; ∘_ = op b
+                _≈_ = Setoid._≈_ (setoid b) ; infix 4 _≈_
+                open Π f′ renaming (_⟨$⟩_ to f)
+            in
+              ∀ x → f (∙ x) ≈ ∘ f x
+    ; Rid  = λ {a} → λ _ → refl (setoid a)
+    ; _∘R_ = λ {a b c} {g′} {f′} gᴴ fᴴ →
+               let ∙_ = op a ; ∘_ = op b ; ⋆_ = op c
+                   open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                   open Π f′ renaming (_⟨$⟩_ to f)
+               in λ x → begin⟨ setoid c ⟩
+                            g (f (∙ x)) ≈⟨ cong-g (fᴴ x) ⟩
+                            g (∘ f x)   ≈⟨ gᴴ (f x) ⟩
+                            ⋆ g (f x)   ∎
+    }
 
--- Binary homomorphism, given means of extracting a setoid and binary
--- operation on its carrier. For instance, Q = Semigroup and op = _∙_.
-H₂ : (S : Q → Setoid o ℓ) → ((A : Q) → Op₂ (Carrier (S A))) → SubCat S
-H₂ setoid op = record
-  { R = λ {a b} f′ →
-          let _∙_ = op a ; _∘_ = op b
-              _≈_ = Setoid._≈_ (setoid b) ; infix 4 _≈_
-              open Π f′ renaming (_⟨$⟩_ to f)
-          in
-            ∀ x y → f (x ∙ y) ≈ f x ∘ f y
-  ; Rid  = λ {a} → λ _ _ → refl (setoid a)
-  ; _∘R_ = λ {a b c} {g′} {f′} gᴴ fᴴ →
-             let _∙_ = op a ; _∘_ = op b ; _⋆_ = op c
-                 open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-                 open Π f′ renaming (_⟨$⟩_ to f)
-             in λ x y → begin⟨ setoid c ⟩
-                          g (f (x ∙ y))     ≈⟨ cong-g (fᴴ x y) ⟩
-                          g (f x ∘ f y)     ≈⟨ gᴴ (f x) (f y) ⟩
-                          g (f x) ⋆ g (f y) ∎
-  }
+  -- Binary homomorphism, given means of extracting a setoid and binary
+  -- operation on its carrier. For instance, Q = Semigroup and op = _∙_.
+  H₂ : ((A : Q) → Op₂ (Carrier (setoid A))) → SubCat setoid
+  H₂ op = record
+    { R = λ {a b} f′ →
+            let _∙_ = op a ; _∘_ = op b
+                _≈_ = Setoid._≈_ (setoid b) ; infix 4 _≈_
+                open Π f′ renaming (_⟨$⟩_ to f)
+            in
+              ∀ x y → f (x ∙ y) ≈ f x ∘ f y
+    ; Rid  = λ {a} → λ _ _ → refl (setoid a)
+    ; _∘R_ = λ {a b c} {g′} {f′} gᴴ fᴴ →
+               let _∙_ = op a ; _∘_ = op b ; _⋆_ = op c
+                   open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                   open Π f′ renaming (_⟨$⟩_ to f)
+               in λ x y → begin⟨ setoid c ⟩
+                            g (f (x ∙ y))     ≈⟨ cong-g (fᴴ x y) ⟩
+                            g (f x ∘ f y)     ≈⟨ gᴴ (f x) (f y) ⟩
+                            g (f x) ⋆ g (f y) ∎
+    }
 
 -------------------------------------------------------------------------------
 -- | Homomorphisms on algebraic structures, embodied as SubCat structures
@@ -98,7 +95,7 @@ open import Algebra.Bundles
 MagmaS : SubCat Magma.setoid
 SemigroupS : SubCat Semigroup.setoid
 
-MagmaS = H₂ setoid _∙_ where open Magma
+MagmaS = H₂ _∙_ where open Magma ; open H setoid
 
 SemigroupS            = map            Semigroup.magma MagmaS
 BandS                 = map                 Band.magma MagmaS
@@ -106,46 +103,42 @@ CommutativeSemigroupS = map CommutativeSemigroup.magma MagmaS
 SemilatticeS          = map          Semilattice.magma MagmaS
 SelectiveMagmaS       = map       SelectiveMagma.magma MagmaS
 
-MonoidS = map semigroup SemigroupS ∩ H₀ setoid ε where open Monoid
+MonoidS = map semigroup SemigroupS ∩ H₀ ε where open Monoid ; open H setoid
 
 CommutativeMonoidS = map CommutativeMonoid.monoid MonoidS
 BoundedLatticeS    = map    BoundedLattice.monoid MonoidS
 IdempotentCommutativeMonoidS =
   map IdempotentCommutativeMonoid.monoid MonoidS
 
-GroupS = map monoid MonoidS ∩ H₁ setoid _⁻¹ where open Group
+GroupS = map monoid MonoidS ∩ H₁ _⁻¹ where open Group ; open H setoid
 
 AbelianGroupS = map AbelianGroup.group GroupS
 
-LatticeS = H₂ setoid _∨_ ∩ H₂ setoid _∧_ where open Lattice
+LatticeS = H₂ _∨_ ∩ H₂ _∧_ where open Lattice ; open H setoid
 
 DistributiveLatticeS = map DistributiveLattice.lattice LatticeS
 
-NearSemiringS = H₂ setoid _*_ ∩ H₂ setoid _+_ where open NearSemiring
+NearSemiringS = H₂ _*_ ∩ H₂ _+_ where open NearSemiring ; open H setoid
 
 SemiringWithoutOneS =
    map           SemiringWithoutOne.nearSemiring NearSemiringS
 CommutativeSemiringWithoutOneS =
   map CommutativeSemiringWithoutOne.nearSemiring NearSemiringS
 
-SemiringWithoutAnnihilatingZeroS =
-    H₂ setoid _+_
-  ∩ H₂ setoid _*_
-  ∩ H₀ setoid  0#
-  ∩ H₀ setoid  1#
- where open SemiringWithoutAnnihilatingZero
+SemiringWithoutAnnihilatingZeroS = H₂ _+_ ∩ H₂ _*_ ∩ H₀ 0# ∩ H₀ 1#
+ where open SemiringWithoutAnnihilatingZero ; open H setoid
 
 SemiringS = map Semiring.semiringWithoutAnnihilatingZero
                SemiringWithoutAnnihilatingZeroS
 
 CommutativeSemiringS = map CommutativeSemiring.semiring SemiringS
 
-RingS = map semiring SemiringS ∩ H₁ setoid (-_) where open Ring
+RingS = map semiring SemiringS ∩ H₁ (-_) where open Ring ; open H setoid
 
 CommutativeRingS = map CommutativeRing.ring RingS
 
-BooleanAlgebraS = H₂ setoid _∨_ ∩ H₂ setoid _∧_ ∩ H₁ setoid ¬_
-  where open BooleanAlgebra
+BooleanAlgebraS = H₂ _∨_ ∩ H₂ _∧_ ∩ H₁ ¬_
+  where open BooleanAlgebra ; open H setoid
 
 Magmas                           = SubCategory                           MagmaS
 Semigroups                       = SubCategory                       SemigroupS
