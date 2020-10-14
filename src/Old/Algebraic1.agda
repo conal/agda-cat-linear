@@ -4,7 +4,7 @@
 
 open import Level
 
-module AlgebraicCats (o ℓ : Level) where
+module Old.Algebraic1 (o ℓ : Level) where
 
 open import Data.Product using (_×_ ; _,_)
 open import Algebra.Bundles
