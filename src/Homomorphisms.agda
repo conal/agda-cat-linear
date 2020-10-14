@@ -89,56 +89,58 @@ module H {q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
 -- | Homomorphisms on algebraic structures, embodied as SubCat structures
 -------------------------------------------------------------------------------
 
-open import Algebra.Bundles
+private
 
--- Sample signatures. The rest all fit this pattern.
-MagmaS : SubCat Magma.setoid
-SemigroupS : SubCat Semigroup.setoid
+  open import Algebra.Bundles
 
-MagmaS = H₂ _∙_ where open Magma ; open H setoid
+  -- Sample signatures. The rest all fit this pattern.
+  MagmaS : SubCat Magma.setoid
+  SemigroupS : SubCat Semigroup.setoid
 
-SemigroupS            = map            Semigroup.magma MagmaS
-BandS                 = map                 Band.magma MagmaS
-CommutativeSemigroupS = map CommutativeSemigroup.magma MagmaS
-SemilatticeS          = map          Semilattice.magma MagmaS
-SelectiveMagmaS       = map       SelectiveMagma.magma MagmaS
+  MagmaS = H₂ _∙_ where open Magma ; open H setoid
 
-MonoidS = map semigroup SemigroupS ∩ H₀ ε where open Monoid ; open H setoid
+  SemigroupS            = map            Semigroup.magma MagmaS
+  BandS                 = map                 Band.magma MagmaS
+  CommutativeSemigroupS = map CommutativeSemigroup.magma MagmaS
+  SemilatticeS          = map          Semilattice.magma MagmaS
+  SelectiveMagmaS       = map       SelectiveMagma.magma MagmaS
 
-CommutativeMonoidS = map CommutativeMonoid.monoid MonoidS
-BoundedLatticeS    = map    BoundedLattice.monoid MonoidS
-IdempotentCommutativeMonoidS =
-  map IdempotentCommutativeMonoid.monoid MonoidS
+  MonoidS = map semigroup SemigroupS ∩ H₀ ε where open Monoid ; open H setoid
 
-GroupS = map monoid MonoidS ∩ H₁ _⁻¹ where open Group ; open H setoid
+  CommutativeMonoidS = map CommutativeMonoid.monoid MonoidS
+  BoundedLatticeS    = map    BoundedLattice.monoid MonoidS
+  IdempotentCommutativeMonoidS =
+    map IdempotentCommutativeMonoid.monoid MonoidS
 
-AbelianGroupS = map AbelianGroup.group GroupS
+  GroupS = map monoid MonoidS ∩ H₁ _⁻¹ where open Group ; open H setoid
 
-LatticeS = H₂ _∨_ ∩ H₂ _∧_ where open Lattice ; open H setoid
+  AbelianGroupS = map AbelianGroup.group GroupS
 
-DistributiveLatticeS = map DistributiveLattice.lattice LatticeS
+  LatticeS = H₂ _∨_ ∩ H₂ _∧_ where open Lattice ; open H setoid
 
-NearSemiringS = H₂ _*_ ∩ H₂ _+_ where open NearSemiring ; open H setoid
+  DistributiveLatticeS = map DistributiveLattice.lattice LatticeS
 
-SemiringWithoutOneS =
-   map           SemiringWithoutOne.nearSemiring NearSemiringS
-CommutativeSemiringWithoutOneS =
-  map CommutativeSemiringWithoutOne.nearSemiring NearSemiringS
+  NearSemiringS = H₂ _*_ ∩ H₂ _+_ where open NearSemiring ; open H setoid
 
-SemiringWithoutAnnihilatingZeroS = H₂ _+_ ∩ H₂ _*_ ∩ H₀ 0# ∩ H₀ 1#
- where open SemiringWithoutAnnihilatingZero ; open H setoid
+  SemiringWithoutOneS =
+     map           SemiringWithoutOne.nearSemiring NearSemiringS
+  CommutativeSemiringWithoutOneS =
+    map CommutativeSemiringWithoutOne.nearSemiring NearSemiringS
 
-SemiringS = map Semiring.semiringWithoutAnnihilatingZero
-               SemiringWithoutAnnihilatingZeroS
+  SemiringWithoutAnnihilatingZeroS = H₂ _+_ ∩ H₂ _*_ ∩ H₀ 0# ∩ H₀ 1#
+   where open SemiringWithoutAnnihilatingZero ; open H setoid
 
-CommutativeSemiringS = map CommutativeSemiring.semiring SemiringS
+  SemiringS = map Semiring.semiringWithoutAnnihilatingZero
+                 SemiringWithoutAnnihilatingZeroS
 
-RingS = map semiring SemiringS ∩ H₁ (-_) where open Ring ; open H setoid
+  CommutativeSemiringS = map CommutativeSemiring.semiring SemiringS
 
-CommutativeRingS = map CommutativeRing.ring RingS
+  RingS = map semiring SemiringS ∩ H₁ (-_) where open Ring ; open H setoid
 
-BooleanAlgebraS = H₂ _∨_ ∩ H₂ _∧_ ∩ H₁ ¬_
-  where open BooleanAlgebra ; open H setoid
+  CommutativeRingS = map CommutativeRing.ring RingS
+
+  BooleanAlgebraS = H₂ _∨_ ∩ H₂ _∧_ ∩ H₁ ¬_
+    where open BooleanAlgebra ; open H setoid
 
 Magmas                           = SubCategory                           MagmaS
 Semigroups                       = SubCategory                       SemigroupS
