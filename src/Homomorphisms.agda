@@ -1,108 +1,172 @@
--- N-ary homomorphism properties as categories (one per n).
--- Generalizes pointed setoids, which corresponds to n ≡ 0.
+-- Experiments in homomorphism construction
 
 open import Level
 
-module Homomorphisms (c ℓ : Level) where
+module H2 (o ℓ : Level) where
 
-open import Data.Product using (Σ; proj₁; _×_; _,_)
-open import Function using (_∘_)
-open import Relation.Binary using (Setoid)
-open import Function.Equality using (Π;_⟨$⟩_)
-open import Relation.Binary.Reasoning.MultiSetoid
 open import Algebra using (Op₁; Op₂)
 
-open import Categories.Category using (Category)
-open import Categories.Category.Instance.Setoids using (Setoids)
-open import Categories.Category.SubCategory
+open import Function.Equality using (Π; _⟨$⟩_; _⟶_)
+open import Relation.Binary
+open import Relation.Binary.Reasoning.MultiSetoid
+
+open import Categories.Category.Instance.Setoids
 
 open Setoid using (Carrier; refl)
 
--------------------------------------------------------------------------------
--- | Nullary homomorphisms, i.e., "pointed setoids"
--------------------------------------------------------------------------------
-
-Sub₀ : SubCat (Setoids c ℓ) (Σ (Setoid c ℓ) Carrier)
-Sub₀ = record
-  { U = proj₁
-  ; R = λ {(A , ∙) (B , ∘)} f′ → let open Π f′ renaming (_⟨$⟩_ to f)
-                                     open Setoid B renaming (_≈_ to _≈₂_) in
-                                   f ∙ ≈₂ ∘
-  ; Rid = λ {(A , _)} → refl A
-  ; _∘R_ = λ {(A , ∙)} {(B , ∘)} {(C , ⋆)} {g′ f′} gᴴ fᴴ →
-             let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-                 open Π f′ renaming (_⟨$⟩_ to f) in
-               begin⟨ C ⟩
-                 g (f ∙) ≈⟨ cong-g fᴴ ⟩
-                 g ∘     ≈⟨ gᴴ ⟩
-                 ⋆       ∎
-  }
-
-H₀ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
-H₀ = SubCategory (Setoids c ℓ) Sub₀
+open import SubCat (Setoids o ℓ)
 
 -------------------------------------------------------------------------------
--- | Unary homomorphisms
+-- | Per-operation homomorphisms in nullary, unary, and binary flavors
 -------------------------------------------------------------------------------
 
-Sub₁ : SubCat (Setoids c ℓ) (Σ (Setoid c ℓ) (Op₁ ∘ Carrier))
-Sub₁ = record
-  { U = proj₁
-  ; R = λ {( A , ∙_ ) ( B , ∘_ )} f′ →
-            let open Π f′ renaming (_⟨$⟩_ to f)
-                open Setoid B using (_≈_) in ∀ x →
-              f (∙ x) ≈ ∘ f x
-  ; Rid = λ {(A , _)} _ → refl A
-  ; _∘R_ = λ {(A , ∙_)} {(B , ∘_)} {(C , ⋆_)} {g′ f′} gᴴ fᴴ →
-             let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-                 open Π f′ renaming (_⟨$⟩_ to f) in λ x →
-               begin⟨ C ⟩
-                 g (f (∙ x)) ≈⟨ cong-g (fᴴ x) ⟩
-                 g (∘ f x)   ≈⟨ gᴴ (f x) ⟩
-                 ⋆ g (f x)   ∎
-  }
+module H {q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
 
-H₁ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
-H₁ = SubCategory (Setoids c ℓ) Sub₁
+  -- Nullary homomorphism, given means of extracting a setoid and nullary
+  -- operation on its carrier. For instance, setoid = Monoid.setoid and op = ε.
+  H₀ : ((A : Q) → Carrier (setoid A)) → SubCat setoid
+  H₀ op = record
+    { R = λ {a b} f′ →
+            let ∙ = op a ; ∘ = op b
+                _≈_ = Setoid._≈_ (setoid b)
+                open Π f′ renaming (_⟨$⟩_ to f)
+            in
+              f ∙ ≈ ∘
+    ; Rid  = λ {a} → refl (setoid a)
+    ; _∘R_ = λ {a b c} {g′} {f′} gᴴ fᴴ →
+               let ∙ = op a ; ∘ = op b ; ⋆ = op c
+                   open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                   open Π f′ renaming (_⟨$⟩_ to f)
+               in begin⟨ setoid c ⟩
+                      g (f ∙) ≈⟨ cong-g fᴴ ⟩
+                      g ∘     ≈⟨ gᴴ ⟩
+                      ⋆       ∎
+    }
+
+  -- Unary homomorphism, given means of extracting a setoid and unary
+  -- operation on its carrier. For instance, Q = Group and op = _⁻¹.
+  H₁ : ((A : Q) → Op₁ (Carrier (setoid A))) → SubCat setoid
+  H₁ op = record
+    { R = λ {a b} f′ →
+            let ∙_ = op a ; ∘_ = op b
+                _≈_ = Setoid._≈_ (setoid b) ; infix 4 _≈_
+                open Π f′ renaming (_⟨$⟩_ to f)
+            in
+              ∀ x → f (∙ x) ≈ ∘ f x
+    ; Rid  = λ {a} → λ _ → refl (setoid a)
+    ; _∘R_ = λ {a b c} {g′} {f′} gᴴ fᴴ →
+               let ∙_ = op a ; ∘_ = op b ; ⋆_ = op c
+                   open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                   open Π f′ renaming (_⟨$⟩_ to f)
+               in λ x → begin⟨ setoid c ⟩
+                            g (f (∙ x)) ≈⟨ cong-g (fᴴ x) ⟩
+                            g (∘ f x)   ≈⟨ gᴴ (f x) ⟩
+                            ⋆ g (f x)   ∎
+    }
+
+  -- Binary homomorphism, given means of extracting a setoid and binary
+  -- operation on its carrier. For instance, Q = Semigroup and op = _∙_.
+  H₂ : ((A : Q) → Op₂ (Carrier (setoid A))) → SubCat setoid
+  H₂ op = record
+    { R = λ {a b} f′ →
+            let _∙_ = op a ; _∘_ = op b
+                _≈_ = Setoid._≈_ (setoid b) ; infix 4 _≈_
+                open Π f′ renaming (_⟨$⟩_ to f)
+            in
+              ∀ x y → f (x ∙ y) ≈ f x ∘ f y
+    ; Rid  = λ {a} → λ _ _ → refl (setoid a)
+    ; _∘R_ = λ {a b c} {g′} {f′} gᴴ fᴴ →
+               let _∙_ = op a ; _∘_ = op b ; _⋆_ = op c
+                   open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                   open Π f′ renaming (_⟨$⟩_ to f)
+               in λ x y → begin⟨ setoid c ⟩
+                            g (f (x ∙ y))     ≈⟨ cong-g (fᴴ x y) ⟩
+                            g (f x ∘ f y)     ≈⟨ gᴴ (f x) (f y) ⟩
+                            g (f x) ⋆ g (f y) ∎
+    }
 
 -------------------------------------------------------------------------------
--- | Binary homomorphisms
--------------------------------------------------------------------------------
-
-Sub₂ : SubCat (Setoids c ℓ) (Σ (Setoid c ℓ) (Op₂ ∘ Carrier))
-Sub₂ = record
-  { U = proj₁
-  ; R = λ {( A , _∙_ ) ( B , _∘_ )} f′ →
-            let open Π f′ renaming (_⟨$⟩_ to f)
-                open Setoid B using (_≈_) in ∀ x y →
-              f (x ∙ y) ≈ f x ∘ f y
-  ; Rid = λ {(A , _)} _ _ → refl A
-  ; _∘R_ = λ {(A , _∙_)} {(B , _∘_)} {(C , _⋆_)} {g′ f′} gᴴ fᴴ →
-             let open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-                 open Π f′ renaming (_⟨$⟩_ to f) in λ x y →
-               begin⟨ C ⟩
-                 g (f (x ∙ y))     ≈⟨ cong-g (fᴴ x y) ⟩
-                 g (f x ∘ f y)     ≈⟨ gᴴ (f x) (f y) ⟩
-                 g (f x) ⋆ g (f y) ∎
-  }
-
-H₂ : Category (suc (c ⊔ ℓ)) (c ⊔ ℓ) (c ⊔ ℓ)
-H₂ = SubCategory (Setoids c ℓ) Sub₂
-
--------------------------------------------------------------------------------
--- | Experiments in usage
+-- | Homomorphisms on algebraic structures, embodied as SubCat structures
 -------------------------------------------------------------------------------
 
 open import Algebra.Bundles
 
-Magmas : Category _ _ _
-Magmas = FullSubCategory H₂ (λ M → let open Magma M in setoid , _∙_)
+-- Sample signatures. The rest all fit this pattern.
+MagmaS : SubCat Magma.setoid
+SemigroupS : SubCat Semigroup.setoid
 
-Semigroups            = FullSubCategory Magmas Semigroup.magma
-Bands                 = FullSubCategory Magmas Band.magma
-CommutativeSemigroups = FullSubCategory Magmas CommutativeSemigroup.magma
-Semilattices          = FullSubCategory Magmas Semilattice.magma
-SelectiveMagmas       = FullSubCategory Magmas SelectiveMagma.magma
+MagmaS = H₂ _∙_ where open Magma ; open H setoid
 
+SemigroupS            = map            Semigroup.magma MagmaS
+BandS                 = map                 Band.magma MagmaS
+CommutativeSemigroupS = map CommutativeSemigroup.magma MagmaS
+SemilatticeS          = map          Semilattice.magma MagmaS
+SelectiveMagmaS       = map       SelectiveMagma.magma MagmaS
 
--- foo = merge (Setoids c ℓ) Sub₂ Sub₁ ?
+MonoidS = map semigroup SemigroupS ∩ H₀ ε where open Monoid ; open H setoid
+
+CommutativeMonoidS = map CommutativeMonoid.monoid MonoidS
+BoundedLatticeS    = map    BoundedLattice.monoid MonoidS
+IdempotentCommutativeMonoidS =
+  map IdempotentCommutativeMonoid.monoid MonoidS
+
+GroupS = map monoid MonoidS ∩ H₁ _⁻¹ where open Group ; open H setoid
+
+AbelianGroupS = map AbelianGroup.group GroupS
+
+LatticeS = H₂ _∨_ ∩ H₂ _∧_ where open Lattice ; open H setoid
+
+DistributiveLatticeS = map DistributiveLattice.lattice LatticeS
+
+NearSemiringS = H₂ _*_ ∩ H₂ _+_ where open NearSemiring ; open H setoid
+
+SemiringWithoutOneS =
+   map           SemiringWithoutOne.nearSemiring NearSemiringS
+CommutativeSemiringWithoutOneS =
+  map CommutativeSemiringWithoutOne.nearSemiring NearSemiringS
+
+SemiringWithoutAnnihilatingZeroS = H₂ _+_ ∩ H₂ _*_ ∩ H₀ 0# ∩ H₀ 1#
+ where open SemiringWithoutAnnihilatingZero ; open H setoid
+
+SemiringS = map Semiring.semiringWithoutAnnihilatingZero
+               SemiringWithoutAnnihilatingZeroS
+
+CommutativeSemiringS = map CommutativeSemiring.semiring SemiringS
+
+RingS = map semiring SemiringS ∩ H₁ (-_) where open Ring ; open H setoid
+
+CommutativeRingS = map CommutativeRing.ring RingS
+
+BooleanAlgebraS = H₂ _∨_ ∩ H₂ _∧_ ∩ H₁ ¬_
+  where open BooleanAlgebra ; open H setoid
+
+Magmas                           = SubCategory                           MagmaS
+Semigroups                       = SubCategory                       SemigroupS
+Bands                            = SubCategory                            BandS
+CommutativeSemigroups            = SubCategory            CommutativeSemigroupS
+Semilattices                     = SubCategory                     SemilatticeS
+SelectiveMagmas                  = SubCategory                  SelectiveMagmaS
+
+Monoids                          = SubCategory                          MonoidS
+CommutativeMonoids               = SubCategory               CommutativeMonoidS
+BoundedLattices                  = SubCategory                  BoundedLatticeS
+IdempotentCommutativeMonoids     = SubCategory     IdempotentCommutativeMonoidS
+
+Groups                           = SubCategory                           GroupS
+AbelianGroups                    = SubCategory                    AbelianGroupS
+
+Lattices                         = SubCategory                         LatticeS
+DistributiveLattices             = SubCategory             DistributiveLatticeS
+
+NearSemirings                    = SubCategory                    NearSemiringS
+SemiringWithoutOnes              = SubCategory              SemiringWithoutOneS
+CommutativeSemiringWithoutOnes   = SubCategory   CommutativeSemiringWithoutOneS
+
+Semirings                        = SubCategory                        SemiringS
+CommutativeSemirings             = SubCategory             CommutativeSemiringS
+
+CommutativeRings                 = SubCategory                 CommutativeRingS
+BooleanAlgebras                  = SubCategory                  BooleanAlgebraS
+
+SemiringWithoutAnnihilatingZeros = SubCategory SemiringWithoutAnnihilatingZeroS
+
