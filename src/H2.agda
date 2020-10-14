@@ -14,7 +14,7 @@ open import Categories.Category.Instance.Setoids
 
 open Setoid using (Carrier; refl)
 
-open import Categories.Category.SubCategory (Setoids o ℓ)
+open import SubCat (Setoids o ℓ)
 
 -------------------------------------------------------------------------------
 -- | Per-operation homomorphisms in nullary, unary, and binary flavors
@@ -26,11 +26,10 @@ private
     Q : Set q
 
 -- Nullary homomorphism, given means of extracting a setoid and nullary
--- operation on its carrier. For instance, Q = Monoid, and op = ε.
-H₀ : (setoid : Q → Setoid o ℓ) → ((A : Q) → Carrier (setoid A)) → SubCat Q
+-- operation on its carrier. For instance, S = Monoid.setoid and op = ε.
+H₀ : (S : Q → Setoid o ℓ) → ((A : Q) → Carrier (S A)) → SubCat S
 H₀ setoid op = record
-  { U = setoid
-  ; R = λ {a b} f′ →
+  { R = λ {a b} f′ →
           let ∙ = op a ; ∘ = op b
               _≈_ = Setoid._≈_ (setoid b)
               open Π f′ renaming (_⟨$⟩_ to f)
@@ -49,10 +48,9 @@ H₀ setoid op = record
 
 -- Unary homomorphism, given means of extracting a setoid and unary
 -- operation on its carrier. For instance, Q = Group and op = _⁻¹.
-H₁ : (setoid : Q → Setoid o ℓ) → ((A : Q) → Op₁ (Carrier (setoid A))) → SubCat Q
+H₁ : (S : Q → Setoid o ℓ) → ((A : Q) → Op₁ (Carrier (S A))) → SubCat S
 H₁ setoid op = record
-  { U = setoid
-  ; R = λ {a b} f′ →
+  { R = λ {a b} f′ →
           let ∙_ = op a ; ∘_ = op b
               _≈_ = Setoid._≈_ (setoid b) ; infix 4 _≈_
               open Π f′ renaming (_⟨$⟩_ to f)
@@ -71,10 +69,9 @@ H₁ setoid op = record
 
 -- Binary homomorphism, given means of extracting a setoid and binary
 -- operation on its carrier. For instance, Q = Semigroup and op = _∙_.
-H₂ : (setoid : Q → Setoid o ℓ) → ((A : Q) → Op₂ (Carrier (setoid A))) → SubCat Q
+H₂ : (S : Q → Setoid o ℓ) → ((A : Q) → Op₂ (Carrier (S A))) → SubCat S
 H₂ setoid op = record
-  { U = setoid
-  ; R = λ {a b} f′ →
+  { R = λ {a b} f′ →
           let _∙_ = op a ; _∘_ = op b
               _≈_ = Setoid._≈_ (setoid b) ; infix 4 _≈_
               open Π f′ renaming (_⟨$⟩_ to f)
@@ -91,18 +88,15 @@ H₂ setoid op = record
                           g (f x) ⋆ g (f y) ∎
   }
 
-
 -------------------------------------------------------------------------------
 -- | Homomorphisms on algebraic structures, embodied as SubCat structures
 -------------------------------------------------------------------------------
 
 open import Algebra.Bundles
-open import Relation.Binary.PropositionalEquality as ≡
-  using (_≡_) renaming (refl to refl≡)
 
 -- Sample signatures. The rest all fit this pattern.
-MagmaS     : SubCat (Magma o ℓ)
-SemigroupS : SubCat (Semigroup o ℓ)
+MagmaS : SubCat Magma.setoid
+SemigroupS : SubCat Semigroup.setoid
 
 MagmaS = H₂ setoid _∙_ where open Magma
 
@@ -112,23 +106,22 @@ CommutativeSemigroupS = map CommutativeSemigroup.magma MagmaS
 SemilatticeS          = map          Semilattice.magma MagmaS
 SelectiveMagmaS       = map       SelectiveMagma.magma MagmaS
 
-MonoidS = merge (map semigroup SemigroupS) (H₀ setoid ε) refl≡ where open Monoid
+MonoidS = map semigroup SemigroupS ∩ H₀ setoid ε where open Monoid
 
 CommutativeMonoidS = map CommutativeMonoid.monoid MonoidS
 BoundedLatticeS    = map    BoundedLattice.monoid MonoidS
 IdempotentCommutativeMonoidS =
   map IdempotentCommutativeMonoid.monoid MonoidS
 
-GroupS = merge (map monoid MonoidS) (H₁ setoid _⁻¹) refl≡ where open Group
+GroupS = map monoid MonoidS ∩ H₁ setoid _⁻¹ where open Group
 
 AbelianGroupS = map AbelianGroup.group GroupS
 
-LatticeS = merge (H₂ setoid _∨_) (H₂ setoid _∧_) refl≡ where open Lattice
+LatticeS = H₂ setoid _∨_ ∩ H₂ setoid _∧_ where open Lattice
 
 DistributiveLatticeS = map DistributiveLattice.lattice LatticeS
 
-NearSemiringS = merge (H₂ setoid _*_) (H₂ setoid _+_) refl≡
-  where open NearSemiring
+NearSemiringS = H₂ setoid _*_ ∩ H₂ setoid _+_ where open NearSemiring
 
 SemiringWithoutOneS =
    map           SemiringWithoutOne.nearSemiring NearSemiringS
@@ -136,9 +129,10 @@ CommutativeSemiringWithoutOneS =
   map CommutativeSemiringWithoutOne.nearSemiring NearSemiringS
 
 SemiringWithoutAnnihilatingZeroS =
-  merge (merge (H₂ setoid _+_) (H₂ setoid _*_) refl≡)
-        (merge (H₀ setoid  0#) (H₀ setoid  1#) refl≡)
-        refl≡
+    H₂ setoid _+_
+  ∩ H₂ setoid _*_
+  ∩ H₀ setoid  0#
+  ∩ H₀ setoid  1#
  where open SemiringWithoutAnnihilatingZero
 
 SemiringS = map Semiring.semiringWithoutAnnihilatingZero
@@ -146,13 +140,11 @@ SemiringS = map Semiring.semiringWithoutAnnihilatingZero
 
 CommutativeSemiringS = map CommutativeSemiring.semiring SemiringS
 
-RingS = merge (map semiring SemiringS) (H₁ setoid (-_)) refl≡ where open Ring
+RingS = map semiring SemiringS ∩ H₁ setoid (-_) where open Ring
 
 CommutativeRingS = map CommutativeRing.ring RingS
 
-BooleanAlgebraS = merge (merge (H₂ setoid _∨_) (H₂ setoid _∧_) refl≡)
-                        (H₁ setoid ¬_)
-                        refl≡
+BooleanAlgebraS = H₂ setoid _∨_ ∩ H₂ setoid _∧_ ∩ H₁ setoid ¬_
   where open BooleanAlgebra
 
 Magmas                           = SubCategory                           MagmaS
@@ -184,3 +176,4 @@ CommutativeRings                 = SubCategory                 CommutativeRingS
 BooleanAlgebras                  = SubCategory                  BooleanAlgebraS
 
 SemiringWithoutAnnihilatingZeros = SubCategory SemiringWithoutAnnihilatingZeroS
+
