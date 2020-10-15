@@ -23,45 +23,45 @@ private
 
   MagmaS = H₂ _∙_ where open Magma ; open H setoid
 
-  SemigroupS            = map            Semigroup.magma MagmaS
-  BandS                 = map                 Band.magma MagmaS
-  CommutativeSemigroupS = map CommutativeSemigroup.magma MagmaS
-  SemilatticeS          = map          Semilattice.magma MagmaS
-  SelectiveMagmaS       = map       SelectiveMagma.magma MagmaS
+  SemigroupS            =            Semigroup.magma ⊢ MagmaS
+  BandS                 =                 Band.magma ⊢ MagmaS
+  CommutativeSemigroupS = CommutativeSemigroup.magma ⊢ MagmaS
+  SemilatticeS          =          Semilattice.magma ⊢ MagmaS
+  SelectiveMagmaS       =       SelectiveMagma.magma ⊢ MagmaS
 
-  MonoidS = map semigroup SemigroupS ∩ H₀ ε where open Monoid ; open H setoid
+  MonoidS = semigroup ⊢ SemigroupS ∩ H₀ ε where open Monoid ; open H setoid
 
-  CommutativeMonoidS = map CommutativeMonoid.monoid MonoidS
-  BoundedLatticeS    = map    BoundedLattice.monoid MonoidS
+  CommutativeMonoidS = CommutativeMonoid.monoid ⊢ MonoidS
+  BoundedLatticeS    =    BoundedLattice.monoid ⊢ MonoidS
   IdempotentCommutativeMonoidS =
-    map IdempotentCommutativeMonoid.monoid MonoidS
+    IdempotentCommutativeMonoid.monoid ⊢ MonoidS
 
-  GroupS = map monoid MonoidS ∩ H₁ _⁻¹ where open Group ; open H setoid
+  GroupS = monoid ⊢ MonoidS ∩ H₁ _⁻¹ where open Group ; open H setoid
 
-  AbelianGroupS = map AbelianGroup.group GroupS
+  AbelianGroupS = AbelianGroup.group ⊢ GroupS
 
   LatticeS = H₂ _∨_ ∩ H₂ _∧_ where open Lattice ; open H setoid
 
-  DistributiveLatticeS = map DistributiveLattice.lattice LatticeS
+  DistributiveLatticeS = DistributiveLattice.lattice ⊢ LatticeS
 
   NearSemiringS = H₂ _*_ ∩ H₂ _+_ where open NearSemiring ; open H setoid
 
   SemiringWithoutOneS =
-     map           SemiringWithoutOne.nearSemiring NearSemiringS
+               SemiringWithoutOne.nearSemiring ⊢ NearSemiringS
   CommutativeSemiringWithoutOneS =
-    map CommutativeSemiringWithoutOne.nearSemiring NearSemiringS
+    CommutativeSemiringWithoutOne.nearSemiring ⊢ NearSemiringS
 
   SemiringWithoutAnnihilatingZeroS = H₂ _+_ ∩ H₂ _*_ ∩ H₀ 0# ∩ H₀ 1#
    where open SemiringWithoutAnnihilatingZero ; open H setoid
 
-  SemiringS = map Semiring.semiringWithoutAnnihilatingZero
-                 SemiringWithoutAnnihilatingZeroS
+  SemiringS = Semiring.semiringWithoutAnnihilatingZero
+                ⊢ SemiringWithoutAnnihilatingZeroS
 
-  CommutativeSemiringS = map CommutativeSemiring.semiring SemiringS
+  CommutativeSemiringS = CommutativeSemiring.semiring ⊢ SemiringS
 
-  RingS = map semiring SemiringS ∩ H₁ (-_) where open Ring ; open H setoid
+  RingS = semiring ⊢ SemiringS ∩ H₁ (-_) where open Ring ; open H setoid
 
-  CommutativeRingS = map CommutativeRing.ring RingS
+  CommutativeRingS = CommutativeRing.ring ⊢ RingS
 
   BooleanAlgebraS = H₂ _∨_ ∩ H₂ _∧_ ∩ H₁ ¬_
     where open BooleanAlgebra ; open H setoid
