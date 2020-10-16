@@ -52,14 +52,14 @@ record {R = R₁; Rid = Rid₁; _∘R_ = _∘R₁_}
   }
 
 infix 10 ⋂
-⋂ : {J : Set j} (H : J → SubCat {r = r} {I} U) → SubCat {r = j ⊔ r} {I} U
-⋂ H = record
+⋂ : ∀ {J : Set j} → (J → SubCat {r = r} U) → SubCat {r = j ⊔ r} U
+⋂ {J = J} H = record
   { R = λ f → ∀ j → R (H j) f  -- ⋂ H R
   ; Rid = λ j → Rid (H j)
   ; _∘R_ = λ G F → λ j → _∘R_ (H j) (G j) (F j)
   } where open SubCat
 
-syntax ⋂ I (λ i → P) = ⋂[ i ∶ I ] P
+syntax ⋂ (λ j → P) = ⋂[ j ] P
 
 -- TODO: generalize H to a *dependent* function.
 
