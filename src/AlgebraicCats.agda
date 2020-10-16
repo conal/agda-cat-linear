@@ -4,14 +4,16 @@
 
 open import Level
 
-module AlgebraicCats (o ℓ : Level) where
+module AlgebraicCats (c ℓ : Level) where
 
 open import Algebra.Bundles
+open import Algebra.Module.Bundles
 
 module _ where
-  import Homomorphisms as H
+  open import Function.Base using (flip)
   open import Categories.Category.Instance.Setoids using (Setoids)
-  open import SubCat (Setoids o ℓ) using (_∩_) renaming (SubCategory to ⟨_⟩)
+  open import SubCat (Setoids c ℓ) using (_∩_; ⋂) renaming (SubCategory to ⟨_⟩)
+  import Homomorphisms as H
 
   Magmas          = ⟨ H₂ _∙_                    ⟩ where open Magma          ; open H setoid
   Monoids         = ⟨ H₂ _∙_ ∩ H₀ ε             ⟩ where open Monoid         ; open H setoid
@@ -23,6 +25,55 @@ module _ where
 
   SemiringWithoutAnnihilatingZeros = ⟨ H₂ _*_ ∩ H₂ _+_ ∩ H₀ 0# ∩ H₀ 1# ⟩
     where open SemiringWithoutAnnihilatingZero ; open H setoid
+
+  -- Algebraic modules and variants
+  private
+    variable
+      r ℓr s ℓs : Level
+
+  module _ (R : Semiring r ℓr) where
+    open Semiring R
+    LeftSemimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ⟩
+      where open LeftSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action setoid
+    RightSemimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hᵣ _*ᵣ_ ⟩
+      where open RightSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action setoid
+
+  module _ (R : Ring r ℓr) where
+    open Ring R
+    LeftModules  = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ⟩
+      where open LeftModule {ring = R} ; open H ≈ᴹ-setoid ; open Action setoid
+    RightModules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hᵣ _*ᵣ_ ⟩
+      where open RightModule {ring = R} ; open H ≈ᴹ-setoid ; open Action setoid
+
+  -- Algebraic modules and variants
+  module _ (R : Semiring r ℓr) (S : Semiring s ℓs) where
+    open Semiring R renaming (setoid to setoidₗ)
+    open Semiring S renaming (setoid to setoidᵣ)
+    Bisemimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ∩ Hᵣ _*ᵣ_ ⟩
+      where open Bisemimodule {R-semiring = R} {S-semiring = S} ; open H ≈ᴹ-setoid
+            open Action setoidₗ using (Hₗ)
+            open Action setoidᵣ using (Hᵣ)
+
+  -- Algebraic modules and variants
+  module _ (R : Ring r ℓr) (S : Ring s ℓs) where
+    open Ring R renaming (setoid to setoidₗ)
+    open Ring S renaming (setoid to setoidᵣ)
+    Bimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ∩ Hᵣ _*ᵣ_ ⟩
+      where open Bimodule {R-ring = R} {S-ring = S} ; open H ≈ᴹ-setoid
+            open Action setoidₗ using (Hₗ)
+            open Action setoidᵣ using (Hᵣ)
+
+  module _ (R : CommutativeSemiring r ℓr) where
+    open CommutativeSemiring R
+    Semimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ∩ Hᵣ _*ᵣ_ ⟩
+      where open Semimodule {commutativeSemiring = R} ; open H ≈ᴹ-setoid
+            open Action setoid
+
+  module _ (R : CommutativeRing r ℓr) where
+    open CommutativeRing R
+    Modules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ∩ Hᵣ _*ᵣ_ ⟩
+      where open Module {commutativeRing = R} ; open H ≈ᴹ-setoid
+            open Action setoid
 
 module _ where
   open import SubCat using () renaming (FullSubCategory to _⇰_)
@@ -44,3 +95,4 @@ module _ where
   Semirings = SemiringWithoutAnnihilatingZeros ⇰ Semiring.semiringWithoutAnnihilatingZero
   CommutativeSemirings = SemiringWithoutAnnihilatingZeros
                            ⇰ CommutativeSemiring.semiringWithoutAnnihilatingZero
+
