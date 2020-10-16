@@ -78,13 +78,11 @@ H₂ op = record
                           g (f x) ⋆ g (f y) ∎
   }
 
-module Action {r ℓr} (setoidᴿ : Setoid r ℓr) where
-  -- Left-action homomorphism
-  open import Function.Base using (flip)
-
-  Hₗ : ((A : Q) → Opₗ (Carrier setoidᴿ) (Carrier (setoid A))) → SubCat setoid
+-- Left- and right-action homomorphisms. Maybe semi-homomorphisms, since one
+-- argument is held constant.
+module Action {s : Level} (S : Set s) where
+  Hₗ : ((A : Q) → Opₗ S (Carrier (setoid A))) → SubCat setoid
   Hₗ op = ⋂ (λ s → H₁ (λ A x → op A s x))
 
-  -- Right-action homomorphism
-  Hᵣ : ((A : Q) → Opᵣ (Carrier setoidᴿ) (Carrier (setoid A))) → SubCat setoid
+  Hᵣ : ((A : Q) → Opᵣ S (Carrier (setoid A))) → SubCat setoid
   Hᵣ op = ⋂ (λ s → H₁ (λ A x → op A x s))

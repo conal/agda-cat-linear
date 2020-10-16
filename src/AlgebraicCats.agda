@@ -39,7 +39,7 @@ module _ where
   module _ (R : Ring r ℓr) where
     open Ring R
     LeftModules  = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ⟩
-      where open LeftModule {ring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
+      where open LeftModule  {ring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
     RightModules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hᵣ _*ᵣ_ ⟩
       where open RightModule {ring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
 
@@ -68,8 +68,7 @@ module _ where
   module _ (R : CommutativeRing r ℓr) where
     open CommutativeRing R
     Modules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ∩ Hᵣ _*ᵣ_ ⟩
-      where open Module {commutativeRing = R} ; open H ≈ᴹ-setoid
-            open Action Carrier
+      where open Module {commutativeRing = R} ; open H ≈ᴹ-setoid ; open Action Carrier
 
 module _ where
   open import SubCat using () renaming (FullSubCategory to _⇰_)

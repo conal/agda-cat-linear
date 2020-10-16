@@ -63,4 +63,5 @@ syntax ⋂ (λ j → P) = ⋂[ j ] P
 
 -- TODO: generalize H to a *dependent* function.
 
--- TODO: disjunctions/unions
+-- TODO: Try disjunctions/unions. Probably gets hung up on _∘R_ for mismatched
+-- disjuncts.
