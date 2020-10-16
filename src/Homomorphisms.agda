@@ -5,11 +5,12 @@
 open import Level
 open import Relation.Binary using (Setoid)
 
-module Homomorphisms {o ℓ q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
+module Homomorphisms {o ℓ : Level} {q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
 
+open import Data.Product using (_,_)
 open import Function.Equality using (Π; _⟨$⟩_; _⟶_)
 open import Relation.Binary.Reasoning.MultiSetoid
-open import Algebra using (Op₁; Op₂)
+open import Algebra using (Op₁; Op₂; Opₗ; Opᵣ)
 
 open import Categories.Category.Instance.Setoids using (Setoids)
 
@@ -37,7 +38,7 @@ H₀ op = record
                     ⋆       ∎
   }
 
--- Unary homomorphism, given A unary operation on its carrier.
+-- Unary homomorphism, given a unary operation on its carrier.
 H₁ : ((A : Q) → Op₁ (Carrier (setoid A))) → SubCat setoid
 H₁ op = record
   { R = λ {A B} f′ →
@@ -57,7 +58,7 @@ H₁ op = record
                           ⋆ g (f x)   ∎
   }
 
--- Binary homomorphism, given A binary operation on its carrier.
+-- Binary homomorphism, given a binary operation on its carrier.
 H₂ : ((A : Q) → Op₂ (Carrier (setoid A))) → SubCat setoid
 H₂ op = record
   { R = λ {A B} f′ →
@@ -77,3 +78,32 @@ H₂ op = record
                           g (f x) ⋆ g (f y) ∎
   }
 
+module L {r ℓr} (setoidᴿ : Setoid r ℓr) where
+
+  -- Left-action homomorphism
+  Hₗ : ((A : Q) → Opₗ (Carrier setoidᴿ) (Carrier (setoid A)))
+     → SubCat setoid
+  Hₗ op = record
+    { R = λ {A B} f′ →
+            let _∙_ = op A ; _∘_ = op B
+                _≈_ = Setoid._≈_ (setoid B) ; infix 4 _≈_
+                open Π f′ renaming (_⟨$⟩_ to f)
+            in
+              ∀ s x → f (s ∙ x) ≈ s ∘ f x
+    ; Rid  = λ {A} → λ _ _ → refl (setoid A)
+    ; _∘R_ = λ {A B C} {g′} {f′} gᴴ fᴴ →
+               let _∙_ = op A ; _∘_ = op B ; _⋆_ = op C
+                   open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
+                   open Π f′ renaming (_⟨$⟩_ to f)
+               in λ s x → begin⟨ setoid C ⟩
+                            g (f (s ∙ x)) ≈⟨ cong-g (fᴴ s x) ⟩
+                            g (s ∘ f x)   ≈⟨ gᴴ s (f x) ⟩
+                            s ⋆ g (f x)   ∎
+    }
+
+  open import Function.Base using (flip)
+  -- Define via H₁
+  Hₗ′ : ((A : Q) → Opₗ (Carrier setoidᴿ) (Carrier (setoid A)))
+      → SubCat setoid
+  Hₗ′ op = ⋂[ s ] H₁ (flip op s)
+  -- Hₗ′ op = ⋂ (λ s → H₁ (flip op s))
