@@ -33,7 +33,6 @@ module _ where
     open Semiring R
     LeftSemimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ⟩
       where open LeftSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
-
     RightSemimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hᵣ _*ᵣ_ ⟩
       where open RightSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
 
