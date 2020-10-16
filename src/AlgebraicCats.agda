@@ -27,9 +27,7 @@ module _ where
     where open SemiringWithoutAnnihilatingZero ; open H setoid
 
   -- Algebraic modules and variants
-  private
-    variable
-      r ℓr s ℓs : Level
+  private variable r ℓr s ℓs : Level
 
   module _ (R : Semiring r ℓr) where
     open Semiring R
@@ -46,7 +44,6 @@ module _ where
     RightModules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hᵣ _*ᵣ_ ⟩
       where open RightModule {ring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
 
-  -- Algebraic modules and variants
   module _ (R : Semiring r ℓr) (S : Semiring s ℓs) where
     open Semiring R renaming (Carrier to setoidₗ)
     open Semiring S renaming (Carrier to setoidᵣ)
@@ -55,7 +52,6 @@ module _ where
             open Action setoidₗ using (Hₗ)
             open Action setoidᵣ using (Hᵣ)
 
-  -- Algebraic modules and variants
   module _ (R : Ring r ℓr) (S : Ring s ℓs) where
     open Ring R renaming (Carrier to setoidₗ)
     open Ring S renaming (Carrier to setoidᵣ)
