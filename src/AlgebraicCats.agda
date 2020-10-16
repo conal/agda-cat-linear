@@ -34,21 +34,22 @@ module _ where
   module _ (R : Semiring r ℓr) where
     open Semiring R
     LeftSemimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ⟩
-      where open LeftSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action setoid
+      where open LeftSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
+
     RightSemimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hᵣ _*ᵣ_ ⟩
-      where open RightSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action setoid
+      where open RightSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
 
   module _ (R : Ring r ℓr) where
     open Ring R
     LeftModules  = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ⟩
-      where open LeftModule {ring = R} ; open H ≈ᴹ-setoid ; open Action setoid
+      where open LeftModule {ring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
     RightModules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hᵣ _*ᵣ_ ⟩
-      where open RightModule {ring = R} ; open H ≈ᴹ-setoid ; open Action setoid
+      where open RightModule {ring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
 
   -- Algebraic modules and variants
   module _ (R : Semiring r ℓr) (S : Semiring s ℓs) where
-    open Semiring R renaming (setoid to setoidₗ)
-    open Semiring S renaming (setoid to setoidᵣ)
+    open Semiring R renaming (Carrier to setoidₗ)
+    open Semiring S renaming (Carrier to setoidᵣ)
     Bisemimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ∩ Hᵣ _*ᵣ_ ⟩
       where open Bisemimodule {R-semiring = R} {S-semiring = S} ; open H ≈ᴹ-setoid
             open Action setoidₗ using (Hₗ)
@@ -56,8 +57,8 @@ module _ where
 
   -- Algebraic modules and variants
   module _ (R : Ring r ℓr) (S : Ring s ℓs) where
-    open Ring R renaming (setoid to setoidₗ)
-    open Ring S renaming (setoid to setoidᵣ)
+    open Ring R renaming (Carrier to setoidₗ)
+    open Ring S renaming (Carrier to setoidᵣ)
     Bimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ∩ Hᵣ _*ᵣ_ ⟩
       where open Bimodule {R-ring = R} {S-ring = S} ; open H ≈ᴹ-setoid
             open Action setoidₗ using (Hₗ)
@@ -67,13 +68,13 @@ module _ where
     open CommutativeSemiring R
     Semimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ∩ Hᵣ _*ᵣ_ ⟩
       where open Semimodule {commutativeSemiring = R} ; open H ≈ᴹ-setoid
-            open Action setoid
+            open Action Carrier
 
   module _ (R : CommutativeRing r ℓr) where
     open CommutativeRing R
     Modules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ∩ Hᵣ _*ᵣ_ ⟩
       where open Module {commutativeRing = R} ; open H ≈ᴹ-setoid
-            open Action setoid
+            open Action Carrier
 
 module _ where
   open import SubCat using () renaming (FullSubCategory to _⇰_)
