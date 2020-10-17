@@ -13,6 +13,7 @@ module SubCart {o ℓ e} {C : Category o ℓ e} (CC : Cartesian C) where
 open import Data.Product hiding (_×_)
 
 open import Categories.Morphism C using (_≅_)
+open import Categories.Morphism.Reasoning C
 
 open import SubCat C
 
@@ -30,7 +31,6 @@ open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 
 record SubCart {I : Set i} (U : I → Obj) : Set (ℓ ⊔ i ⊔ o ⊔ e ⊔ suc r) where
   field
-    -- R : {a b : I} → U a ⇒ U b → Set r -- Factor out? Replace by SubCat?
     subCat : SubCat {r = r} U
   open SubCat subCat public
   open _≅_
@@ -47,6 +47,8 @@ record SubCart {I : Set i} (U : I → Obj) : Set (ℓ ⊔ i ⊔ o ⊔ e ⊔ suc 
     R⟨,⟩ : ∀ {a c d : I} {f : U a ⇒ U c} {g : U a ⇒ U d}
          → R f → R g → R (from (×≅ {c} {d}) ∘ ⟨ f , g ⟩)
 
+open HomReasoning
+
 SubCartesian : ∀ {i I U}
              → (sc : SubCart {i = i} {r} {I} U)
              → let open SubCart sc in
@@ -57,13 +59,10 @@ SubCartesian {i = i} {I} {U} sc = record
       ; ⊤-is-terminal = let open _≅_ ⊤≅ in record
           { ! = from ∘ ! , R!
           ; !-unique = λ {a : I} (f , _) →
-              let open HomReasoning {U a} {U ⊤ᴵ} in
               begin
-                from ∘ !        ≈⟨ refl⟩∘⟨ !-unique (to ∘ f) ⟩
-                from ∘ (to ∘ f) ≈⟨ sym-assoc ⟩
-                (from ∘ to) ∘ f ≈⟨ isoʳ ⟩∘⟨refl ⟩
-                id ∘ f          ≈⟨ identityˡ ⟩
-                f               ∎
+                from ∘ !      ≈⟨ refl⟩∘⟨ !-unique (to ∘ f) ⟩
+                from ∘ to ∘ f ≈⟨ cancelˡ isoʳ ⟩
+                f             ∎
           }
       }
   ; products = record
@@ -71,38 +70,19 @@ SubCartesian {i = i} {I} {U} sc = record
           { A×B = a ×ᴵ b
           ; π₁ = π₁ ∘ to , Rπ₁
           ; π₂ = π₂ ∘ to , Rπ₂
-          ; ⟨_,_⟩ = λ {c : I} (f , Rf) (g , Rg) →
-              from ∘ ⟨ f , g ⟩ , R⟨,⟩ Rf Rg
-          ; project₁ = λ {c : I} {(h , _ )} {(i , _)} →
-              let open HomReasoning in
-              begin
-                (π₁ ∘ to) ∘ (from ∘ ⟨ h , i ⟩) ≈⟨ assoc ⟩
-                π₁ ∘ (to ∘ (from ∘ ⟨ h , i ⟩)) ≈⟨ ∘-resp-≈ʳ sym-assoc ⟩
-                π₁ ∘ ((to ∘ from) ∘ ⟨ h , i ⟩) ≈⟨ ∘-resp-≈ʳ (∘-resp-≈ˡ isoˡ) ⟩
-                π₁ ∘ (id ∘ ⟨ h , i ⟩)          ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
-                π₁ ∘ ⟨ h , i ⟩                 ≈⟨ project₁ ⟩
-                h                              ∎
-          ; project₂ = λ {c : I} {(h , _ )} {(i , _)} →
-              let open HomReasoning in
-              begin
-                (π₂ ∘ to) ∘ (from ∘ ⟨ h , i ⟩) ≈⟨ assoc ⟩
-                π₂ ∘ (to ∘ (from ∘ ⟨ h , i ⟩)) ≈⟨ ∘-resp-≈ʳ sym-assoc ⟩
-                π₂ ∘ ((to ∘ from) ∘ ⟨ h , i ⟩) ≈⟨ ∘-resp-≈ʳ (∘-resp-≈ˡ isoˡ) ⟩
-                π₂ ∘ (id ∘ ⟨ h , i ⟩)          ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
-                π₂ ∘ ⟨ h , i ⟩                 ≈⟨ project₂ ⟩
-                i                              ∎
-          ; unique = λ {c : I} {(h , _)} {(i , _)} {(j , _)}
-                       (eq₁ : (π₁ ∘ to) ∘ h ≈ i)
-                       (eq₂ : (π₂ ∘ to) ∘ h ≈ j) →
-              let open HomReasoning
-                  eq₁′ : π₁ ∘ (to ∘ h) ≈ i ; eq₁′ = sym-assoc ○ eq₁
-                  eq₂′ : π₂ ∘ (to ∘ h) ≈ j ; eq₂′ = sym-assoc ○ eq₂ in
-              begin
-                from ∘ ⟨ i , j ⟩ ≈⟨ ∘-resp-≈ʳ (unique eq₁′ eq₂′) ⟩
-                from ∘ (to ∘ h)  ≈⟨ sym-assoc ⟩
-                (from ∘ to) ∘ h  ≈⟨ ∘-resp-≈ˡ isoʳ ⟩
-                id ∘ h           ≈⟨ identityˡ ⟩
-                h                ∎
+          ; ⟨_,_⟩ = λ {c : I} (f , Rf) (g , Rg) → from ∘ ⟨ f , g ⟩ , R⟨,⟩ Rf Rg
+          ; project₁ = cancelInner isoˡ ○ project₁
+          ; project₂ = cancelInner isoˡ ○ project₂
+          ; unique = λ {_ (h , _) (i , _) (j , _)} eq₁ eq₂ →
+            begin
+                from ∘ ⟨ i , j ⟩                        
+              ≈˘⟨ refl⟩∘⟨ ⟨⟩-cong₂ eq₁ eq₂ ⟩
+                from ∘ ⟨ (π₁ ∘ to) ∘ h , (π₂ ∘ to) ∘ h ⟩
+              ≈⟨ refl⟩∘⟨ unique sym-assoc sym-assoc ⟩
+                from ∘ to ∘ h
+              ≈⟨ cancelˡ isoʳ ⟩
+                h
+              ∎
           } }
   } where open SubCart sc
 
