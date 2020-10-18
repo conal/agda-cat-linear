@@ -32,9 +32,9 @@ H₀ op = record
                  open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f)
              in begin⟨ setoid C ⟩
-                    g (f ∙) ≈⟨ cong-g fᴴ ⟩
-                    g ∘     ≈⟨ gᴴ ⟩
-                    ⋆       ∎
+                  g (f ∙) ≈⟨ cong-g fᴴ ⟩
+                  g ∘     ≈⟨ gᴴ ⟩
+                  ⋆       ∎
   }
 
 -- Unary homomorphism, given a unary operation on its carrier.
@@ -51,9 +51,9 @@ H₁ op = record
                  open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f)
              in λ x → begin⟨ setoid C ⟩
-                          g (f (∙ x)) ≈⟨ cong-g (fᴴ x) ⟩
-                          g (∘ f x)   ≈⟨ gᴴ (f x) ⟩
-                          ⋆ g (f x)   ∎
+                        g (f (∙ x)) ≈⟨ cong-g (fᴴ x) ⟩
+                        g (∘ f x)   ≈⟨ gᴴ (f x) ⟩
+                        ⋆ g (f x)   ∎
   }
 
 -- Binary homomorphism, given a binary operation on its carrier.
