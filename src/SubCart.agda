@@ -25,23 +25,27 @@ private
   variable
     r i : Level
     I : Set i
-    U : I → Obj
 
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 
-record SubCart {I : Set i} (U : I → Obj) : Set (ℓ ⊔ i ⊔ o ⊔ e ⊔ suc r) where
+record CartMap {i} (I : Set i) : Set (o ⊔ ℓ ⊔ e ⊔ i) where
+  infixr 2 _×ᴵ_
+  field
+    U : I → Obj
+    ⊤ᴵ : I
+    ⊤≅ : ⊤ ≅ U ⊤ᴵ
+    _×ᴵ_ : I → I → I
+    ×≅   : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
+
+record SubCart {i r} {I : Set i} (cartMap : CartMap I)
+       : Set (ℓ ⊔ i ⊔ o ⊔ suc r) where
+  open CartMap cartMap public
   field
     subCat : SubCat {r = r} U
   open SubCat subCat public
   open _≅_
   field
-    ⊤ᴵ : I
-    ⊤≅ : ⊤ ≅ U ⊤ᴵ
     R! : {a : I} → R (from ⊤≅ ∘ ! {U a})
-  infixr 2 _×ᴵ_
-  field
-    _×ᴵ_ : I → I → I
-    ×≅   : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
     Rπ₁  : {a b : I} → R (π₁ ∘ to (×≅ {a} {b}))
     Rπ₂  : {a b : I} → R (π₂ ∘ to (×≅ {a} {b}))
     R⟨,⟩ : {a c d : I} {f : U a ⇒ U c} {g : U a ⇒ U d}
@@ -49,8 +53,8 @@ record SubCart {I : Set i} (U : I → Obj) : Set (ℓ ⊔ i ⊔ o ⊔ e ⊔ suc 
 
 open HomReasoning
 
-SubCartesian : ∀ {i I U}
-             → (sc : SubCart {i = i} {r} {I} U)
+SubCartesian : ∀ {i I cm}
+             → (sc : SubCart {i = i} {r = r} {I = I} cm)
              → let open SubCart sc in
                Cartesian (SubCategory subCat)
 SubCartesian {i = i} {I} {U} sc = record
@@ -92,3 +96,4 @@ SubCartesian {i = i} {I} {U} sc = record
 -- terminal or product (IIUC). TODO: generalize them.
 
 -- TODO: counterpart to FullSubCategory.
+
