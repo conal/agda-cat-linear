@@ -21,12 +21,11 @@ open Setoid using (Carrier; refl)
 -- Nullary homomorphism, given a nullary operation on its carrier.
 H₀ : ((A : Q) → Carrier (setoid A)) → SubCat setoid
 H₀ op = record
-  { R = λ {A B} f′ →
-          let ∙ = op A ; ∘ = op B
-              _≈_ = Setoid._≈_ (setoid B)
-              open Π f′ renaming (_⟨$⟩_ to f)
-          in
-            f ∙ ≈ ∘
+  { R = λ {A B} f′ → let ∙ = op A ; ∘ = op B
+                         _≈_ = Setoid._≈_ (setoid B)
+                         open Π f′ renaming (_⟨$⟩_ to f)
+                     in
+                       f ∙ ≈ ∘
   ; Rid  = λ {A} → refl (setoid A)
   ; _∘R_ = λ {A B C} {g′} {f′} gᴴ fᴴ →
              let ∙ = op A ; ∘ = op B ; ⋆ = op C
@@ -41,12 +40,11 @@ H₀ op = record
 -- Unary homomorphism, given a unary operation on its carrier.
 H₁ : ((A : Q) → Op₁ (Carrier (setoid A))) → SubCat setoid
 H₁ op = record
-  { R = λ {A B} f′ →
-          let ∙_ = op A ; ∘_ = op B
-              _≈_ = Setoid._≈_ (setoid B) ; infix 4 _≈_
-              open Π f′ renaming (_⟨$⟩_ to f)
-          in
-            ∀ x → f (∙ x) ≈ ∘ f x
+  { R = λ {A B} f′ → let ∙_ = op A ; ∘_ = op B
+                         _≈_ = Setoid._≈_ (setoid B) ; infix 4 _≈_
+                         open Π f′ renaming (_⟨$⟩_ to f)
+                     in
+                       ∀ x → f (∙ x) ≈ ∘ f x
   ; Rid  = λ {A} → λ _ → refl (setoid A)
   ; _∘R_ = λ {A B C} {g′} {f′} gᴴ fᴴ →
              let ∙_ = op A ; ∘_ = op B ; ⋆_ = op C
@@ -61,12 +59,11 @@ H₁ op = record
 -- Binary homomorphism, given a binary operation on its carrier.
 H₂ : ((A : Q) → Op₂ (Carrier (setoid A))) → SubCat setoid
 H₂ op = record
-  { R = λ {A B} f′ →
-          let _∙_ = op A ; _∘_ = op B
-              _≈_ = Setoid._≈_ (setoid B) ; infix 4 _≈_
-              open Π f′ renaming (_⟨$⟩_ to f)
-          in
-            ∀ x y → f (x ∙ y) ≈ f x ∘ f y
+  { R = λ {A B} f′ → let _∙_ = op A ; _∘_ = op B
+                         _≈_ = Setoid._≈_ (setoid B) ; infix 4 _≈_
+                         open Π f′ renaming (_⟨$⟩_ to f)
+                     in
+                       ∀ x y → f (x ∙ y) ≈ f x ∘ f y
   ; Rid  = λ {A} → λ _ _ → refl (setoid A)
   ; _∘R_ = λ {A B C} {g′} {f′} gᴴ fᴴ →
              let _∙_ = op A ; _∘_ = op B ; _⋆_ = op C
