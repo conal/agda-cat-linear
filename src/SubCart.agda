@@ -44,7 +44,7 @@ record SubCart {I : Set i} (U : I → Obj) : Set (ℓ ⊔ i ⊔ o ⊔ e ⊔ suc 
     ×≅   : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
     Rπ₁  : {a b : I} → R (π₁ ∘ to (×≅ {a} {b}))
     Rπ₂  : {a b : I} → R (π₂ ∘ to (×≅ {a} {b}))
-    R⟨,⟩ : ∀ {a c d : I} {f : U a ⇒ U c} {g : U a ⇒ U d}
+    R⟨,⟩ : {a c d : I} {f : U a ⇒ U c} {g : U a ⇒ U d}
          → R f → R g → R (from (×≅ {c} {d}) ∘ ⟨ f , g ⟩)
 
 open HomReasoning
