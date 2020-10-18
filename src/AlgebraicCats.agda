@@ -9,12 +9,17 @@ module AlgebraicCats (c ℓ : Level) where
 open import Algebra.Bundles
 open import Algebra.Module.Bundles
 
+open import Categories.Category.Core
+
+private variable r ℓr s ℓs : Level
+
 module _ where
-  open import Function.Base using (flip)
   open import Categories.Category.Instance.Setoids using (Setoids)
   open import SubCat (Setoids c ℓ) using (_∩_; ⋂) renaming (SubCategory to ⟨_⟩)
   import Homomorphisms as H
 
+  -- Temporarily comment out most categories to speed up reloading
+{-
   Magmas          = ⟨ H₂ _∙_                    ⟩ where open Magma          ; open H setoid
   Monoids         = ⟨ H₂ _∙_ ∩ H₀ ε             ⟩ where open Monoid         ; open H setoid
   Groups          = ⟨ H₂ _∙_ ∩ H₀ ε ∩ H₁ _⁻¹    ⟩ where open Group          ; open H setoid
@@ -22,17 +27,16 @@ module _ where
   NearSemirings   = ⟨ H₂ _*_ ∩ H₂ _+_ ∩ H₀ 0#   ⟩ where open NearSemiring   ; open H setoid
   Rings           = ⟨ H₂ _*_ ∩ H₂ _+_ ∩ H₁ (-_) ⟩ where open Ring           ; open H setoid
   BooleanAlgebras = ⟨ H₂ _∨_ ∩ H₂ _∧_ ∩ H₁ ¬_   ⟩ where open BooleanAlgebra ; open H setoid
+ -}
 
   SemiringWithoutAnnihilatingZeros = ⟨ H₂ _*_ ∩ H₂ _+_ ∩ H₀ 0# ∩ H₀ 1# ⟩
     where open SemiringWithoutAnnihilatingZero ; open H setoid
-
-  -- Algebraic modules and variants
-  private variable r ℓr s ℓs : Level
 
   module _ (R : Semiring r ℓr) where
     open Semiring R
     LeftSemimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ⟩
       where open LeftSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
+{-
     RightSemimodules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hᵣ _*ᵣ_ ⟩
       where open RightSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
 
@@ -69,10 +73,12 @@ module _ where
     open CommutativeRing R
     Modules = ⟨ H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_ ∩ Hᵣ _*ᵣ_ ⟩
       where open Module {commutativeRing = R} ; open H ≈ᴹ-setoid ; open Action Carrier
+-}
 
 module _ where
   open import SubCat using () renaming (FullSubCategory to _⇰_)
  
+{-
   Semigroups                     = Magmas        ⇰ Semigroup.magma
   Bands                          = Magmas        ⇰ Band.magma
   CommutativeSemigroups          = Magmas        ⇰ CommutativeSemigroup.magma
@@ -86,8 +92,52 @@ module _ where
   SemiringWithoutOnes            = NearSemirings ⇰ SemiringWithoutOne.nearSemiring
   CommutativeSemiringWithoutOnes = NearSemirings ⇰ CommutativeSemiringWithoutOne.nearSemiring
   CommutativeRings               = Rings         ⇰ CommutativeRing.ring
+-}
 
   Semirings = SemiringWithoutAnnihilatingZeros ⇰ Semiring.semiringWithoutAnnihilatingZero
   CommutativeSemirings = SemiringWithoutAnnihilatingZeros
                            ⇰ CommutativeSemiring.semiringWithoutAnnihilatingZero
+
+
+-------------------------------------------------------------------------------
+-- | Cartesian categories. Start with a few, and then generalize.
+-------------------------------------------------------------------------------
+
+module _ (R : Semiring r ℓr) where
+  open Semiring R using (Carrier)
+  open import Data.Unit.Polymorphic
+  open import Data.Product using (_,_)
+  open import Relation.Binary.Bundles using (Setoid)
+  import Algebra.Module.Construct.Zero.Polymorphic as Z
+  import Algebra.Module.Construct.DirectProduct    as P
+
+  open import Categories.Category.Cartesian
+  open import Categories.Category.Monoidal.Instance.Setoids
+  open import Categories.Category.Instance.Setoids using (Setoids)
+
+  open import SubCat (Setoids c ℓ) using (_∩_; ⋂)
+  open import SubCart (Setoids-Cartesian {c} {ℓ})
+  import Homomorphisms as H
+  open import Misc
+
+  LeftSemimodules-Cartesian : Cartesian (LeftSemimodules R)
+  LeftSemimodules-Cartesian = SubCartesian record
+    { subCat = subCat
+    ; ⊤ᴵ = Z.leftSemimodule
+    ; ⊤≅ = id≅
+    ; R! = (λ x y → tt) , tt , (λ s x → tt)
+    ; _×ᴵ_ = P.leftSemimodule
+    ; ×≅ = id≅
+    ; Rπ₁ = λ {a₁ a₂} → let open Setoid (≈ᴹ-setoid a₁) renaming (refl to refl₁) in
+                          (λ _ _ → refl₁) , refl₁ , (λ _ _ → refl₁)
+    ; Rπ₂ = λ {a₁ a₂} → let open Setoid (≈ᴹ-setoid a₂) renaming (refl to refl₂) in
+                          (λ _ _ → refl₂) , refl₂ , (λ _ _ → refl₂)
+    ; R⟨,⟩ = λ (_+₁_ , 0₁ , _*₁_) (_+₂_ , 0₂ , _*₂_) →
+               (λ x y → x +₁ y , x +₂ y) , (0₁ , 0₂) , (λ s x → s *₁ x , s *₂ x)
+    } where
+        open LeftSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
+        subCat = H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_
+        
+  -- TODO: eliminate the redundant SubCat construction and associated imports.
+  -- Return to the style of Old.Algebraic2
 
