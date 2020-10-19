@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K --safe -Wall #-}
 
 -- Variation on Categories.Category.SubCategory. The U field of SubCat is moved
 -- out to a parameter, so it can be kept in common for SubCat intersection.
@@ -11,7 +11,8 @@ open Category C
 open Equiv
 
 open import Level
-open import Data.Product hiding (map)
+open import Function using (_∘′_)
+open import Data.Product
 
 import Categories.Category.SubCategory C as Sub
 
@@ -36,20 +37,20 @@ SubCategory {I = I} {U} sc = let open SubCat sc in
   Sub.SubCategory record { U = U; R = R ; Rid = Rid ; _∘R_ = _∘R_ }
 
 infixr 9 _⊢_
-_⊢_ : (J→I : J → I) → SubCat {r = r} U → SubCat {r = r} (λ j → U (J→I j))
-_⊢_ J→I subcat = record {R = R; Rid = Rid; _∘R_ = _∘R_} where open SubCat subcat
+_⊢_ : (J→I : J → I) → SubCat {r = r} U → SubCat {r = r} (U ∘′ J→I)
+_ ⊢ subcat = record {R = R; Rid = Rid; _∘R_ = _∘R_} where open SubCat subcat
 
 infixr 7 _∩_
 _∩_ : ∀ {r₁ r₂} {U : I → Obj}
       → SubCat {r = r₁     } U
       → SubCat {r =      r₂} U
       → SubCat {r = r₁ ⊔ r₂} U
-record {R = R₁; Rid = Rid₁; _∘R_ = _∘R₁_}
- ∩ record {R = R₂; Rid = Rid₂; _∘R_ = _∘R₂_} = record
-  { R = λ f → R₁ f × R₂ f  -- R₁ ∩ R₂
-  ; Rid = Rid₁ , Rid₂
-  ; _∘R_ = λ (g₁ , g₂) (f₁ , f₂) → g₁ ∘R₁ f₁ , g₂ ∘R₂ f₂
-  }
+S₁ ∩ S₂ = record
+  { R = λ f → S₁.R f × S₂.R f  -- S₁.R ∩ S₂.R
+  ; Rid = S₁.Rid , S₂.Rid
+  ; _∘R_ = λ (g₁ , g₂) (f₁ , f₂) → g₁ S₁.∘R f₁ , g₂ S₂.∘R f₂
+  } where module S₁ = SubCat S₁
+          module S₂ = SubCat S₂
 
 infix 10 ⋂
 ⋂ : ∀ {J : Set j} → (J → SubCat {r = r} U) → SubCat {r = j ⊔ r} U
