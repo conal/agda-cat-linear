@@ -5,7 +5,7 @@
 open import Level
 open import Relation.Binary using (Setoid)
 
-module Category.Homomorphisms {o ℓ : Level} {q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
+module Category.Homomorphisms {o ℓ : Level} {i : Level} {I : Set i} (U : I → Setoid o ℓ) where
 
 open import Data.Product using (_,_)
 open import Function.Equality using (Π; _⟨$⟩_; _⟶_)
@@ -19,57 +19,57 @@ open import Category.Sub (Setoids o ℓ)
 open Setoid using (Carrier; refl)
 
 -- Nullary homomorphism, given a nullary operation on its carrier.
-H₀ : ((A : Q) → Carrier (setoid A)) → SubCat setoid
+H₀ : ((A : I) → Carrier (U A)) → SubCat U
 H₀ op = record
   { R = λ {A B} f′ → let ∙ = op A ; ∘ = op B
-                         _≈_ = Setoid._≈_ (setoid B)
+                         _≈_ = Setoid._≈_ (U B)
                          open Π f′ renaming (_⟨$⟩_ to f)
                      in
                        f ∙ ≈ ∘
-  ; Rid  = λ {A} → refl (setoid A)
+  ; Rid  = λ {A} → refl (U A)
   ; _∘R_ = λ {A B C} {g′} {f′} gᴴ fᴴ →
              let ∙ = op A ; ∘ = op B ; ⋆ = op C
                  open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f)
-             in begin⟨ setoid C ⟩
+             in begin⟨ U C ⟩
                   g (f ∙) ≈⟨ cong-g fᴴ ⟩
                   g ∘     ≈⟨ gᴴ ⟩
                   ⋆       ∎
   }
 
 -- Unary homomorphism, given a unary operation on its carrier.
-H₁ : ((A : Q) → Op₁ (Carrier (setoid A))) → SubCat setoid
+H₁ : ((A : I) → Op₁ (Carrier (U A))) → SubCat U
 H₁ op = record
   { R = λ {A B} f′ → let ∙_ = op A ; ∘_ = op B
-                         _≈_ = Setoid._≈_ (setoid B) ; infix 4 _≈_
+                         _≈_ = Setoid._≈_ (U B) ; infix 4 _≈_
                          open Π f′ renaming (_⟨$⟩_ to f)
                      in
                        ∀ x → f (∙ x) ≈ ∘ f x
-  ; Rid  = λ {A} → λ _ → refl (setoid A)
+  ; Rid  = λ {A} → λ _ → refl (U A)
   ; _∘R_ = λ {A B C} {g′} {f′} gᴴ fᴴ →
              let ∙_ = op A ; ∘_ = op B ; ⋆_ = op C
                  open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f)
-             in λ x → begin⟨ setoid C ⟩
+             in λ x → begin⟨ U C ⟩
                         g (f (∙ x)) ≈⟨ cong-g (fᴴ x) ⟩
                         g (∘ f x)   ≈⟨ gᴴ (f x) ⟩
                         ⋆ g (f x)   ∎
   }
 
 -- Binary homomorphism, given a binary operation on its carrier.
-H₂ : ((A : Q) → Op₂ (Carrier (setoid A))) → SubCat setoid
+H₂ : ((A : I) → Op₂ (Carrier (U A))) → SubCat U
 H₂ op = record
   { R = λ {A B} f′ → let _∙_ = op A ; _∘_ = op B
-                         _≈_ = Setoid._≈_ (setoid B) ; infix 4 _≈_
+                         _≈_ = Setoid._≈_ (U B) ; infix 4 _≈_
                          open Π f′ renaming (_⟨$⟩_ to f)
                      in
                        ∀ x y → f (x ∙ y) ≈ f x ∘ f y
-  ; Rid  = λ {A} → λ _ _ → refl (setoid A)
+  ; Rid  = λ {A} → λ _ _ → refl (U A)
   ; _∘R_ = λ {A B C} {g′} {f′} gᴴ fᴴ →
              let _∙_ = op A ; _∘_ = op B ; _⋆_ = op C
                  open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
                  open Π f′ renaming (_⟨$⟩_ to f)
-             in λ x y → begin⟨ setoid C ⟩
+             in λ x y → begin⟨ U C ⟩
                           g (f (x ∙ y))     ≈⟨ cong-g (fᴴ x y) ⟩
                           g (f x ∘ f y)     ≈⟨ gᴴ (f x) (f y) ⟩
                           g (f x) ⋆ g (f y) ∎
@@ -78,8 +78,8 @@ H₂ op = record
 -- Left- and right-action homomorphisms. Maybe semi-homomorphisms, since one
 -- argument is held constant.
 module Action {s : Level} (S : Set s) where
-  Hₗ : ((A : Q) → Opₗ S (Carrier (setoid A))) → SubCat setoid
+  Hₗ : ((A : I) → Opₗ S (Carrier (U A))) → SubCat U
   Hₗ op = ⋂ (λ s → H₁ (λ A x → op A s x))
 
-  Hᵣ : ((A : Q) → Opᵣ S (Carrier (setoid A))) → SubCat setoid
+  Hᵣ : ((A : I) → Opᵣ S (Carrier (U A))) → SubCat U
   Hᵣ op = ⋂ (λ s → H₁ (λ A x → op A x s))
