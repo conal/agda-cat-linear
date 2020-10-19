@@ -15,8 +15,8 @@ private variable r ℓr s ℓs : Level
 
 module _ where
   open import Categories.Category.Instance.Setoids using (Setoids)
-  open import SubCat (Setoids c ℓ) using (_∩_; ⋂) renaming (SubCategory to ⟨_⟩)
-  import Homomorphisms as H
+  open import Category.Sub (Setoids c ℓ) using (_∩_; ⋂) renaming (SubCategory to ⟨_⟩)
+  import Category.Homomorphisms as H
 
   -- Temporarily comment out most categories to speed up reloading
 {-
@@ -76,7 +76,7 @@ module _ where
 -}
 
 module _ where
-  open import SubCat using () renaming (FullSubCategory to _⇰_)
+  open import Category.Sub using () renaming (FullSubCategory to _⇰_)
  
 {-
   Semigroups                     = Magmas        ⇰ Semigroup.magma
@@ -115,25 +115,29 @@ module _ (R : Semiring r ℓr) where
   open import Categories.Category.Monoidal.Instance.Setoids
   open import Categories.Category.Instance.Setoids using (Setoids)
 
-  open import SubCat (Setoids c ℓ) using (_∩_; ⋂)
-  open import SubCart (Setoids-Cartesian {c} {ℓ})
-  import Homomorphisms as H
+  open import Category.Sub (Setoids c ℓ) using (_∩_; ⋂)
+  open import Cartesian.Sub (Setoids-CartesianCategory c ℓ) hiding (_∩_)
+  import Category.Homomorphisms as H
   open import Misc
 
-  LeftSemimodules-Cartesian : Cartesian (LeftSemimodules R)
-  LeftSemimodules-Cartesian = SubCartesian record
-    { subCat = subCat
-    ; ⊤ᴵ = Z.leftSemimodule
+  LeftSemimodule-CartOps : CartOps (LeftSemimodule.≈ᴹ-setoid {semiring = R})
+  LeftSemimodule-CartOps = record 
+    { ⊤ᴵ = Z.leftSemimodule
     ; ⊤≅ = id≅
-    ; R! = (λ x y → tt) , tt , (λ s x → tt)
     ; _×ᴵ_ = P.leftSemimodule
     ; ×≅ = id≅
+    }
+
+  LeftSemimodules-Cartesian : Cartesian (LeftSemimodules R)
+  LeftSemimodules-Cartesian = SubCartesian {ops = LeftSemimodule-CartOps} record
+    { subCat = subCat
+    ; R! = (λ x y → tt) , tt , (λ s x → tt)
     ; Rπ₁ = λ {a₁ a₂} → let open Setoid (≈ᴹ-setoid a₁) renaming (refl to refl₁) in
                           (λ _ _ → refl₁) , refl₁ , (λ _ _ → refl₁)
     ; Rπ₂ = λ {a₁ a₂} → let open Setoid (≈ᴹ-setoid a₂) renaming (refl to refl₂) in
                           (λ _ _ → refl₂) , refl₂ , (λ _ _ → refl₂)
-    ; R⟨,⟩ = λ (_+₁_ , 0₁ , _*₁_) (_+₂_ , 0₂ , _*₂_) →
-               (λ x y → x +₁ y , x +₂ y) , (0₁ , 0₂) , (λ s x → s *₁ x , s *₂ x)
+    ; R⟨_,_⟩ = λ (_+₁_ , 0₁ , _*₁_) (_+₂_ , 0₂ , _*₂_) →
+                 (λ x y → x +₁ y , x +₂ y) , (0₁ , 0₂) , (λ s x → s *₁ x , s *₂ x)
     } where
         open LeftSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
         subCat = H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_

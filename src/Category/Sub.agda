@@ -5,7 +5,7 @@
 
 open import Categories.Category
 
-module SubCat {o ℓ e} (C : Category o ℓ e) where
+module Category.Sub {o ℓ e} (C : Category o ℓ e) where
 
 open Category C
 open Equiv

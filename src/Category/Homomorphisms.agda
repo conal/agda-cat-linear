@@ -5,7 +5,7 @@
 open import Level
 open import Relation.Binary using (Setoid)
 
-module Homomorphisms {o ℓ : Level} {q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
+module Category.Homomorphisms {o ℓ : Level} {q : Level} {Q : Set q} (setoid : Q → Setoid o ℓ) where
 
 open import Data.Product using (_,_)
 open import Function.Equality using (Π; _⟨$⟩_; _⟶_)
@@ -14,7 +14,7 @@ open import Algebra using (Op₁; Op₂; Opₗ; Opᵣ)
 
 open import Categories.Category.Instance.Setoids using (Setoids)
 
-open import SubCat (Setoids o ℓ)
+open import Category.Sub (Setoids o ℓ)
 
 open Setoid using (Carrier; refl)
 
