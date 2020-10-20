@@ -14,11 +14,13 @@ open CartesianCategory CC renaming (U to C)
 open import Function using (_∘′_; case_of_)
 open import Data.Product using (_,_) renaming (_×_ to _×′_)
 
+import Categories.Object.Product C as P
+import Categories.Object.Terminal C as T
 open import Categories.Morphism C using (_≅_)
 open import Categories.Morphism.Reasoning C
 
 import Category.Sub C as SC
-open SC hiding (_⊢_; _∩_; ⋂)
+open SC hiding (_⊢_; _∩_; ⋂) public
 
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 open _≡_
@@ -60,42 +62,27 @@ SubCartesian : ∀ {i I U ops}
              → let open SubCart sc in
                Cartesian (SubCategory subCat)
 SubCartesian {i = i} {I} {U} sc = record
-  { terminal = record
+  { terminal = let module t′ = T.Terminal (T.transport-by-iso terminal ⊤≅)
+      in record
       { ⊤ = ⊤ᴵ
-      ; ⊤-is-terminal = let open _≅_ ⊤≅ in record
-          { ! = from ∘ ! , R!
-          ; !-unique = λ {a : I} (f , _) →
-              begin
-                from ∘ !      ≈⟨ refl⟩∘⟨ !-unique (to ∘ f) ⟩
-                from ∘ to ∘ f ≈⟨ cancelˡ isoʳ ⟩
-                f             ∎
+      ; ⊤-is-terminal = record
+          { ! = t′.! , R!
+          ; !-unique = λ (f , _) → t′.!-unique f
           }
       }
   ; products = record
-      { product = λ {a b} → let open _≅_ (×≅ {a} {b}) in record
+      { product = λ {a b} →
+          let module p′ = P.Product (P.transport-by-iso product (×≅ {a} {b}))
+          in record
           { A×B = a ×ᴵ b
-          ; π₁ = π₁ ∘ to , Rπ₁
-          ; π₂ = π₂ ∘ to , Rπ₂
-          ; ⟨_,_⟩ = λ {c : I} (f , Rf) (g , Rg) → from ∘ ⟨ f , g ⟩ , R⟨ Rf , Rg ⟩
-          ; project₁ = cancelInner isoˡ ○ project₁
-          ; project₂ = cancelInner isoˡ ○ project₂
-          ; unique = λ {_ (h , _) (i , _) (j , _)} eq₁ eq₂ →
-            begin
-                from ∘ ⟨ i , j ⟩                        
-              ≈˘⟨ refl⟩∘⟨ ⟨⟩-cong₂ eq₁ eq₂ ⟩
-                from ∘ ⟨ (π₁ ∘ to) ∘ h , (π₂ ∘ to) ∘ h ⟩
-              ≈⟨ refl⟩∘⟨ unique sym-assoc sym-assoc ⟩
-                from ∘ to ∘ h
-              ≈⟨ cancelˡ isoʳ ⟩
-                h
-              ∎
+          ; π₁ = p′.π₁ , Rπ₁
+          ; π₂ = p′.π₂ , Rπ₂
+          ; ⟨_,_⟩ = λ {c : I} (f , Rf) (g , Rg) → p′.⟨ f , g ⟩ , R⟨ Rf , Rg ⟩
+          ; project₁ = p′.project₁
+          ; project₂ = p′.project₂
+          ; unique = λ {_ (h , _) (i , _) (j , _)} → p′.unique {_} {h} {i} {j}
           } }
   } where open SubCart sc
-
--- SubCartesian is *almost* trivially definable via the transport-by-iso
--- functions from Terminal and Product. Those functions, however, assume that
--- the constructed terminal or product is in the same category as the given
--- terminal or product (IIUC). TODO: generalize them.
 
 -- TODO: counterpart to FullSubCategory.
 
