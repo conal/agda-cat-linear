@@ -45,21 +45,15 @@ module _ (ops : CartOps {i = i} {I = I} U) where
   H₀ op = record
     { subCat = subCat
     ; R! = λ {A : I} → 
-       let open _≅_ ⊤≅
-           open Π (from ∘ ! {U A}) renaming (_⟨$⟩_ to f)
-           ∙ = op A ; ⋆ = op ⊤ᴵ
+       let ∙ = op A ; ⋆ = op ⊤ᴵ
+           open Setoid (U A) using (refl)
            module t′ = Terminal (transport-by-iso terminal ⊤≅)
-           open Setoid (U A)
        in
-         begin⟨ U ⊤ᴵ ⟩
-           (from ∘ ! {U A}) ⟨$⟩ ∙
-             ≈⟨ t′.!-unique {U A} (const ⋆) (refl {∙}) ⟩
-           ⋆                  ∎
+         t′.!-unique {U A} (const ⋆) (refl {∙})
     ; Rπ₁ = {!!}
     ; Rπ₂ = {!!}
     ; R⟨_,_⟩ = {!!}
     } where subCat = CH.H₀ op
-            open SubCat subCat
 
   -- record CartOps {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) where
   --   infixr 2 _×ᴵ_
