@@ -33,6 +33,9 @@ open Setoid using (Carrier)
 
 import Data.Unit.Polymorphic.Base as PU
 
+-- TODO: Try flattening to a single module with an ops argument. Unsure, as I'd
+-- probably need to replicate constructing Setoids-CartesianCategory.
+
 module _ (ops : CartOps {i = i} {I = I} U) where
   open CartOps ops
 
@@ -50,21 +53,6 @@ module _ (ops : CartOps {i = i} {I = I} U) where
     ; Rπ₂ = {!!}
     ; R⟨_,_⟩ = {!!}
     } where subCat = CH.H₀ op
-
-  -- -- Unary homomorphism, given a unary operation on its carrier.
-  -- H₁ : ((A : I) → Op₁ (Carrier (U A))) → SubCart ops
-  -- H₁ op = record
-  --   { subCat = subCat
-  --   ; R! = λ {A : I} → 
-  --      let ∙_ = op A ; ⋆_ = op ⊤ᴵ
-  --          open Setoid (U A) using (refl)
-  --          module t′ = Terminal (transport-by-iso terminal ⊤≅)
-  --      in
-  --        t′.!-unique {U A} (const ⋆) (refl {∙})
-  --   ; Rπ₁ = {!!}
-  --   ; Rπ₂ = {!!}
-  --   ; R⟨_,_⟩ = {!!}
-  --   } where subCat = CH.H₀ op
 
   {-
 
