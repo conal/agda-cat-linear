@@ -28,6 +28,12 @@ record CartOps {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) whe
     _×ᴵ_ : I → I → I
     ×≅   : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
 
+  module terminal′ = T.Terminal (T.transport-by-iso terminal ⊤≅)
+  module product′ {a b} = P.Product (P.transport-by-iso product (×≅ {a} {b}))
+
+-- TODO: Replace ⊤ᴵ and _×ᴵ_ by a terminal and a product. Use transport-by-iso
+-- to make them.
+
 private
   variable
     r i j : Level
@@ -50,34 +56,31 @@ record SubCart {i r} {I : Set i} {U : I → Obj} (ops : CartOps {i = i} {I = I} 
     R⟨_,_⟩ : {a c d : I} {f : U a ⇒ U c} {g : U a ⇒ U d}
            → R f → R g → R (from (×≅ {c} {d}) ∘ ⟨ f , g ⟩)
 
-SubCartesian : ∀ {i I U ops}
-             → (sc : SubCart {i = i} {r = r} {I = I} {U = U} ops)
-             → let open SubCart sc in
-               Cartesian (SubCategory subCat)
-SubCartesian {i = i} {I} {U} sc = record
-  { terminal = let module t′ = T.Terminal (T.transport-by-iso terminal ⊤≅)
-      in record
-      { ⊤ = ⊤ᴵ
-      ; ⊤-is-terminal = record
-          { ! = t′.! , R!
-          ; !-unique = λ (f , _) → t′.!-unique f
-          }
-      }
-  ; products = record
-      { product = λ {a b} →
-          let module p′ = P.Product (P.transport-by-iso product (×≅ {a} {b}))
-          in record
-          { A×B = a ×ᴵ b
-          ; π₁ = p′.π₁ , Rπ₁
-          ; π₂ = p′.π₂ , Rπ₂
-          ; ⟨_,_⟩ = λ {c : I} (f , Rf) (g , Rg) → p′.⟨ f , g ⟩ , R⟨ Rf , Rg ⟩
-          ; project₁ = p′.project₁
-          ; project₂ = p′.project₂
-          ; unique = λ {_ (h , _) (i , _) (j , _)} → p′.unique {_} {h} {i} {j}
-          } }
-  } where open SubCart sc
+  SubCartesian : Cartesian SubCategory
+  SubCartesian = record
+    { terminal = record
+        { ⊤ = ⊤ᴵ
+        ; ⊤-is-terminal = record
+            { ! = terminal′.! , R!
+            ; !-unique = λ (f , _) → terminal′.!-unique f
+            }
+        }
+    ; products = record
+        { product = λ {a b} → let module p′ = product′ {a} {b} in record
+            { A×B = a ×ᴵ b
+            ; π₁ = p′.π₁ , Rπ₁
+            ; π₂ = p′.π₂ , Rπ₂
+            ; ⟨_,_⟩ = λ {c : I} (f , Rf) (g , Rg) → p′.⟨ f , g ⟩ , R⟨ Rf , Rg ⟩
+            ; project₁ = p′.project₁
+            ; project₂ = p′.project₂
+            ; unique = λ {_ (h , _) (i , _) (j , _)} → p′.unique {_} {h} {i} {j}
+            } }
+    }
 
--- Note: Cartesian.Homomorphisms also uses t′ and p′. Look for refactoring opportunities.
+  -- open Cartesian SubCartesian public
+
+-- TODO: This SubCartesian definition looks like a special case of a more
+-- general construction. Investigate.
 
 -- TODO: counterpart to FullSubCategory.
 
@@ -109,7 +112,6 @@ infix 10 ⋂
   } where open SubCart
 
 syntax ⋂ (λ j → P) = ⋂[ j ] P
-
 
 {-
 -- _⊢_ : (J→I : J → I) → SubCat {r = r} {I = I} U → SubCat {r = r} {I = J} (U ∘′ J→I)

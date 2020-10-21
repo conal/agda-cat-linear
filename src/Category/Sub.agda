@@ -32,9 +32,11 @@ record SubCat {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ i ⊔ suc r) wher
     Rid : {a : I} → R (id {U a})
     _∘R_ : {a b c : I} {g : U b ⇒ U c} {f : U a ⇒ U b} → R g → R f → R (g ∘ f)
 
-SubCategory : SubCat {r = r} {I} U → Category _ _ _
-SubCategory {I = I} {U} sc = let open SubCat sc in
-  Sub.SubCategory record { U = U; R = R ; Rid = Rid ; _∘R_ = _∘R_ }
+  SubCategory : Category _ _ _
+  SubCategory =
+    Sub.SubCategory record { U = U; R = R ; Rid = Rid ; _∘R_ = _∘R_ }
+
+  -- open Category SubCategory public
 
 infixr 9 _⊢_
 _⊢_ : (J→I : J → I) → SubCat {r = r} U → SubCat {r = r} (U ∘′ J→I)

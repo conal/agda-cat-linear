@@ -46,9 +46,8 @@ module _ (ops : CartOps {i = i} {I = I} U) where
     ; R! = λ {A : I} → 
        let ∙ = op A ; ∘ = op ⊤ᴵ
            open Setoid (U A) using (refl)
-           module t′ = Terminal (transport-by-iso terminal ⊤≅)
        in
-         t′.!-unique {U A} (const ∘) (refl {∙})
+         terminal′.!-unique {U A} (const ∘) (refl {∙})
     ; Rπ₁ = {!!}
     ; Rπ₂ = {!!}
     ; R⟨_,_⟩ = {!!}
