@@ -11,19 +11,14 @@ module Cartesian.Sub {o ℓ e} (CC : CartesianCategory o ℓ e) where
 
 open CartesianCategory CC renaming (U to C)
 
-open import Function using (_∘′_; case_of_)
-open import Data.Product using (_,_) renaming (_×_ to _×′_)
+open import Data.Product using (_,_)
 
 import Categories.Object.Product C as P
 import Categories.Object.Terminal C as T
 open import Categories.Morphism C using (_≅_)
-open import Categories.Morphism.Reasoning C
 
 import Category.Sub C as SC
 open SC hiding (_⊢_; _∩_; ⋂) public
-
-open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
-open _≡_
 
 record CartOps {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) where
   infixr 2 _×ᴵ_
@@ -55,8 +50,6 @@ record SubCart {i r} {I : Set i} {U : I → Obj} (ops : CartOps {i = i} {I = I} 
     R⟨_,_⟩ : {a c d : I} {f : U a ⇒ U c} {g : U a ⇒ U d}
            → R f → R g → R (from (×≅ {c} {d}) ∘ ⟨ f , g ⟩)
 
-open HomReasoning
-
 SubCartesian : ∀ {i I U ops}
              → (sc : SubCart {i = i} {r = r} {I = I} {U = U} ops)
              → let open SubCart sc in
@@ -83,6 +76,8 @@ SubCartesian {i = i} {I} {U} sc = record
           ; unique = λ {_ (h , _) (i , _) (j , _)} → p′.unique {_} {h} {i} {j}
           } }
   } where open SubCart sc
+
+-- Note: Cartesian.Homomorphisms also uses t′ and p′. Look for refactoring opportunities.
 
 -- TODO: counterpart to FullSubCategory.
 
