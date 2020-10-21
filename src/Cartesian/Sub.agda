@@ -28,11 +28,12 @@ record CartOps {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) whe
     _×ᴵ_ : I → I → I
     ×≅   : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
 
-  module terminal′ = T.Terminal (T.transport-by-iso terminal ⊤≅)
-  module product′ {a b} = P.Product (P.transport-by-iso product (×≅ {a} {b}))
+  -- Terminal and products in the base category using the ⊤≅ and ×ᴵ isomorphisms
+  module terminal′      = T.Terminal (T.transport-by-iso terminal ⊤≅         )
+  module product′ {a b} = P.Product  (P.transport-by-iso product (×≅ {a} {b}))
 
--- TODO: Replace ⊤ᴵ and _×ᴵ_ by a terminal and a product. Use transport-by-iso
--- to make them.
+-- TODO: Replace ⊤ᴵ and _×ᴵ_ by a terminal and a product. Use terminal′ and
+-- product′ to make them.
 
 private
   variable
