@@ -13,9 +13,7 @@ open import Function.Equality using (Π; _⟨$⟩_; _⟶_; const)
 open import Relation.Binary.Reasoning.MultiSetoid
 open import Algebra using (Op₁; Op₂; Opₗ; Opᵣ)
 
-open import Categories.Category
-open import Categories.Category.Cartesian
-open import Categories.Category.Cartesian.Structure
+open import Categories.Category.Cartesian.Structure using (CartesianCategory)
 
 open import Categories.Category.Monoidal.Instance.Setoids
      using (Setoids-CartesianCategory)
@@ -23,11 +21,9 @@ open import Categories.Category.Monoidal.Instance.Setoids
 Setoids-CC : CartesianCategory _ _ _
 Setoids-CC = Setoids-CartesianCategory o ℓ
 
-open CartesianCategory Setoids-CC renaming (U to category)
+open CartesianCategory Setoids-CC using (terminal) renaming (U to category)
 
 open import Categories.Object.Terminal category
-open import Categories.Morphism
-open import Categories.Morphism.Reasoning category
 
 open import Cartesian.Sub Setoids-CC
 
@@ -45,41 +41,30 @@ module _ (ops : CartOps {i = i} {I = I} U) where
   H₀ op = record
     { subCat = subCat
     ; R! = λ {A : I} → 
-       let ∙ = op A ; ⋆ = op ⊤ᴵ
+       let ∙ = op A ; ∘ = op ⊤ᴵ
            open Setoid (U A) using (refl)
            module t′ = Terminal (transport-by-iso terminal ⊤≅)
        in
-         t′.!-unique {U A} (const ⋆) (refl {∙})
+         t′.!-unique {U A} (const ∘) (refl {∙})
     ; Rπ₁ = {!!}
     ; Rπ₂ = {!!}
     ; R⟨_,_⟩ = {!!}
     } where subCat = CH.H₀ op
 
-  -- record CartOps {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) where
-  --   infixr 2 _×ᴵ_
-  --   field
-  --     ⊤ᴵ : I
-  --     ⊤≅ : ⊤ ≅ U ⊤ᴵ
-  --     _×ᴵ_ : I → I → I
-  --     ×≅   : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
-
-
-  -- H₀ op = record
-  --   { R = λ {A B} f′ → let ∙ = op A ; ∘ = op B
-  --                          _≈_ = Setoid._≈_ (U B)
-  --                          open Π f′ renaming (_⟨$⟩_ to f)
-  --                      in
-  --                        f ∙ ≈ ∘
-  --   ; Rid  = λ {A} → refl (U A)
-  --   ; _∘R_ = λ {A B C} {g′} {f′} gᴴ fᴴ →
-  --              let ∙ = op A ; ∘ = op B ; ⋆ = op C
-  --                  open Π g′ renaming (_⟨$⟩_ to g; cong to cong-g)
-  --                  open Π f′ renaming (_⟨$⟩_ to f)
-  --              in begin⟨ U C ⟩
-  --                   g (f ∙) ≈⟨ cong-g fᴴ ⟩
-  --                   g ∘     ≈⟨ gᴴ ⟩
-  --                   ⋆       ∎
-  --   }
+  -- -- Unary homomorphism, given a unary operation on its carrier.
+  -- H₁ : ((A : I) → Op₁ (Carrier (U A))) → SubCart ops
+  -- H₁ op = record
+  --   { subCat = subCat
+  --   ; R! = λ {A : I} → 
+  --      let ∙_ = op A ; ⋆_ = op ⊤ᴵ
+  --          open Setoid (U A) using (refl)
+  --          module t′ = Terminal (transport-by-iso terminal ⊤≅)
+  --      in
+  --        t′.!-unique {U A} (const ⋆) (refl {∙})
+  --   ; Rπ₁ = {!!}
+  --   ; Rπ₂ = {!!}
+  --   ; R⟨_,_⟩ = {!!}
+  --   } where subCat = CH.H₀ op
 
   {-
 
