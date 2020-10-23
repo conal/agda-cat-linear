@@ -15,7 +15,8 @@ private variable r ℓr s ℓs : Level
 
 module _ where
   open import Categories.Category.Instance.Setoids using (Setoids)
-  open import Category.Sub (Setoids c ℓ) using (_∩_; ⋂) renaming (SubCategory to ⟨_⟩)
+  open import Category.Sub (Setoids c ℓ) as Sub using (_∩_; ⋂) -- renaming (SubCat.SubCategory to ⟨_⟩)
+  open Sub.SubCat renaming (SubCategory to ⟨_⟩)
   import Category.Homomorphisms as H
 
   -- Temporarily comment out most categories to speed up reloading
@@ -108,7 +109,7 @@ module _ (R : Semiring r ℓr) where
   open import Data.Unit.Polymorphic
   open import Data.Product using (_,_)
   open import Relation.Binary.Bundles using (Setoid)
-  import Algebra.Module.Construct.Zero.Polymorphic as Z
+  import Algebra.Module.Construct.Zero as Z
   import Algebra.Module.Construct.DirectProduct    as P
 
   open import Categories.Category.Cartesian
@@ -116,17 +117,19 @@ module _ (R : Semiring r ℓr) where
   open import Categories.Category.Instance.Setoids using (Setoids)
 
   open import Category.Sub (Setoids c ℓ) using (_∩_; ⋂)
-  open import Cartesian.Sub (Setoids-CartesianCategory c ℓ) hiding (_∩_)
+  open import Cartesian.Sub (Setoids-CartesianCategory c ℓ) as Sub hiding (_∩_)
+  open Sub.SubCart using (SubCartesian)
   import Category.Homomorphisms as H
   open import Misc
 
+  open import Relation.Binary.PropositionalEquality using (_≡_)
   LeftSemimodule-CartOps : CartOps (LeftSemimodule.≈ᴹ-setoid {semiring = R})
   LeftSemimodule-CartOps = record 
     { ⊤ᴵ = Z.leftSemimodule
-    ; ⊤≅ = id≅
+    ; ⊤≡ = refl
     ; _×ᴵ_ = P.leftSemimodule
-    ; ×≅ = id≅
-    }
+    ; ×≡ = refl
+    } where open _≡_
 
   LeftSemimodules-Cartesian : Cartesian (LeftSemimodules R)
   LeftSemimodules-Cartesian = SubCartesian {ops = LeftSemimodule-CartOps} record

@@ -9,9 +9,11 @@ open import Categories.Category.Cartesian.Structure
 
 module Cartesian.Sub {o ℓ e} (CC : CartesianCategory o ℓ e) where
 
-open CartesianCategory CC renaming (U to C)
+open CartesianCategory CC using () renaming (U to C)
+open Category C
 
 open import Data.Product using (_,_)
+open import Relation.Binary.PropositionalEquality using (_≡_)
 
 import Categories.Object.Product C as P
 import Categories.Object.Terminal C as T
@@ -20,20 +22,33 @@ open import Categories.Morphism C using (_≅_)
 import Category.Sub C as SC
 open SC hiding (_⊢_; _∩_; ⋂) public
 
+open import Misc using (≡≅)
+
 record CartOps {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) where
   infixr 2 _×ᴵ_
+  open CartesianCategory CC using (⊤ ; _×_) renaming (terminal to T₀ ; product to P₀)
   field
     ⊤ᴵ : I
-    ⊤≅ : ⊤ ≅ U ⊤ᴵ
+    ⊤≡ : ⊤ ≡ U ⊤ᴵ
     _×ᴵ_ : I → I → I
-    ×≅   : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
+    ×≡   : {a b : I} → U a × U b ≡ U (a ×ᴵ b)
 
-  -- Terminal and products in the base category using the ⊤≅ and ×ᴵ isomorphisms
-  module terminal′      = T.Terminal (T.transport-by-iso terminal ⊤≅         )
-  module product′ {a b} = P.Product  (P.transport-by-iso product (×≅ {a} {b}))
+  -- I'm unsure whether to use equality or isomorphism. Define equality but use
+  -- the weaker isomorphism wherever possible.
+  ⊤≅ : ⊤ ≅ U ⊤ᴵ
+  ⊤≅ = ≡≅ ⊤≡
+  ×≅ : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
+  ×≅ = ≡≅ ×≡
 
--- TODO: Replace ⊤ᴵ and _×ᴵ_ by a terminal and a product. Use terminal′ and
--- product′ to make them.
+  private
+    module terminal      = T.Terminal (T.transport-by-iso T₀ ⊤≅         )
+    module product {a b} = P.Product  (P.transport-by-iso P₀ (×≅ {a} {b}))
+
+  open terminal public
+  open product  public
+
+-- TODO: Replace ⊤ᴵ and _×ᴵ_ by a terminal and a product. I guess from a full
+-- subcategory of C. Use terminal′ and product′ to make them.
 
 private
   variable
@@ -51,30 +66,32 @@ record SubCart {i r} {I : Set i} {U : I → Obj} (ops : CartOps {i = i} {I = I} 
   open SubCat subCat public
   open _≅_
   field
-    R!     : {a : I} → R (from ⊤≅ ∘ ! {U a})
-    Rπ₁    : {a b : I} → R (π₁ ∘ to (×≅ {a} {b}))
-    Rπ₂    : {a b : I} → R (π₂ ∘ to (×≅ {a} {b}))
+    -- Note: the !, π₁, π₂, ⟨_,_⟩ here are from terminal and product, thus
+    -- hiding the isomorphisms.
+    R!     : {a : I} → R (! {U a})
+    Rπ₁    : {a b : I} → R (π₁ {a} {b})
+    Rπ₂    : {a b : I} → R (π₂ {a} {b})
     R⟨_,_⟩ : {a c d : I} {f : U a ⇒ U c} {g : U a ⇒ U d}
-           → R f → R g → R (from (×≅ {c} {d}) ∘ ⟨ f , g ⟩)
+           → R f → R g → R (⟨ f , g ⟩)
 
   SubCartesian : Cartesian SubCategory
   SubCartesian = record
     { terminal = record
         { ⊤ = ⊤ᴵ
         ; ⊤-is-terminal = record
-            { ! = terminal′.! , R!
-            ; !-unique = λ (f , _) → terminal′.!-unique f
+            { ! = ! , R!
+            ; !-unique = λ (f , _) → !-unique f
             }
         }
     ; products = record
-        { product = λ {a b} → let module p′ = product′ {a} {b} in record
+        { product = λ {a b} → record
             { A×B = a ×ᴵ b
-            ; π₁ = p′.π₁ , Rπ₁
-            ; π₂ = p′.π₂ , Rπ₂
-            ; ⟨_,_⟩ = λ {c : I} (f , Rf) (g , Rg) → p′.⟨ f , g ⟩ , R⟨ Rf , Rg ⟩
-            ; project₁ = p′.project₁
-            ; project₂ = p′.project₂
-            ; unique = λ {_ (h , _) (i , _) (j , _)} → p′.unique {_} {h} {i} {j}
+            ; π₁ = π₁ , Rπ₁
+            ; π₂ = π₂ , Rπ₂
+            ; ⟨_,_⟩ = λ {c : I} (f , Rf) (g , Rg) → ⟨ f , g ⟩ , R⟨ Rf , Rg ⟩
+            ; project₁ = project₁
+            ; project₂ = project₂
+            ; unique = λ {_ (h , _) (i , _) (j , _)} → unique {a} {b} {_} {h} {i} {j}
             } }
     }
 
