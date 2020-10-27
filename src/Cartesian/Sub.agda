@@ -40,12 +40,46 @@ record CartOps {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) whe
   ×≅ : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
   ×≅ = ≡≅ ×≡
 
-  private
-    module terminal      = T.Terminal (T.transport-by-iso T₀ ⊤≅         )
-    module product {a b} = P.Product  (P.transport-by-iso P₀ (×≅ {a} {b}))
+  open import Function using (case_of_)
+  
+  open _≡_
+  -- foo₀ : ∀ {a b} → U (a ×ᴵ b) ≡ U (a ×ᴵ b)
+  -- foo₀ = refl
 
-  open terminal public
-  open product  public
+  -- -- Fails with or without K
+  -- foo₁ : ∀ {a b} → U a × U b ≡ U (a ×ᴵ b)
+  -- foo₁ {a} {b} = case ×≡ {a} {b} of λ { refl → refl }
+
+  -- foo₁ : {a b : I} → U a × U b ≡ U (a ×ᴵ b
+  -- foo₁ {a} {b} = bar (×≡ {a} {b})
+  --   where bar : U a × U b ≡ U (a ×ᴵ b) → U a × U b ≡ U (a ×ᴵ b)
+  --         bar refl = refl  )  -- fail
+  --         -- bar x = x
+
+  -- foo : {a b : I} → a ≡ b → a ≡ b  -- okay
+  -- foo refl = refl
+
+  -- foo : {a b : I} → U a × U b ≡ U (a ×ᴵ b) → U a × U b ≡ U (a ×ᴵ b)
+  -- foo {a} {b} refl = ? -- nope
+
+  -- foo : {a b : I} → U a ≡ U b → U a ≡ U b
+  -- foo refl = {!!} -- fails with or without K
+
+  -- foo : {a : I} → U a ≡ U a → U a ≡ U a
+  -- foo refl = {!!} -- needs K
+
+  -- -- This one fails if compiling --without-K and succeeds otherwise.
+  -- foo : {a : I} → U a ≡ U a → U a ≡ U a
+  -- foo refl = {!!} -- nope
+
+
+  -- foo₂ : ∀ {a b} → Carrier (U (a ×ᴵ b)) → Carrier (U a × U b)
+
+  module terminal′      = T.Terminal (T.transport-by-iso T₀ ⊤≅         )
+  module product′ {a b} = P.Product  (P.transport-by-iso P₀ (×≅ {a} {b}))
+
+  -- open terminal′ public
+  -- open product′  public
 
 -- TODO: Replace ⊤ᴵ and _×ᴵ_ by a terminal and a product. I guess from a full
 -- subcategory of C. Use terminal′ and product′ to make them.
@@ -63,6 +97,7 @@ record SubCart {i r} {I : Set i} {U : I → Obj} (ops : CartOps {i = i} {I = I} 
   open CartOps ops public
   field
     subCat : SubCat {r = r} U
+  open terminal′ ; open product′
   open SubCat subCat public
   open _≅_
   field

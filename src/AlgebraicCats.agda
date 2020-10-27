@@ -121,7 +121,7 @@ module _ (R : Semiring r ℓr) where
   open Sub.SubCart using (SubCartesian)
   import Category.Homomorphisms as H
   open import Misc
-
+  
   open import Relation.Binary.PropositionalEquality using (_≡_)
   LeftSemimodule-CartOps : CartOps (LeftSemimodule.≈ᴹ-setoid {semiring = R})
   LeftSemimodule-CartOps = record 
@@ -134,11 +134,11 @@ module _ (R : Semiring r ℓr) where
   LeftSemimodules-Cartesian : Cartesian (LeftSemimodules R)
   LeftSemimodules-Cartesian = SubCartesian {ops = LeftSemimodule-CartOps} record
     { subCat = subCat
-    ; R! = (λ x y → tt) , tt , (λ s x → tt)
-    ; Rπ₁ = λ {a₁ a₂} → let open Setoid (≈ᴹ-setoid a₁) renaming (refl to refl₁) in
-                          (λ _ _ → refl₁) , refl₁ , (λ _ _ → refl₁)
-    ; Rπ₂ = λ {a₁ a₂} → let open Setoid (≈ᴹ-setoid a₂) renaming (refl to refl₂) in
-                          (λ _ _ → refl₂) , refl₂ , (λ _ _ → refl₂)
+    ; R! = (λ _ _ → tt) , tt , (λ _ _ → tt)
+    ; Rπ₁ = λ {a₁ a₂} → let open Setoid (≈ᴹ-setoid a₁) in
+                          (λ _ _ → refl) , refl , (λ _ _ → refl)
+    ; Rπ₂ = λ {a₁ a₂} → let open Setoid (≈ᴹ-setoid a₂) in
+                          (λ _ _ → refl) , refl , (λ _ _ → refl)
     ; R⟨_,_⟩ = λ (_+₁_ , 0₁ , _*₁_) (_+₂_ , 0₂ , _*₂_) →
                  (λ x y → x +₁ y , x +₂ y) , (0₁ , 0₂) , (λ s x → s *₁ x , s *₂ x)
     } where

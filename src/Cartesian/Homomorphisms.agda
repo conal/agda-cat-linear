@@ -46,14 +46,20 @@ open import Function.Base using (case_of_)
 
 module _ (ops : CartOps {i = i} {I = I} U) where
   open CartOps ops
+  -- open cartesian
   record Oper₀ : Set {!!} where
     field
       p : (A : I) → Carrier (U A)
       -- p⊤ : let open ⊤ using (tt)
       --          open Setoid ⊤ using (_≈_) in
       --      p ⊤ᴵ ≈ tt
-      p× : ∀ {A B : I} → case ×≡ {A} {B} of λ { refl≡ →
-                         p (A ×ᴵ B) ≡ (p A , p B) }
+
+      p× : ∀ {A B : I} → p (A ×ᴵ B) ≡ (p A , p B)
+
+      -- p (A ×ᴵ B) : Carrier (U (A ×ᴵ B))
+      --            : Carrier (U A × U B))
+      --            : Carrier (U A) × Carrier (U B)
+
 
       -- ?1 : Carrier (U (A ×ᴵ B))
       -- ×≡ : {a b : I} → U a × U b ≡ U (a ×ᴵ b)
@@ -75,7 +81,7 @@ module _ (ops : CartOps {i = i} {I = I} U) where
     } where subCat = CH.H₀ p₀
             open SubCat subCat
             -- open Category category
-            -- open Cartesian cartesian
+            open Cartesian cartesian
 
     -- -- Note: the !, π₁, π₂, ⟨_,_⟩ here are from terminal and product
     -- R!     : {a : I} → R (! {U a})
