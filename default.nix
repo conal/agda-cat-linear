@@ -41,7 +41,7 @@ pkgs.stdenv.mkDerivation rec {
   phases = [ "unpackPhase" "buildPhase" ];
 
   buildPhase = ''
-    find . -name '*.agda' -execdir time agda --compile {} \;
+    find . -name '*.agda' -execdir time agda --compile --no-main {} \;
   '';
 
   env = pkgs.buildEnv { name = name; paths = buildInputs; };
