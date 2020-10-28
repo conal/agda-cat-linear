@@ -38,10 +38,13 @@ pkgs.stdenv.mkDerivation rec {
     pkgs.time
   ];
 
-  phases = [ "unpackPhase" "buildPhase" ];
-
   buildPhase = ''
     find . -name '*.agda' -execdir time agda --compile --no-main {} \;
+  '';
+
+  installPhase = ''
+    mkdir -p $out
+    cp -pR src $out
   '';
 
   env = pkgs.buildEnv { name = name; paths = buildInputs; };
