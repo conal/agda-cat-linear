@@ -106,6 +106,7 @@ module _ where
 
 module _ (R : Semiring r ℓr) where
   open Semiring R using (Carrier)
+  -- open import Function using (const)
   open import Data.Unit.Polymorphic
   open import Data.Product using (_,_)
   open import Relation.Binary.Bundles using (Setoid)
@@ -122,8 +123,11 @@ module _ (R : Semiring r ℓr) where
   import Category.Homomorphisms as H
   open import Misc
   
+  setoid = LeftSemimodule.≈ᴹ-setoid {semiring = R}
+  lsm = LeftSemimodules R
+
   open import Relation.Binary.PropositionalEquality using (_≡_)
-  LeftSemimodule-CartOps : CartOps (LeftSemimodule.≈ᴹ-setoid {semiring = R})
+  LeftSemimodule-CartOps : Ops setoid
   LeftSemimodule-CartOps = record 
     { ⊤ᴵ = Z.leftSemimodule
     ; ⊤≡ = refl
@@ -131,7 +135,7 @@ module _ (R : Semiring r ℓr) where
     ; ×≡ = refl
     } where open _≡_
 
-  LeftSemimodules-Cartesian : Cartesian (LeftSemimodules R)
+  LeftSemimodules-Cartesian : Cartesian lsm
   LeftSemimodules-Cartesian = SubCartesian {ops = LeftSemimodule-CartOps} record
     { subCat = subCat
     ; R! = (λ _ _ → tt) , tt , (λ _ _ → tt)
@@ -144,7 +148,14 @@ module _ (R : Semiring r ℓr) where
     } where
         open LeftSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
         subCat = H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_
+
+  -- LeftSemimodule-CocartOps : Ops setoid
+  -- LeftSemimodule-CocartOps = record
+  --   { ⊤ᴵ = {!!}
+  --   ; ⊤≡ = {!!}
+  --   ; _×ᴵ_ = {!!}
+  --   ; ×≡ = {!!}
+  --   }
         
   -- TODO: eliminate the redundant SubCat construction and associated imports.
   -- Return to the style of Old.Algebraic2
-
