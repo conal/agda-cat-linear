@@ -34,9 +34,7 @@ pkgs.stdenv.mkDerivation rec {
           }))
        ]))
     pkgs.findutils
-    pkgs.coreutils
     pkgs.parallel
-    pkgs.time
   ];
 
   buildPhase = ''
@@ -48,7 +46,7 @@ pkgs.stdenv.mkDerivation rec {
     find src -name Old -prune -o                      \
              -name '*.agda' -type f -print0           \
         | parallel --will-cite -0 -j $NIX_BUILD_CORES \
-              "cd {//} && time agda --no-main {/}"
+              "cd {//} && agda --no-main {/}"
   '';
 
   installPhase = ''
