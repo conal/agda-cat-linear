@@ -38,10 +38,17 @@ pkgs.stdenv.mkDerivation rec {
     pkgs.time
   ];
 
-  phases = [ "unpackPhase" "buildPhase" ];
-
   buildPhase = ''
-    find . -name '*.agda' -execdir time agda --compile --no-main {} \;
+    # jww (2020-10-28): We cannot use --compile at the moment, because some
+    # files (such as Biproduct.agda) take almost four hours to compile.
+
+    find . -name Old -prune -o \
+           -name '*.agda' -type f -execdir time agda --no-main {} \;
+  '';
+
+  installPhase = ''
+    mkdir -p $out
+    cp -pR src $out
   '';
 
   env = pkgs.buildEnv { name = name; paths = buildInputs; };
