@@ -19,7 +19,20 @@ pkgs.stdenv.mkDerivation rec {
   src = ./.;
 
   buildInputs = [
-    (agda.withPackages (p: [p.standard-library p.agda-categories]))
+    (agda.withPackages (p:
+       let standard-library =
+             (p.standard-library.overrideAttrs (attrs: {
+               version = "master";
+               src = ../agda-stdlib;
+              })); in
+       [ standard-library
+         ((p.agda-categories.override { inherit standard-library; })
+                            .overrideAttrs (attrs: {
+            # version = "0.1.3.1";
+            version = "master";
+            src = ../agda-categories;
+          }))
+       ]))
   ];
 
   buildPhase = ''
