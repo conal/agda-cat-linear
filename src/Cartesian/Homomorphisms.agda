@@ -44,17 +44,20 @@ open import Relation.Binary.PropositionalEquality using (_≡_) renaming (refl t
 open import Data.Product using (_,_)
 open import Function.Base using (case_of_)
 
+{-
+
 module _ (ops : CartOps {i = i} {I = I} U) where
   open CartOps ops
-  -- open cartesian
-  record Oper₀ : Set {!!} where
+  open Cartesian cartesian
+  record Oper₀ : Set _ where
     field
       p : (A : I) → Carrier (U A)
-      -- p⊤ : let open ⊤ using (tt)
-      --          open Setoid ⊤ using (_≈_) in
-      --      p ⊤ᴵ ≈ tt
 
-      p× : ∀ {A B : I} → p (A ×ᴵ B) ≡ (p A , p B)
+      p⊤ : let -- open ⊤ using (tt)
+               open Setoid ⊤ using (_≈_) in
+           {!!} -- p ⊤ᴵ ≈ tt
+
+      -- p× : ∀ {A B : I} → p (A ×ᴵ B) ≡ (p A , p B)
 
       -- p (A ×ᴵ B) : Carrier (U (A ×ᴵ B))
       --            : Carrier (U A × U B))
@@ -71,7 +74,7 @@ module _ (ops : CartOps {i = i} {I = I} U) where
     { subCat = subCat
     ; R! = λ {A : I} → let ∙ = p₀ A ; ⋆ = p₀ ⊤ᴵ
                            open Setoid (U A) using (refl) in
-         !-unique {U A} (const ⋆) (refl {∙})
+           ? -- !-unique {U A} (const ⋆) (refl {∙})
     ; Rπ₁ = λ {A B : I} → let ∙ = p₀ (A ×ᴵ B) ; ⋆ = p₀ A in
                             begin⟨ U A ⟩
                               π₁ ⟨$⟩ ∙ ≈⟨ {!!} ⟩
@@ -90,8 +93,6 @@ module _ (ops : CartOps {i = i} {I = I} U) where
     -- R⟨_,_⟩ : {a c d : I} {f : U a ⇒ U c} {g : U a ⇒ U d}
     --        → R f → R g → R (⟨ f , g ⟩)
 
-
-  {-
 
   -- Unary homomorphism, given a unary operation on its carrier.
   H₁ : ((A : I) → Op₁ (Carrier (U A))) → SubCart U

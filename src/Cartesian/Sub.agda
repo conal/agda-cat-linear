@@ -24,7 +24,7 @@ open SC hiding (_⊢_; _∩_; ⋂) public
 
 open import Misc using (≡≅)
 
-record CartOps {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) where
+record Ops {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) where
   infixr 2 _×ᴵ_
   open CartesianCategory CC using (⊤ ; _×_) renaming (terminal to T₀ ; product to P₀)
   field
@@ -39,41 +39,6 @@ record CartOps {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) whe
   ⊤≅ = ≡≅ ⊤≡
   ×≅ : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
   ×≅ = ≡≅ ×≡
-
-  open import Function using (case_of_)
-  
-  open _≡_
-  -- foo₀ : ∀ {a b} → U (a ×ᴵ b) ≡ U (a ×ᴵ b)
-  -- foo₀ = refl
-
-  -- -- Fails with or without K
-  -- foo₁ : ∀ {a b} → U a × U b ≡ U (a ×ᴵ b)
-  -- foo₁ {a} {b} = case ×≡ {a} {b} of λ { refl → refl }
-
-  -- foo₁ : {a b : I} → U a × U b ≡ U (a ×ᴵ b
-  -- foo₁ {a} {b} = bar (×≡ {a} {b})
-  --   where bar : U a × U b ≡ U (a ×ᴵ b) → U a × U b ≡ U (a ×ᴵ b)
-  --         bar refl = refl  )  -- fail
-  --         -- bar x = x
-
-  -- foo : {a b : I} → a ≡ b → a ≡ b  -- okay
-  -- foo refl = refl
-
-  -- foo : {a b : I} → U a × U b ≡ U (a ×ᴵ b) → U a × U b ≡ U (a ×ᴵ b)
-  -- foo {a} {b} refl = ? -- nope
-
-  -- foo : {a b : I} → U a ≡ U b → U a ≡ U b
-  -- foo refl = {!!} -- fails with or without K
-
-  -- foo : {a : I} → U a ≡ U a → U a ≡ U a
-  -- foo refl = {!!} -- needs K
-
-  -- -- This one fails if compiling --without-K and succeeds otherwise.
-  -- foo : {a : I} → U a ≡ U a → U a ≡ U a
-  -- foo refl = {!!} -- nope
-
-
-  -- foo₂ : ∀ {a b} → Carrier (U (a ×ᴵ b)) → Carrier (U a × U b)
 
   module terminal′      = T.Terminal (T.transport-by-iso T₀ ⊤≅         )
   module product′ {a b} = P.Product  (P.transport-by-iso P₀ (×≅ {a} {b}))
@@ -90,11 +55,11 @@ private
     I : Set i
     J : Set j
     U : I → Obj
-    ops : CartOps U
+    ops : Ops U
 
-record SubCart {i r} {I : Set i} {U : I → Obj} (ops : CartOps {i = i} {I = I} U)
+record SubCart {i r} {I : Set i} {U : I → Obj} (ops : Ops {i = i} {I = I} U)
        : Set (ℓ ⊔ i ⊔ o ⊔ suc r) where
-  open CartOps ops public
+  open Ops ops public
   field
     subCat : SubCat {r = r} U
   open terminal′ ; open product′
@@ -169,23 +134,23 @@ syntax ⋂ (λ j → P) = ⋂[ j ] P
 {-
 -- _⊢_ : (J→I : J → I) → SubCat {r = r} {I = I} U → SubCat {r = r} {I = J} (U ∘′ J→I)
 
-record IsCartMorphism (N : CartOps {j} {J} V) (ops : CartOps {i} {I} U) 
+record IsCartMorphism (N : Ops {j} {J} V) (ops : Ops {i} {I} U) 
                       (F₀ : J → I) : Set (j ⊔ i) where
   private
-    module M = CartOps M
-    module N = CartOps N
+    module M = Ops M
+    module N = Ops N
   field
     F⊤ : M.⊤ᴵ ≡ F₀ (N.⊤ᴵ)
     F× : ∀ {a b : J} → (F₀ a M.×ᴵ F₀ b) ≡ F₀ (a N.×ᴵ b)
 
-record CartMorphism (N : CartOps {j} {J} V) (M : CartOps {i} {I} U) : Set (j ⊔ i) where
+record CartMorphism (N : Ops {j} {J} V) (M : Ops {i} {I} U) : Set (j ⊔ i) where
   field
     F₀ : J → I
     isCartMorphism : IsCartMorphism N M F₀
 
   open IsCartMorphism isCartMorphism public
 
--- record CartOps {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) where
+-- record Ops {i} {I : Set i} (U : I → Obj) : Set (o ⊔ ℓ ⊔ e ⊔ i) where
 --   infixr 2 _×ᴵ_
 --   field
 --     ⊤ᴵ : I
@@ -194,14 +159,14 @@ record CartMorphism (N : CartOps {j} {J} V) (M : CartOps {i} {I} U) : Set (j ⊔
 --     ×≅   : {a b : I} → U a × U b ≅ U (a ×ᴵ b)
 
 -- mapOps : ∀ {i j} {I : Set i} {J : Set j} {U : I → Obj}
---        → (F : CartMorphism U → CartOps {j} {J} (U ∘′ J→I)
+--        → (F : CartMorphism U → Ops {j} {J} (U ∘′ J→I)
 -- mapOps J→I ops = record { ⊤ᴵ = {!!} ; ⊤≅ = {!!} ; _×ᴵ_ = {!!} ; ×≅ = {!!} }
 
 -- infixr 9 _⊢_
-map : ∀ {i j} {I : Set i} {J : Set j} {U : I → Obj} {M : CartOps U}
+map : ∀ {i j} {I : Set i} {J : Set j} {U : I → Obj} {M : Ops U}
         (F₀ : J → I) 
       → let V = U ∘′ F₀ in
-        {N : CartOps V}
+        {N : Ops V}
         (CM : IsCartMorphism N M F₀)
     → SubCart {r = r} {I = I} {U = U} M
     → SubCart {r = r} {I = J} {U = V} N
@@ -220,9 +185,9 @@ map {i = i} {j} {I} {J} {U} {M} F₀ {N} CM subCart = record
   } where open SubCart subCart
           open IsCartMorphism CM
           open _≅_
-          -- open CartOps
+          -- open Ops
           -- open _≡_
-          -- open CartOps (F M)
+          -- open Ops (F M)
 
 -- Goal: R (from (⊤≅ (F M)) ∘ !)
 
@@ -237,9 +202,9 @@ map {i = i} {j} {I} {J} {U} {M} F₀ {N} CM subCart = record
 
 
 {-
-Goal: SC.SubCat.R (subCat subCart) (from (CartOps.⊤≅ (F M)) ∘ !)
+Goal: SC.SubCat.R (subCat subCart) (from (Ops.⊤≅ (F M)) ∘ !)
 
-Goal: R (from (CartOps.⊤≅ (F M)) ∘ !)
+Goal: R (from (Ops.⊤≅ (F M)) ∘ !)
 
 ! : 
 
