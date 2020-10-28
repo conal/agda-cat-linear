@@ -23,27 +23,32 @@ pkgs.stdenv.mkDerivation rec {
        let standard-library =
              (p.standard-library.overrideAttrs (attrs: {
                version = "master";
-               src = ../agda-stdlib;
+               src = vendor/agda-stdlib;
               })); in
        [ standard-library
          ((p.agda-categories.override { inherit standard-library; })
                             .overrideAttrs (attrs: {
             # version = "0.1.3.1";
             version = "master";
-            src = ../agda-categories;
+            src = vendor/agda-categories;
           }))
        ]))
     pkgs.findutils
     pkgs.coreutils
+    pkgs.parallel
     pkgs.time
   ];
 
   buildPhase = ''
+    set -e # fail if any file fails to typecheck
+
     # jww (2020-10-28): We cannot use --compile at the moment, because some
     # files (such as Biproduct.agda) take almost four hours to compile.
 
-    find . -name Old -prune -o \
-           -name '*.agda' -type f -execdir time agda --no-main {} \;
+    find src -name Old -prune -o                      \
+             -name '*.agda' -type f -print0           \
+        | parallel --will-cite -0 -j $NIX_BUILD_CORES \
+              "cd {//} && time agda --no-main {/}"
   '';
 
   installPhase = ''

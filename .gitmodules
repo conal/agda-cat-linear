@@ -1,0 +1,6 @@
+[submodule "vendor/agda-stdlib"]
+	path = vendor/agda-stdlib
+	url = git@github.com:conal/agda-stdlib
+[submodule "vendor/agda-categories"]
+	path = vendor/agda-categories
+	url = git@github.com:conal/agda-categories
