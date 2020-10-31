@@ -149,13 +149,121 @@ module _ (R : Semiring r ℓr) where
         open LeftSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
         subCat = H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_
 
-  -- LeftSemimodule-CocartOps : Ops setoid
-  -- LeftSemimodule-CocartOps = record
-  --   { ⊤ᴵ = {!!}
-  --   ; ⊤≡ = {!!}
-  --   ; _×ᴵ_ = {!!}
-  --   ; ×≡ = {!!}
-  --   }
+  -- How to tackle Cocartesian, which is defined via Cartesian & op?
+  -- Start with a manual definition.
+
+  open import Categories.Category.Cocartesian 
+  open import Categories.Object.Initial
+
+  open import Function using (case_of_)
+  open import Function.Equality
+  open import Relation.Binary.Reasoning.MultiSetoid
+  LeftSemimodules-Cocartesian : Cocartesian lsm
+  LeftSemimodules-Cocartesian = record
+    { initial = record
+        { ⊥ = Z.leftSemimodule
+        ; ⊥-is-initial = record
+           { ! = λ {A} → let open LeftSemimodule A
+                             open Monoid +ᴹ-monoid hiding (refl;sym)
+                             open Setoid ≈ᴹ-setoid
+                         in
+                   const 0ᴹ
+                 , (λ x y → sym (identityˡ 0ᴹ)) -- sym!
+                 , refl                         -- sym!
+                 , (λ s x → sym (*ₗ-zeroʳ s))   -- sym!
+
+           ; !-unique = λ {A} F@(f′ , _ , f0≈0 , _) {x y} → λ x≈y →
+                         let open LeftSemimodule A
+                             open Π f′ renaming (_⟨$⟩_ to f)
+                             open Setoid ≈ᴹ-setoid
+                         in
+                           sym f0≈0             -- sym!
+           }
+        }
+    ; coproducts = record
+        { coproduct = λ {A B} → let A+B = P.leftSemimodule A B
+                                    module A   = LeftSemimodule A
+                                    module   B = LeftSemimodule   B
+                                    module A+B = LeftSemimodule A+B
+                                    A+B-setoid = LeftSemimodule.≈ᴹ-setoid A+B
+                                in record
+            { A+B = A+B
+            ; i₁ = record { _⟨$⟩_ = (λ x → x , B.0ᴹ)
+                          ; cong = _, Setoid.refl B.≈ᴹ-setoid
+                          }
+                 , let open Monoid B.+ᴹ-monoid in
+                   -- (λ x y → Setoid.refl A.≈ᴹ-setoid , sym (identityˡ B.0ᴹ)) -- sym!
+                      (λ x y → begin⟨ A+B.≈ᴹ-setoid ⟩
+                                 (x A.+ᴹ y , B.0ᴹ) ≈⟨ Setoid.refl A.≈ᴹ-setoid , sym (identityˡ B.0ᴹ) ⟩  -- sym!
+                                 (x A.+ᴹ y , B.0ᴹ B.+ᴹ B.0ᴹ) ∎ )
+                    , Setoid.refl A+B.≈ᴹ-setoid
+                    , -- (λ s x → Setoid.refl A.≈ᴹ-setoid , sym (B.*ₗ-zeroʳ s))  -- sym!
+                      (λ s x → begin⟨ A+B.≈ᴹ-setoid ⟩
+                                 (s A.*ₗ x , B.0ᴹ) ≈⟨ Setoid.refl A.≈ᴹ-setoid , sym (B.*ₗ-zeroʳ s) ⟩  -- sym!
+                                 (s A.*ₗ x , s B.*ₗ B.0ᴹ) ∎ )
+            ; i₂ = record { _⟨$⟩_ = (λ x → A.0ᴹ , x)
+                          ; cong = Setoid.refl A.≈ᴹ-setoid ,_
+                          }
+                 , let open Monoid A.+ᴹ-monoid in
+                   -- (λ x y → sym (identityˡ A.0ᴹ) , Setoid.refl B.≈ᴹ-setoid)  -- sym!
+                      (λ x y → begin⟨ A+B.≈ᴹ-setoid ⟩
+                                 (A.0ᴹ , x B.+ᴹ y) ≈⟨ sym (identityˡ A.0ᴹ) , Setoid.refl B.≈ᴹ-setoid ⟩  -- sym!
+                                 (A.0ᴹ A.+ᴹ A.0ᴹ , x B.+ᴹ y) ∎ )
+                    , Setoid.refl A+B.≈ᴹ-setoid
+                    , -- (λ s x → sym (A.*ₗ-zeroʳ s) , Setoid.refl B.≈ᴹ-setoid)  -- sym!
+                      (λ s x → begin⟨ A+B.≈ᴹ-setoid ⟩
+                                 (A.0ᴹ , s B.*ₗ x) ≈⟨ sym (A.*ₗ-zeroʳ s) , Setoid.refl B.≈ᴹ-setoid ⟩  -- sym!
+                                 (s A.*ₗ A.0ᴹ , s B.*ₗ x) ∎ )
+            ; [_,_] = λ {C} (f′ , f+ , f0 , f*) (g′ , g+ , g0 , g*) →
+                let open Π f′ using () renaming (_⟨$⟩_ to f ; cong to f-cong)
+                    open Π g′ using () renaming (_⟨$⟩_ to g ; cong to g-cong)
+                    module C = LeftSemimodule C in
+                record
+                    { _⟨$⟩_ = λ (x , y) → f x C.+ᴹ g y
+                    ; cong = λ {(x₁ , y₁) (x₂ , y₂)} (x₁≈x₂ , y₁≈y₂) →
+                        C.+ᴹ-cong (f-cong x₁≈x₂) (g-cong y₁≈y₂)
+                        -- begin⟨ C.≈ᴹ-setoid ⟩
+                        --   f x₁ C.+ᴹ g y₁ ≈⟨ C.+ᴹ-cong (f-cong x₁≈x₂) (g-cong y₁≈y₂) ⟩
+                        --   f x₂ C.+ᴹ g y₂ ∎
+                    }
+                  , (λ (x₁ , y₁) (x₂ , y₂) →
+                       -- Is this proof done somewhere else?
+                       -- I'd expect to find it in Algebra.Properties.Semigroup.
+                       begin⟨ C.≈ᴹ-setoid ⟩
+                         f (x₁ A.+ᴹ x₂) C.+ᴹ g (y₁ B.+ᴹ y₂)
+                           ≈⟨ C.+ᴹ-cong (f+ x₁ x₂) (g+ y₁ y₂) ⟩
+                         (f x₁ C.+ᴹ f x₂) C.+ᴹ (g y₁ C.+ᴹ g y₂)
+                           ≈˘⟨ C.+ᴹ-assoc (f x₁ C.+ᴹ f x₂) (g y₁) (g y₂) ⟩
+                         ((f x₁ C.+ᴹ f x₂) C.+ᴹ g y₁) C.+ᴹ g y₂
+                           ≈⟨ C.+ᴹ-congʳ (C.+ᴹ-assoc (f x₁) (f x₂) (g y₁)) ⟩
+                         (f x₁ C.+ᴹ (f x₂ C.+ᴹ g y₁)) C.+ᴹ g y₂
+                           ≈⟨ C.+ᴹ-congʳ (C.+ᴹ-congˡ (C.+ᴹ-comm (f x₂) (g y₁))) ⟩
+                         (f x₁ C.+ᴹ (g y₁ C.+ᴹ f x₂)) C.+ᴹ g y₂
+                           ≈⟨ C.+ᴹ-congʳ (C.≈ᴹ-sym (C.+ᴹ-assoc (f x₁) (g y₁) (f x₂))) ⟩   -- sym!
+                         ((f x₁ C.+ᴹ g y₁) C.+ᴹ f x₂) C.+ᴹ g y₂
+                           ≈⟨ C.+ᴹ-assoc (f x₁ C.+ᴹ g y₁) (f x₂) (g y₂) ⟩
+                         (f x₁ C.+ᴹ g y₁) C.+ᴹ (f x₂ C.+ᴹ g y₂)
+                           ∎
+                       )
+                  , (begin⟨ C.≈ᴹ-setoid ⟩
+                      f A.0ᴹ C.+ᴹ g B.0ᴹ ≈⟨ C.+ᴹ-cong f0 g0 ⟩
+                      C.0ᴹ C.+ᴹ C.0ᴹ     ≈⟨ C.+ᴹ-identityʳ C.0ᴹ ⟩
+                      C.0ᴹ               ∎)
+                  , (λ s (x , y) →
+                       begin⟨ C.≈ᴹ-setoid ⟩
+                         f (s A.*ₗ x) C.+ᴹ g (s B.*ₗ y)
+                           ≈⟨ C.+ᴹ-cong (f* s x) (g* s y) ⟩
+                         s C.*ₗ f x C.+ᴹ s C.*ₗ g y
+                           ≈⟨ C.≈ᴹ-sym (C.*ₗ-distribˡ s (f x) (g y)) ⟩
+                         s C.*ₗ (f x C.+ᴹ g y)          ∎
+                         )
+            ; inject₁ = {!!}
+            ; inject₂ = {!!}
+            ; unique = {!!}
+            } }
+    }
+
+
+-- TODO: eliminate the redundant SubCat construction and associated imports.
+-- Return to the style of Old.Algebraic2
         
-  -- TODO: eliminate the redundant SubCat construction and associated imports.
-  -- Return to the style of Old.Algebraic2
