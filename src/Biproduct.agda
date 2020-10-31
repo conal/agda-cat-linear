@@ -64,87 +64,83 @@ record PreadditiveCartesian : Set (suc (o ⊔ ℓ ⊔ e)) where
   open Cartesian cartesian public
   open Preadditive preadditive public
   field
-    unique-𝟎 : ∀ {f : ⊤ ⇒ A} → f ≈ 𝟎
+    unique-𝟎 : ∀ (f : ⊤ ⇒ A) → 𝟎 ≈ f
     ⟨⟩⊹⟨⟩ : ∀ {f h : A ⇒ B} {g i : A ⇒ C} → ⟨ f , g ⟩ ⊹ ⟨ h , i ⟩ ≈ ⟨ f ⊹ h , g ⊹ i ⟩
 
--- Cocartesian via Cartesian + Preadditive
-Preadditive⇒Cocartesian : Cartesian → Preadditive → Cocartesian
-Preadditive⇒Cocartesian cartesian preadditive = record
-  { initial = record
-      { ⊥ = ⊤
-      ; ⊥-is-initial = record
-         { ! = 𝟎
-         ; !-unique = {!!}  -- ???
-         }
-      }
-  ; coproducts = record
-     { coproduct = λ {A B} → record
-         { A+B = A × B
-         ; i₁ = ⟨ id , 𝟎 ⟩
-         ; i₂ = ⟨ 𝟎 , id ⟩
-         ; [_,_] = λ {C} f g → f ∘ π₁ ⊹ g ∘ π₂
-         ; inject₁ = λ {C} {f : A ⇒ C} {g : B ⇒ C} →
-             begin
-               (f ∘ π₁ ⊹ g ∘ π₂) ∘ ⟨ id , 𝟎 ⟩
-                 ≈⟨ distrib-⊹ʳ ⟩
-               (f ∘ π₁) ∘ ⟨ id , 𝟎 ⟩ ⊹ (g ∘ π₂) ∘ ⟨ id , 𝟎 ⟩
-                 ≈⟨ ⊹-resp-≈ assoc assoc ⟩
-               f ∘ π₁ ∘ ⟨ id , 𝟎 ⟩ ⊹ g ∘ (π₂ ∘ ⟨ id , 𝟎 ⟩)
-                 ≈⟨ ⊹-resp-≈ (∘-resp-≈ʳ project₁) (∘-resp-≈ʳ project₂) ⟩
-               f ∘ id ⊹ g ∘ 𝟎
-                 ≈⟨ ⊹-resp-≈ identityʳ distrib-𝟎ˡ ⟩
-               f ⊹ 𝟎
-                 ≈⟨ ⊹-identityʳ ⟩
-               f
-                 ∎
-         ; inject₂ = λ {C} {f : A ⇒ C} {g : B ⇒ C} →
-             begin
-               (f ∘ π₁ ⊹ g ∘ π₂) ∘ ⟨ 𝟎 , id ⟩
-                 ≈⟨ distrib-⊹ʳ ⟩
-               (f ∘ π₁) ∘ ⟨ 𝟎 , id ⟩ ⊹ (g ∘ π₂) ∘ ⟨ 𝟎 , id ⟩
-                 ≈⟨ ⊹-resp-≈ assoc assoc ⟩
-               f ∘ π₁ ∘ ⟨ 𝟎 , id ⟩ ⊹ g ∘ (π₂ ∘ ⟨ 𝟎 , id ⟩)
-                 ≈⟨ ⊹-resp-≈ (∘-resp-≈ʳ project₁) (∘-resp-≈ʳ project₂) ⟩
-               f ∘ 𝟎 ⊹ g ∘ id
-                 ≈⟨ ⊹-resp-≈ distrib-𝟎ˡ identityʳ ⟩
-               𝟎 ⊹ g
-                 ≈⟨ ⊹-identityˡ ⟩
-               g
-                 ∎
-         ; unique = λ {C} {h : A × B ⇒ C} {f : A ⇒ C} {g : B ⇒ C}
-                      (eq₁ : h ∘ ⟨ id , 𝟎 ⟩ ≈ f) (eq₂ : h ∘ ⟨ 𝟎 , id ⟩ ≈ g) → 
-             begin
-               f ∘ π₁ ⊹ g ∘ π₂
-                 ≈⟨ ⊹-resp-≈ (∘-resp-≈ˡ (sym eq₁)) (∘-resp-≈ˡ (sym eq₂)) ⟩
-               (h ∘ ⟨ id , 𝟎 ⟩) ∘ π₁ ⊹ (h ∘ ⟨ 𝟎 , id ⟩) ∘ π₂
-                 ≈⟨ ⊹-resp-≈ assoc assoc ⟩
-               h ∘ (⟨ id , 𝟎 ⟩ ∘ π₁) ⊹ h ∘ (⟨ 𝟎 , id ⟩ ∘ π₂)
-                 ≈˘⟨ distrib-⊹ˡ ⟩
-               h ∘ ( ⟨ id , 𝟎 ⟩ ∘ π₁ ⊹ ⟨ 𝟎 , id ⟩ ∘ π₂)
-                 ≈⟨ ∘-resp-≈ʳ (⊹-resp-≈ ⟨⟩∘ ⟨⟩∘) ⟩
-               h ∘ (⟨ id ∘ π₁ , 𝟎 ∘ π₁ ⟩ ⊹ ⟨ 𝟎 ∘ π₂ , id ∘ π₂ ⟩)
-                 ≈⟨ ∘-resp-≈ʳ (⊹-resp-≈ (⟨⟩-cong₂ identityˡ distrib-𝟎ʳ)
-                                        (⟨⟩-cong₂ distrib-𝟎ʳ identityˡ)) ⟩
-               h ∘ (⟨ π₁ , 𝟎 ⟩ ⊹ ⟨ 𝟎 , π₂ ⟩)
-                 ≈⟨ ∘-resp-≈ʳ {!!} ⟩
-               h ∘ ⟨ π₁ ⊹ 𝟎 , 𝟎 ⊹ π₂ ⟩
-                 ≈⟨ ∘-resp-≈ʳ (⟨⟩-cong₂ ⊹-identityʳ ⊹-identityˡ) ⟩
-               h ∘ ⟨ π₁ , π₂ ⟩
-                 ≈⟨ ∘-resp-≈ʳ η ⟩
-               h ∘ id
-                 ≈⟨ identityʳ ⟩
-               h
-                 ∎
-
-         } }
-  } where open Cartesian cartesian
-          open Preadditive preadditive
-          open HomReasoning
+  cocartesian : Cocartesian
+  cocartesian = record
+    { initial = record
+        { ⊥ = ⊤
+        ; ⊥-is-initial = record
+           { ! = 𝟎
+           ; !-unique = unique-𝟎 
+           }
+        }
+    ; coproducts = record
+       { coproduct = λ {A B} → record
+           { A+B = A × B
+           ; i₁ = ⟨ id , 𝟎 ⟩
+           ; i₂ = ⟨ 𝟎 , id ⟩
+           ; [_,_] = λ {C} f g → f ∘ π₁ ⊹ g ∘ π₂
+           ; inject₁ = λ {C} {f : A ⇒ C} {g : B ⇒ C} →
+               begin
+                 (f ∘ π₁ ⊹ g ∘ π₂) ∘ ⟨ id , 𝟎 ⟩
+                   ≈⟨ distrib-⊹ʳ ⟩
+                 (f ∘ π₁) ∘ ⟨ id , 𝟎 ⟩ ⊹ (g ∘ π₂) ∘ ⟨ id , 𝟎 ⟩
+                   ≈⟨ ⊹-resp-≈ assoc assoc ⟩
+                 f ∘ π₁ ∘ ⟨ id , 𝟎 ⟩ ⊹ g ∘ (π₂ ∘ ⟨ id , 𝟎 ⟩)
+                   ≈⟨ ⊹-resp-≈ (∘-resp-≈ʳ project₁) (∘-resp-≈ʳ project₂) ⟩
+                 f ∘ id ⊹ g ∘ 𝟎
+                   ≈⟨ ⊹-resp-≈ identityʳ distrib-𝟎ˡ ⟩
+                 f ⊹ 𝟎
+                   ≈⟨ ⊹-identityʳ ⟩
+                 f
+                   ∎
+           ; inject₂ = λ {C} {f : A ⇒ C} {g : B ⇒ C} →
+               begin
+                 (f ∘ π₁ ⊹ g ∘ π₂) ∘ ⟨ 𝟎 , id ⟩
+                   ≈⟨ distrib-⊹ʳ ⟩
+                 (f ∘ π₁) ∘ ⟨ 𝟎 , id ⟩ ⊹ (g ∘ π₂) ∘ ⟨ 𝟎 , id ⟩
+                   ≈⟨ ⊹-resp-≈ assoc assoc ⟩
+                 f ∘ π₁ ∘ ⟨ 𝟎 , id ⟩ ⊹ g ∘ (π₂ ∘ ⟨ 𝟎 , id ⟩)
+                   ≈⟨ ⊹-resp-≈ (∘-resp-≈ʳ project₁) (∘-resp-≈ʳ project₂) ⟩
+                 f ∘ 𝟎 ⊹ g ∘ id
+                   ≈⟨ ⊹-resp-≈ distrib-𝟎ˡ identityʳ ⟩
+                 𝟎 ⊹ g
+                   ≈⟨ ⊹-identityˡ ⟩
+                 g
+                   ∎
+           ; unique = λ {C} {h : A × B ⇒ C} {f : A ⇒ C} {g : B ⇒ C}
+                        (eq₁ : h ∘ ⟨ id , 𝟎 ⟩ ≈ f) (eq₂ : h ∘ ⟨ 𝟎 , id ⟩ ≈ g) → 
+               begin
+                 f ∘ π₁ ⊹ g ∘ π₂
+                   ≈⟨ ⊹-resp-≈ (∘-resp-≈ˡ (sym eq₁)) (∘-resp-≈ˡ (sym eq₂)) ⟩
+                 (h ∘ ⟨ id , 𝟎 ⟩) ∘ π₁ ⊹ (h ∘ ⟨ 𝟎 , id ⟩) ∘ π₂
+                   ≈⟨ ⊹-resp-≈ assoc assoc ⟩
+                 h ∘ (⟨ id , 𝟎 ⟩ ∘ π₁) ⊹ h ∘ (⟨ 𝟎 , id ⟩ ∘ π₂)
+                   ≈˘⟨ distrib-⊹ˡ ⟩
+                 h ∘ ( ⟨ id , 𝟎 ⟩ ∘ π₁ ⊹ ⟨ 𝟎 , id ⟩ ∘ π₂)
+                   ≈⟨ ∘-resp-≈ʳ (⊹-resp-≈ ⟨⟩∘ ⟨⟩∘) ⟩
+                 h ∘ (⟨ id ∘ π₁ , 𝟎 ∘ π₁ ⟩ ⊹ ⟨ 𝟎 ∘ π₂ , id ∘ π₂ ⟩)
+                   ≈⟨ ∘-resp-≈ʳ (⊹-resp-≈ (⟨⟩-cong₂ identityˡ distrib-𝟎ʳ)
+                                          (⟨⟩-cong₂ distrib-𝟎ʳ identityˡ)) ⟩
+                 h ∘ (⟨ π₁ , 𝟎 ⟩ ⊹ ⟨ 𝟎 , π₂ ⟩)
+                   ≈⟨ ∘-resp-≈ʳ ⟨⟩⊹⟨⟩ ⟩
+                 h ∘ ⟨ π₁ ⊹ 𝟎 , 𝟎 ⊹ π₂ ⟩
+                   ≈⟨ ∘-resp-≈ʳ (⟨⟩-cong₂ ⊹-identityʳ ⊹-identityˡ) ⟩
+                 h ∘ ⟨ π₁ , π₂ ⟩
+                   ≈⟨ ∘-resp-≈ʳ η ⟩
+                 h ∘ id
+                   ≈⟨ identityʳ ⟩
+                 h
+                   ∎
+           } }
+    } where open HomReasoning
 
 
-    -- inject₁ : [ f , g ] ∘ i₁ ≈ f
-    -- inject₂ : [ f , g ] ∘ i₂ ≈ g
-    -- unique   : h ∘ i₁ ≈ f → h ∘ i₂ ≈ g → [ f , g ] ≈ h
+      -- inject₁ : [ f , g ] ∘ i₁ ≈ f
+      -- inject₂ : [ f , g ] ∘ i₂ ≈ g
+      -- unique   : h ∘ i₁ ≈ f → h ∘ i₂ ≈ g → [ f , g ] ≈ h
 
 
 -- A bicartesian category is cartesian and cocartesian
