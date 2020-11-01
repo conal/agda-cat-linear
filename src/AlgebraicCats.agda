@@ -158,111 +158,149 @@ module _ (R : Semiring r ℓr) where
   open import Function using (case_of_)
   open import Function.Equality
   open import Relation.Binary.Reasoning.MultiSetoid
-  LeftSemimodules-Cocartesian : Cocartesian lsm
-  LeftSemimodules-Cocartesian = record
-    { initial = record
-        { ⊥ = Z.leftSemimodule
-        ; ⊥-is-initial = record
-           { ! = λ {A} → let open LeftSemimodule A
-                             open Monoid +ᴹ-monoid hiding (refl;sym)
-                             open Setoid ≈ᴹ-setoid
-                         in
-                   const 0ᴹ
-                 , (λ x y → sym (identityˡ 0ᴹ)) -- sym!
-                 , refl                         -- sym!
-                 , (λ s x → sym (*ₗ-zeroʳ s))   -- sym!
 
-           ; !-unique = λ {A} F@(f′ , _ , f0≈0 , _) {x y} → λ x≈y →
-                         let open LeftSemimodule A
-                             open Π f′ renaming (_⟨$⟩_ to f)
-                             open Setoid ≈ᴹ-setoid
-                         in
-                           sym f0≈0             -- sym!
+  open import Biproduct lsm
+  open LeftSemimodule
+
+  LSM-Preadditive : Preadditive
+  LSM-Preadditive = record
+    { _⊹_ = λ {A B} (f′ , f+ , f0 , f*) (g′ , g+ , g0 , g*) →
+       let open Π f′ renaming (_⟨$⟩_ to f ; cong to f-cong)
+           open Π g′ renaming (_⟨$⟩_ to g ; cong to g-cong)
+           module A = LeftSemimodule A
+           module B = LeftSemimodule B
+       in record
+         { _⟨$⟩_ = λ x → f x B.+ᴹ g x
+         ; cong = λ {x y} x≈y →
+             begin⟨ B.≈ᴹ-setoid ⟩
+               f x B.+ᴹ g x  ≈⟨ B.+ᴹ-cong (f-cong x≈y) (g-cong x≈y) ⟩
+               f y B.+ᴹ g y  ∎
+         }
+        , (λ x y →
+             -- (f + g) (x+y) ≈ (f + g) x + (f + g) y
+             begin⟨ B.≈ᴹ-setoid ⟩
+               f (x A.+ᴹ y) B.+ᴹ g (x A.+ᴹ y)
+                 ≈⟨ B.+ᴹ-cong (f+ x y) (g+ x y) ⟩
+               (f x B.+ᴹ f y) B.+ᴹ (g x B.+ᴹ g y)
+                 ≈˘⟨ B.+ᴹ-assoc (f x B.+ᴹ f y) (g x) (g y) ⟩
+               ((f x B.+ᴹ f y) B.+ᴹ g x) B.+ᴹ g y
+                 ≈⟨ B.+ᴹ-congʳ (B.+ᴹ-assoc (f x) (f y) (g x)) ⟩
+               (f x B.+ᴹ (f y B.+ᴹ g x)) B.+ᴹ g y
+                 ≈⟨ B.+ᴹ-congʳ (B.+ᴹ-congˡ (B.+ᴹ-comm (f y) (g x))) ⟩
+               (f x B.+ᴹ (g x B.+ᴹ f y)) B.+ᴹ g y
+                 ≈⟨ B.+ᴹ-congʳ (B.≈ᴹ-sym (B.+ᴹ-assoc (f x) (g x) (f y))) ⟩   -- sym!
+               ((f x B.+ᴹ g x) B.+ᴹ f y) B.+ᴹ g y
+                 ≈⟨ B.+ᴹ-assoc (f x B.+ᴹ g x) (f y) (g y) ⟩
+               (f x B.+ᴹ g x) B.+ᴹ (f y B.+ᴹ g y)
+                 ∎ )
+          , ( -- (f + g) 0 ≈ 0
+             begin⟨ B.≈ᴹ-setoid ⟩
+              f A.0ᴹ B.+ᴹ g A.0ᴹ ≈⟨ B.+ᴹ-cong f0 g0 ⟩
+              B.0ᴹ B.+ᴹ B.0ᴹ     ≈⟨ B.+ᴹ-identityʳ B.0ᴹ ⟩
+              B.0ᴹ               ∎)
+          , ( -- (f + g) (s *ₗ x) ≈ s *ₗ (f + g) x
+             λ s x →
+               begin⟨ B.≈ᴹ-setoid ⟩
+                 f (s A.*ₗ x) B.+ᴹ g (s A.*ₗ x)
+                   ≈⟨ B.+ᴹ-cong (f* s x) (g* s x) ⟩
+                 s B.*ₗ f x B.+ᴹ s B.*ₗ g x
+                   ≈⟨ B.≈ᴹ-sym (B.*ₗ-distribˡ s (f x) (g x)) ⟩
+                 s B.*ₗ (f x B.+ᴹ g x)
+                   ∎)
+    ; 𝟎 = λ {A B} → let module B = LeftSemimodule B in
+          const B.0ᴹ
+        , (λ x y → B.≈ᴹ-sym (B.+ᴹ-identityʳ B.0ᴹ))  -- sym!
+        , B.≈ᴹ-refl                                 -- (sym)
+        , (λ s x → B.≈ᴹ-sym (B.*ₗ-zeroʳ s))         -- sym!
+    ; isPreadditive = record
+        { ⊹-zero-isMonoid = λ {A B} → let module A = LeftSemimodule A
+                                          module B = LeftSemimodule B
+                                      in record  
+           { isSemigroup = record
+              { isMagma = record
+                 { isEquivalence = Category.equiv lsm {A}{B}
+                 ; ∙-cong = λ f≈g h≈i x≈y → B.+ᴹ-cong (f≈g x≈y) (h≈i x≈y)
+                 }
+              ; assoc = λ (f′ , _) (g′ , _) (h′ , _) → λ {x y} x≈y →
+                  let open Π f′ renaming (_⟨$⟩_ to f ; cong to f-cong)
+                      open Π g′ renaming (_⟨$⟩_ to g ; cong to g-cong)
+                      open Π h′ renaming (_⟨$⟩_ to h ; cong to h-cong)
+                  in
+                    begin⟨ B.≈ᴹ-setoid ⟩
+                      (f x B.+ᴹ g x) B.+ᴹ h x ≈⟨ B.+ᴹ-assoc (f x) (g x) (h x)⟩
+                      f x B.+ᴹ (g x B.+ᴹ h x) ≈⟨ B.+ᴹ-cong (f-cong x≈y)
+                                                   (B.+ᴹ-cong (g-cong x≈y)
+                                                              (h-cong x≈y)) ⟩
+                      f y B.+ᴹ (g y B.+ᴹ h y) ∎
+              }
+           ; identity = (λ (f′ , _) {x y} x≈y →
+                            let open Π f′ renaming (_⟨$⟩_ to f; cong to f-cong) in
+                            begin⟨ B.≈ᴹ-setoid ⟩
+                              B.0ᴹ B.+ᴹ f x ≈⟨ B.+ᴹ-identityˡ (f x) ⟩
+                              f x ≈⟨ f-cong x≈y ⟩
+                              f y  ∎)
+                      , (λ (f′ , _) {x y} x≈y →
+                            let open Π f′ renaming (_⟨$⟩_ to f; cong to f-cong) in
+                            begin⟨ B.≈ᴹ-setoid ⟩
+                              f x B.+ᴹ B.0ᴹ ≈⟨ B.+ᴹ-identityʳ (f x) ⟩
+                              f x ≈⟨ f-cong x≈y ⟩
+                              f y  ∎)
            }
+        -- distrib-⊹ˡ : ∀ {A B C} {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
+        ; distrib-⊹ˡ = λ {A B C} {(f′ , _) (g′ , _) (h′ , h+ , _)} {x y} x≈y →
+            let module B = LeftSemimodule B
+                module C = LeftSemimodule C
+                open Π f′ renaming (_⟨$⟩_ to f ; cong to f-cong)
+                open Π g′ renaming (_⟨$⟩_ to g ; cong to g-cong)
+                open Π h′ renaming (_⟨$⟩_ to h ; cong to h-cong)
+            in
+            begin⟨ C.≈ᴹ-setoid ⟩
+              h (f x B.+ᴹ g x)     ≈⟨ h+ (f x) (g x) ⟩
+              h (f x) C.+ᴹ h (g x) ≈⟨ C.+ᴹ-cong (h-cong (f-cong x≈y))
+                                                (h-cong (g-cong x≈y)) ⟩
+              h (f y) C.+ᴹ h (g y) ∎
+        -- distrib-⊹ʳ : ∀ {A B C} {f g : B ⇒ C} {h : A ⇒ B} → (f ⊹ g) ∘ h ≈ (f ∘ h) ⊹ (g ∘ h)
+        ; distrib-⊹ʳ = λ {A B C} {(f′ , _) (g′ , _) (h′ , _)} {x y} x≈y →
+            let module C = LeftSemimodule C
+                open Π f′ renaming (_⟨$⟩_ to f ; cong to f-cong)
+                open Π g′ renaming (_⟨$⟩_ to g ; cong to g-cong)
+                open Π h′ renaming (_⟨$⟩_ to h ; cong to h-cong)
+            in
+            begin⟨ C.≈ᴹ-setoid ⟩
+              f (h x) C.+ᴹ g (h x) ≈⟨ C.+ᴹ-cong (f-cong (h-cong x≈y))
+                                                (g-cong (h-cong x≈y)) ⟩
+              f (h y) C.+ᴹ g (h y) ∎
+        -- distrib-𝟎ˡ : ∀ {A B C} {g : B ⇒ C} → g ∘ 𝟎 ≈ 𝟎 {A} {C}
+        ; distrib-𝟎ˡ = λ {A B C} {(_ , _ , g0 , _)} x≈y → g0
+        -- distrib-𝟎ʳ : ∀ {A B C} {f : A ⇒ B} → 𝟎 ∘ f ≈ 𝟎 {A} {C}
+        ; distrib-𝟎ʳ = λ {A B C} x≈y → ≈ᴹ-refl C
         }
-    ; coproducts = record
-        { coproduct = λ {A B} → let A+B = P.leftSemimodule A B
-                                    module A   = LeftSemimodule A
-                                    module   B = LeftSemimodule   B
-                                    module A+B = LeftSemimodule A+B
-                                    A+B-setoid = LeftSemimodule.≈ᴹ-setoid A+B
-                                in record
-            { A+B = A+B
-            ; i₁ = record { _⟨$⟩_ = (λ x → x , B.0ᴹ)
-                          ; cong = _, Setoid.refl B.≈ᴹ-setoid
-                          }
-                 , let open Monoid B.+ᴹ-monoid in
-                   -- (λ x y → Setoid.refl A.≈ᴹ-setoid , sym (identityˡ B.0ᴹ)) -- sym!
-                      (λ x y → begin⟨ A+B.≈ᴹ-setoid ⟩
-                                 (x A.+ᴹ y , B.0ᴹ) ≈⟨ Setoid.refl A.≈ᴹ-setoid , sym (identityˡ B.0ᴹ) ⟩  -- sym!
-                                 (x A.+ᴹ y , B.0ᴹ B.+ᴹ B.0ᴹ) ∎ )
-                    , Setoid.refl A+B.≈ᴹ-setoid
-                    , -- (λ s x → Setoid.refl A.≈ᴹ-setoid , sym (B.*ₗ-zeroʳ s))  -- sym!
-                      (λ s x → begin⟨ A+B.≈ᴹ-setoid ⟩
-                                 (s A.*ₗ x , B.0ᴹ) ≈⟨ Setoid.refl A.≈ᴹ-setoid , sym (B.*ₗ-zeroʳ s) ⟩  -- sym!
-                                 (s A.*ₗ x , s B.*ₗ B.0ᴹ) ∎ )
-            ; i₂ = record { _⟨$⟩_ = (λ x → A.0ᴹ , x)
-                          ; cong = Setoid.refl A.≈ᴹ-setoid ,_
-                          }
-                 , let open Monoid A.+ᴹ-monoid in
-                   -- (λ x y → sym (identityˡ A.0ᴹ) , Setoid.refl B.≈ᴹ-setoid)  -- sym!
-                      (λ x y → begin⟨ A+B.≈ᴹ-setoid ⟩
-                                 (A.0ᴹ , x B.+ᴹ y) ≈⟨ sym (identityˡ A.0ᴹ) , Setoid.refl B.≈ᴹ-setoid ⟩  -- sym!
-                                 (A.0ᴹ A.+ᴹ A.0ᴹ , x B.+ᴹ y) ∎ )
-                    , Setoid.refl A+B.≈ᴹ-setoid
-                    , -- (λ s x → sym (A.*ₗ-zeroʳ s) , Setoid.refl B.≈ᴹ-setoid)  -- sym!
-                      (λ s x → begin⟨ A+B.≈ᴹ-setoid ⟩
-                                 (A.0ᴹ , s B.*ₗ x) ≈⟨ sym (A.*ₗ-zeroʳ s) , Setoid.refl B.≈ᴹ-setoid ⟩  -- sym!
-                                 (s A.*ₗ A.0ᴹ , s B.*ₗ x) ∎ )
-            ; [_,_] = λ {C} (f′ , f+ , f0 , f*) (g′ , g+ , g0 , g*) →
-                let open Π f′ using () renaming (_⟨$⟩_ to f ; cong to f-cong)
-                    open Π g′ using () renaming (_⟨$⟩_ to g ; cong to g-cong)
-                    module C = LeftSemimodule C in
-                record
-                    { _⟨$⟩_ = λ (x , y) → f x C.+ᴹ g y
-                    ; cong = λ {(x₁ , y₁) (x₂ , y₂)} (x₁≈x₂ , y₁≈y₂) →
-                        C.+ᴹ-cong (f-cong x₁≈x₂) (g-cong y₁≈y₂)
-                        -- begin⟨ C.≈ᴹ-setoid ⟩
-                        --   f x₁ C.+ᴹ g y₁ ≈⟨ C.+ᴹ-cong (f-cong x₁≈x₂) (g-cong y₁≈y₂) ⟩
-                        --   f x₂ C.+ᴹ g y₂ ∎
-                    }
-                  , (λ (x₁ , y₁) (x₂ , y₂) →
-                       -- Is this proof done somewhere else?
-                       -- I'd expect to find it in Algebra.Properties.Semigroup.
-                       begin⟨ C.≈ᴹ-setoid ⟩
-                         f (x₁ A.+ᴹ x₂) C.+ᴹ g (y₁ B.+ᴹ y₂)
-                           ≈⟨ C.+ᴹ-cong (f+ x₁ x₂) (g+ y₁ y₂) ⟩
-                         (f x₁ C.+ᴹ f x₂) C.+ᴹ (g y₁ C.+ᴹ g y₂)
-                           ≈˘⟨ C.+ᴹ-assoc (f x₁ C.+ᴹ f x₂) (g y₁) (g y₂) ⟩
-                         ((f x₁ C.+ᴹ f x₂) C.+ᴹ g y₁) C.+ᴹ g y₂
-                           ≈⟨ C.+ᴹ-congʳ (C.+ᴹ-assoc (f x₁) (f x₂) (g y₁)) ⟩
-                         (f x₁ C.+ᴹ (f x₂ C.+ᴹ g y₁)) C.+ᴹ g y₂
-                           ≈⟨ C.+ᴹ-congʳ (C.+ᴹ-congˡ (C.+ᴹ-comm (f x₂) (g y₁))) ⟩
-                         (f x₁ C.+ᴹ (g y₁ C.+ᴹ f x₂)) C.+ᴹ g y₂
-                           ≈⟨ C.+ᴹ-congʳ (C.≈ᴹ-sym (C.+ᴹ-assoc (f x₁) (g y₁) (f x₂))) ⟩   -- sym!
-                         ((f x₁ C.+ᴹ g y₁) C.+ᴹ f x₂) C.+ᴹ g y₂
-                           ≈⟨ C.+ᴹ-assoc (f x₁ C.+ᴹ g y₁) (f x₂) (g y₂) ⟩
-                         (f x₁ C.+ᴹ g y₁) C.+ᴹ (f x₂ C.+ᴹ g y₂)
-                           ∎
-                       )
-                  , (begin⟨ C.≈ᴹ-setoid ⟩
-                      f A.0ᴹ C.+ᴹ g B.0ᴹ ≈⟨ C.+ᴹ-cong f0 g0 ⟩
-                      C.0ᴹ C.+ᴹ C.0ᴹ     ≈⟨ C.+ᴹ-identityʳ C.0ᴹ ⟩
-                      C.0ᴹ               ∎)
-                  , (λ s (x , y) →
-                       begin⟨ C.≈ᴹ-setoid ⟩
-                         f (s A.*ₗ x) C.+ᴹ g (s B.*ₗ y)
-                           ≈⟨ C.+ᴹ-cong (f* s x) (g* s y) ⟩
-                         s C.*ₗ f x C.+ᴹ s C.*ₗ g y
-                           ≈⟨ C.≈ᴹ-sym (C.*ₗ-distribˡ s (f x) (g y)) ⟩
-                         s C.*ₗ (f x C.+ᴹ g y)          ∎
-                         )
-            ; inject₁ = {!!}
-            ; inject₂ = {!!}
-            ; unique = {!!}
-            } }
     }
-
+  
+  LeftSemimodules-PreadditiveCartesian : PreadditiveCartesian
+  LeftSemimodules-PreadditiveCartesian = record
+    { cartesian = LeftSemimodules-Cartesian
+    ; preadditive = LSM-Preadditive
+    -- unique-𝟎 : ∀ (f : ⊤ ⇒ A) → 𝟎 ≈ f
+    ; unique-𝟎 = λ {A} (f′ , _ , f0 , _) {x y} x≈y →
+          ≈ᴹ-sym A f0
+    -- ⟨⟩⊹⟨⟩ : ∀ {(f h : A ⇒ B} {g i : A ⇒ C} → ⟨ f , g ⟩ ⊹ ⟨ h , i ⟩ ≈ ⟨ f ⊹ h , g ⊹ i ⟩
+    ; ⟨⟩⊹⟨⟩ = λ {A B C} {(f′  , _) (h′  , _) (g′  , _) (i′  , _)} {x y} x≈y →
+       let B×C = P.leftSemimodule B C
+           module B   = LeftSemimodule B
+           module C   = LeftSemimodule C
+           module B×C = LeftSemimodule B×C
+           open Π f′ renaming (_⟨$⟩_ to f ; cong to f-cong)
+           open Π g′ renaming (_⟨$⟩_ to g ; cong to g-cong)
+           open Π h′ renaming (_⟨$⟩_ to h ; cong to h-cong)
+           open Π i′ renaming (_⟨$⟩_ to i ; cong to i-cong)
+       in
+         begin⟨ B×C.≈ᴹ-setoid ⟩
+           f x B.+ᴹ h x , g x C.+ᴹ i x
+             ≈⟨ B.+ᴹ-cong (f-cong x≈y) (h-cong x≈y)
+              , C.+ᴹ-cong (g-cong x≈y) (i-cong x≈y) ⟩
+           f y B.+ᴹ h y , g y C.+ᴹ i y ∎
+    }
 
 -- TODO: eliminate the redundant SubCat construction and associated imports.
 -- Return to the style of Old.Algebraic2
