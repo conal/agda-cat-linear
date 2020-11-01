@@ -185,9 +185,10 @@ module _ (R : Semiring r ℓr) where
                ((f x B.+ᴹ f y) B.+ᴹ g x) B.+ᴹ g y
                  ≈⟨ B.+ᴹ-congʳ (B.+ᴹ-assoc (f x) (f y) (g x)) ⟩
                (f x B.+ᴹ (f y B.+ᴹ g x)) B.+ᴹ g y
+                 -- The only use of commutativity!
                  ≈⟨ B.+ᴹ-congʳ (B.+ᴹ-congˡ (B.+ᴹ-comm (f y) (g x))) ⟩
                (f x B.+ᴹ (g x B.+ᴹ f y)) B.+ᴹ g y
-                 ≈⟨ B.+ᴹ-congʳ (B.≈ᴹ-sym (B.+ᴹ-assoc (f x) (g x) (f y))) ⟩   -- sym!
+                 ≈˘⟨ B.+ᴹ-congʳ (B.+ᴹ-assoc (f x) (g x) (f y)) ⟩
                ((f x B.+ᴹ g x) B.+ᴹ f y) B.+ᴹ g y
                  ≈⟨ B.+ᴹ-assoc (f x B.+ᴹ g x) (f y) (g y) ⟩
                (f x B.+ᴹ g x) B.+ᴹ (f y B.+ᴹ g y)
@@ -203,14 +204,14 @@ module _ (R : Semiring r ℓr) where
                  f (s A.*ₗ x) B.+ᴹ g (s A.*ₗ x)
                    ≈⟨ B.+ᴹ-cong (f* s x) (g* s x) ⟩
                  s B.*ₗ f x B.+ᴹ s B.*ₗ g x
-                   ≈⟨ B.≈ᴹ-sym (B.*ₗ-distribˡ s (f x) (g x)) ⟩
+                   ≈˘⟨ B.*ₗ-distribˡ s (f x) (g x) ⟩
                  s B.*ₗ (f x B.+ᴹ g x)
                    ∎)
     ; 𝟎 = λ {A B} → let module B = LeftSemimodule B in
           const B.0ᴹ
-        , (λ x y → B.≈ᴹ-sym (B.+ᴹ-identityʳ B.0ᴹ))  -- sym!
-        , B.≈ᴹ-refl                                 -- (sym)
-        , (λ s x → B.≈ᴹ-sym (B.*ₗ-zeroʳ s))         -- sym!
+        , (λ x y → B.≈ᴹ-sym (B.+ᴹ-identityʳ B.0ᴹ))
+        , B.≈ᴹ-refl
+        , (λ s x → B.≈ᴹ-sym (B.*ₗ-zeroʳ s))
     ; isPreadditive = record
         { ⊹-zero-isMonoid = λ {A B} → let module A = LeftSemimodule A
                                           module B = LeftSemimodule B
