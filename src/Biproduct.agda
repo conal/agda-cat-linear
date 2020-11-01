@@ -27,17 +27,16 @@ private
   variable
     A B C : Obj
 
-Op⇒₀ : Set (o ⊔ ℓ)
-Op⇒₀ = ∀ {A B} → A ⇒ B
+  Op⇒₀ : Set (o ⊔ ℓ)
+  Op⇒₀ = ∀ {A B} → A ⇒ B
 
-Op⇒₂ : Set (o ⊔ ℓ)
-Op⇒₂ = ∀ {A B} → Op₂ (A ⇒ B)
+  Op⇒₂ : Set (o ⊔ ℓ)
+  Op⇒₂ = ∀ {A B} → Op₂ (A ⇒ B)
 
--- TODO: Pass in a monoid instead.
 record IsPreadditive (_⊹_ : Op⇒₂) (𝟎 : Op⇒₀) : Set (levelOfTerm 𝒞) where
   field
     ⊹-zero-isMonoid : IsMonoid (_≈_ {A} {B}) _⊹_ 𝟎
-    -- TODO: a ring?
+
     distrib-⊹ˡ : ∀ {A B C} {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
     distrib-⊹ʳ : ∀ {A B C} {f g : B ⇒ C} {h : A ⇒ B} → (f ⊹ g) ∘ h ≈ (f ∘ h) ⊹ (g ∘ h)
     distrib-𝟎ˡ : ∀ {A B C} {g : B ⇒ C} → g ∘ 𝟎 ≈ 𝟎 {A} {C}
@@ -73,7 +72,8 @@ record Bicartesian : Set (levelOfTerm 𝒞) where
   open   Cartesian   cartesian public
   open Cocartesian cocartesian public
 
-record IsBiproduct (bi : Bicartesian) (pre : Preadditive) (A B : Obj) : Set (levelOfTerm 𝒞) where
+record IsBiproduct (bi : Bicartesian) (pre : Preadditive) (A B : Obj)
+       : Set (levelOfTerm 𝒞) where
   open Bicartesian bi
   open Preadditive pre
 
@@ -94,10 +94,36 @@ record IsBiproduct (bi : Bicartesian) (pre : Preadditive) (A B : Obj) : Set (lev
   field
     +⇒×′≈ : +⇒×′ ≈ +⇒×  -- important?
 
-    π₁∘i₁ : π₁ ∘ +⇒× ∘ i₁ ≈ id
-    π₁∘i₂ : π₁ ∘ +⇒× ∘ i₂ ≈ 𝟎
-    π₂∘i₁ : π₂ ∘ +⇒× ∘ i₁ ≈ 𝟎
-    π₂∘i₂ : π₂ ∘ +⇒× ∘ i₂ ≈ id
+    i₁≈⟨⟩ : +⇒× ∘ i₁ ≈ ⟨ id , 𝟎 ⟩
+    i₂≈⟨⟩ : +⇒× ∘ i₂ ≈ ⟨ 𝟎 , id ⟩
+
+  π₁∘i₁ : π₁ ∘ +⇒× ∘ i₁ ≈ id
+  π₁∘i₁ =
+    begin
+      π₁ ∘ +⇒× ∘ i₁   ≈⟨ ∘-resp-≈ʳ i₁≈⟨⟩ ⟩
+      π₁ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₁ ⟩
+      id              ∎
+
+  π₁∘i₂ : π₁ ∘ +⇒× ∘ i₂ ≈ 𝟎
+  π₁∘i₂ =
+    begin
+      π₁ ∘ +⇒× ∘ i₂   ≈⟨ ∘-resp-≈ʳ i₂≈⟨⟩ ⟩
+      π₁ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₁ ⟩
+      𝟎               ∎
+
+  π₂∘i₁ : π₂ ∘ +⇒× ∘ i₁ ≈ 𝟎
+  π₂∘i₁ =
+    begin
+      π₂ ∘ +⇒× ∘ i₁   ≈⟨ ∘-resp-≈ʳ i₁≈⟨⟩ ⟩
+      π₂ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₂ ⟩
+      𝟎               ∎
+
+  π₂∘i₂ : π₂ ∘ +⇒× ∘ i₂ ≈ id
+  π₂∘i₂ =
+    begin
+      π₂ ∘ +⇒× ∘ i₂   ≈⟨ ∘-resp-≈ʳ i₂≈⟨⟩ ⟩
+      π₂ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₂ ⟩
+      id              ∎
 
   -- []-bi : {f : A ⇒ C} {g : B ⇒ C} → [ f , g ] ≈ (f ∘ π₁ ⊹ g ∘ π₂) ∘ +⇒×
   -- []-bi {f = f} {g} =
@@ -107,7 +133,7 @@ record IsBiproduct (bi : Bicartesian) (pre : Preadditive) (A B : Obj) : Set (lev
   --     (f ∘ π₁) ∘ +⇒× ⊹ (g ∘ π₂) ∘ +⇒×  ≈˘⟨ distrib-⊹ʳ ⟩
   --     (f ∘ π₁ ⊹ g ∘ π₂) ∘ +⇒×  ∎
 
--- A biproduct category is bicartesian, has a zero object, and has coinciding
+-- A biproduct category is bicartesian, has a zero object, and compatible
 -- products and coproducts.
 record Biproduct : Set (levelOfTerm 𝒞) where
   field
@@ -120,6 +146,8 @@ record Biproduct : Set (levelOfTerm 𝒞) where
 
 -- open Biproduct public
 
+-- Use a cartesian and preadditive structure to define a cocartesian, and
+-- biproduct.
 record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
   field
     cartesian : Cartesian
@@ -127,6 +155,7 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
   open Cartesian cartesian public
   open Preadditive preadditive public
   field
+    -- Extra help needed for the proofs
     unique-𝟎 : ∀ (f : ⊤ ⇒ A) → 𝟎 ≈ f
     ⟨⟩⊹⟨⟩ : ∀ {f h : A ⇒ B} {g i : A ⇒ C} → ⟨ f , g ⟩ ⊹ ⟨ h , i ⟩ ≈ ⟨ f ⊹ h , g ⊹ i ⟩
 
@@ -213,9 +242,9 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
         { iso = id≅
         ; +⇒×′≈ =
           begin
-            ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
-              ≡⟨⟩
-            ⟨ id {A} ∘ π₁ ⊹ 𝟎 ∘ π₂ , 𝟎 ∘ π₁ ⊹ id ∘ π₂ ⟩
+            ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩
+              ≡⟨⟩  -- [_,_] definition above
+            ⟨ id ∘ π₁ ⊹ 𝟎 ∘ π₂ , 𝟎 ∘ π₁ ⊹ id ∘ π₂ ⟩
               ≈⟨ ⟨⟩-cong₂ (⊹-resp-≈ identityˡ distrib-𝟎ʳ)
                           (⊹-resp-≈ distrib-𝟎ʳ identityˡ) ⟩
             ⟨ π₁ ⊹ 𝟎 , 𝟎 ⊹ π₂ ⟩
@@ -224,30 +253,12 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
               ≈⟨ η ⟩
             id
               ∎
-        ; π₁∘i₁ =
-            begin
-              π₁ ∘ id ∘ i₁    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
-              π₁ ∘ i₁         ≡⟨⟩
-              π₁ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₁ ⟩
-              id              ∎
-        ; π₁∘i₂ =
-            begin
-              π₁ ∘ id ∘ i₂    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
-              π₁ ∘ i₂         ≡⟨⟩
-              π₁ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₁ ⟩
-              𝟎               ∎
-        ; π₂∘i₁ =
-            begin
-              π₂ ∘ id ∘ i₁    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
-              π₂ ∘ i₁         ≡⟨⟩
-              π₂ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₂ ⟩
-              𝟎               ∎
-        ; π₂∘i₂ =
-            begin
-              π₂ ∘ id ∘ i₂    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
-              π₂ ∘ i₂         ≡⟨⟩
-              π₂ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₂ ⟩
-              id              ∎
+        ; i₁≈⟨⟩ = identityˡ
+        ; i₂≈⟨⟩ = identityˡ
         }
     }
 
+-- TODO: Define PreadditiveCocartesian that starts with a cocartesian. Use
+-- duality, turning the cocartesian into a cartesian for the opposite category.
+-- Similarly, dualize bicartesian to a bicartesian, and a biproduct to a
+-- biproduct.

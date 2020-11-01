@@ -149,13 +149,12 @@ module _ (R : Semiring r ℓr) where
         open LeftSemimodule {semiring = R} ; open H ≈ᴹ-setoid ; open Action Carrier
         subCat = H₂ _+ᴹ_ ∩ H₀ 0ᴹ ∩ Hₗ _*ₗ_
 
-  -- How to tackle Cocartesian, which is defined via Cartesian & op?
-  -- Start with a manual definition.
+  -- For Cocartesian, Bicartesian, and Biproduct, use the Cartesian-to-Biproduct
+  -- construction.
 
   open import Categories.Category.Cocartesian 
   open import Categories.Object.Initial
 
-  open import Function using (case_of_)
   open import Function.Equality
   open import Relation.Binary.Reasoning.MultiSetoid
 
@@ -282,8 +281,7 @@ module _ (R : Semiring r ℓr) where
     { cartesian = LeftSemimodules-Cartesian
     ; preadditive = LSM-Preadditive
     -- unique-𝟎 : ∀ (f : ⊤ ⇒ A) → 𝟎 ≈ f
-    ; unique-𝟎 = λ {A} (f′ , _ , f0 , _) {x y} x≈y →
-          ≈ᴹ-sym A f0
+    ; unique-𝟎 = λ {A} (f′ , _ , f0 , _) {x y} x≈y → ≈ᴹ-sym A f0
     -- ⟨⟩⊹⟨⟩ : ∀ {(f h : A ⇒ B} {g i : A ⇒ C} → ⟨ f , g ⟩ ⊹ ⟨ h , i ⟩ ≈ ⟨ f ⊹ h , g ⊹ i ⟩
     ; ⟨⟩⊹⟨⟩ = λ {A B C} {(f′  , _) (h′  , _) (g′  , _) (i′  , _)} {x y} x≈y →
        let B×C = P.leftSemimodule B C
