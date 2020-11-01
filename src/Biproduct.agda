@@ -73,29 +73,29 @@ record IsBiproduct (bi : Bicartesian) (pre : Preadditive) : Set (levelOfTerm �
   open Bicartesian bi
   open Preadditive pre
 
-  -- TODO: wrap the rest of this record in an anonymous module parametrized by {A B}
-
+  -- TODO: factor out a record parametrized by A & B to reduce the type
+  -- parameters below. See Product and BinaryProducts in Cartesian.
   field
     iso : ∀ {A B} → A + B ≅ A × B
 
-  module iso {A}{B} = _≅_ (iso {A} {B})
+  module iso {A}{B} = _≅_ (iso {A}{B})
 
-  +⇒× : ∀ {A B} → A + B ⇒ A × B
-  +⇒× {A}{B} = iso.from {A} {B}
+  +⇒× : A + B ⇒ A × B
+  +⇒× = iso.from
 
-  ×⇒+ : ∀ {A B} → A × B ⇒ A + B
+  ×⇒+ : A × B ⇒ A + B
   ×⇒+ = iso.to
 
   +⇒×′ : ∀ {A B} → A + B ⇒ A × B
   +⇒×′ {A}{B} = ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
 
   field
-    from-iso : ∀ {A B} → +⇒× {A}{B} ≈ +⇒×′
+    +⇒×≈ : +⇒× {A}{B} ≈ +⇒×′
 
-    π₁∘i₁ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₁ ≈ id
-    π₁∘i₂ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₂ ≈ 𝟎
-    π₂∘i₁ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₁ ≈ 𝟎
-    π₂∘i₂ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₂ ≈ id
+    π₁∘i₁ : π₁ ∘ +⇒× {A}{B} ∘ i₁ ≈ id
+    π₁∘i₂ : π₁ ∘ +⇒× {A}{B} ∘ i₂ ≈ 𝟎
+    π₂∘i₁ : π₂ ∘ +⇒× {A}{B} ∘ i₁ ≈ 𝟎
+    π₂∘i₂ : π₂ ∘ +⇒× {A}{B} ∘ i₂ ≈ id
 
   -- []-bi : {f : A ⇒ C} {g : B ⇒ C} → [ f , g ] ≈ (f ∘ π₁ ⊹ g ∘ π₂) ∘ +⇒×
   -- []-bi {f = f} {g} =
