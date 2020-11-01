@@ -21,6 +21,8 @@ open HomReasoning
 open import Categories.Morphism 𝒞
 open import Categories.Morphism.Reasoning 𝒞
 
+open import Misc using (id≅)
+
 private
   variable
     A B C : Obj
@@ -90,7 +92,7 @@ record IsBiproduct (bi : Bicartesian) (pre : Preadditive) : Set (levelOfTerm �
   +⇒×′ {A}{B} = ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
 
   field
-    +⇒×≈ : +⇒× {A}{B} ≈ +⇒×′
+    +⇒×′≈ : +⇒×′ {A}{B} ≈ +⇒×
 
     π₁∘i₁ : π₁ ∘ +⇒× {A}{B} ∘ i₁ ≈ id
     π₁∘i₂ : π₁ ∘ +⇒× {A}{B} ∘ i₂ ≈ 𝟎
@@ -198,79 +200,54 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
            } }
     }
 
+  open Cocartesian cocartesian
+
   bicartesian : Bicartesian
   bicartesian = record { cartesian = cartesian ; cocartesian = cocartesian }
 
-  -- biproduct : Biproduct
-  -- biproduct = record
-  --   { bicartesian = bicartesian
-  --   ; preadditive = preadditive
-  --   ; isBiproduct = 
-
-  open Cocartesian cocartesian
-
-  +⇒× : ∀ {A B} → A + B ⇒ A × B
-  +⇒× {A} {B} = ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
-
-  +⇒×≡id : ∀ {A B} → +⇒× {A} {B} ≈ id
-  +⇒×≡id {A} {B} = begin
-    +⇒× {A} {B}
-      ≡⟨⟩
-    ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
-      ≡⟨⟩
-    ⟨ id {A} ∘ π₁ ⊹ 𝟎 ∘ π₂ , 𝟎 ∘ π₁ ⊹ id ∘ π₂ ⟩
-      ≈⟨ ⟨⟩-cong₂ (⊹-resp-≈ identityˡ distrib-𝟎ʳ)
-                  (⊹-resp-≈ distrib-𝟎ʳ identityˡ) ⟩
-    ⟨ π₁ ⊹ 𝟎 , 𝟎 ⊹ π₂ ⟩
-      ≈⟨ ⟨⟩-cong₂ ⊹-identityʳ ⊹-identityˡ ⟩
-    ⟨ π₁ , π₂ ⟩
-      ≈⟨ η ⟩
-    id
-      ∎
-
-  π₁∘i₁ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₁ ≈ id
-  π₁∘i₁ {A} {B} =
-    begin
-      π₁ ∘ +⇒× ∘ i₁   ≈⟨ ∘-resp-≈ʳ (elimˡ +⇒×≡id) ⟩
-      π₁ ∘ i₁         ≡⟨⟩
-      π₁ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₁ ⟩
-      id              ∎
-
-  π₁∘i₂ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₂ ≈ 𝟎
-  π₁∘i₂ {A} {B} =
-    begin
-      π₁ ∘ +⇒× ∘ i₂   ≈⟨ ∘-resp-≈ʳ (elimˡ +⇒×≡id) ⟩
-      π₁ ∘ i₂         ≡⟨⟩
-      π₁ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₁ ⟩
-      𝟎               ∎
-
-  π₂∘i₁ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₁ ≈ 𝟎
-  π₂∘i₁ {A} {B} =
-    begin
-      π₂ ∘ +⇒× ∘ i₁   ≈⟨ ∘-resp-≈ʳ (elimˡ +⇒×≡id) ⟩
-      π₂ ∘ i₁         ≡⟨⟩
-      π₂ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₂ ⟩
-      𝟎               ∎
-
-  π₂∘i₂ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₂ ≈ id
-  π₂∘i₂ {A} {B} =
-    begin
-      π₂ ∘ +⇒× ∘ i₂   ≈⟨ ∘-resp-≈ʳ (elimˡ +⇒×≡id) ⟩
-      π₂ ∘ i₂         ≡⟨⟩
-      π₂ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₂ ⟩
-      id              ∎
-
-  ×⇒+ : A × B ⇒ A + B
-  ×⇒+ = id
-
-  iso : Iso (+⇒× {A} {B}) ×⇒+
-  iso = record
-    { isoˡ = begin
-               ×⇒+ ∘ +⇒× ≈⟨ ∘-resp-≈ʳ +⇒×≡id ⟩
-               id ∘ id   ≈⟨ identity² ⟩
-               id ∎
-    ; isoʳ = begin
-               +⇒× ∘ ×⇒+ ≈⟨ ∘-resp-≈ˡ +⇒×≡id ⟩
-               id ∘ id   ≈⟨ identity² ⟩
-               id ∎
+  biproduct : Biproduct
+  biproduct = record
+    { bicartesian = bicartesian
+    ; preadditive = preadditive
+    ; isBiproduct = record
+        { iso = id≅
+        ; +⇒×′≈ = λ {A B} →
+          begin
+            ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
+              ≡⟨⟩
+            ⟨ id {A} ∘ π₁ ⊹ 𝟎 ∘ π₂ , 𝟎 ∘ π₁ ⊹ id ∘ π₂ ⟩
+              ≈⟨ ⟨⟩-cong₂ (⊹-resp-≈ identityˡ distrib-𝟎ʳ)
+                          (⊹-resp-≈ distrib-𝟎ʳ identityˡ) ⟩
+            ⟨ π₁ ⊹ 𝟎 , 𝟎 ⊹ π₂ ⟩
+              ≈⟨ ⟨⟩-cong₂ ⊹-identityʳ ⊹-identityˡ ⟩
+            ⟨ π₁ , π₂ ⟩
+              ≈⟨ η ⟩
+            id
+              ∎
+        ; π₁∘i₁ = λ {A B} →
+            begin
+              π₁ ∘ id ∘ i₁    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
+              π₁ ∘ i₁         ≡⟨⟩
+              π₁ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₁ ⟩
+              id              ∎
+        ; π₁∘i₂ = λ {A B} →
+            begin
+              π₁ ∘ id ∘ i₂    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
+              π₁ ∘ i₂         ≡⟨⟩
+              π₁ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₁ ⟩
+              𝟎               ∎
+        ; π₂∘i₁ = λ {A B} →
+            begin
+              π₂ ∘ id ∘ i₁    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
+              π₂ ∘ i₁         ≡⟨⟩
+              π₂ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₂ ⟩
+              𝟎               ∎
+        ; π₂∘i₂ = λ {A B} →
+            begin
+              π₂ ∘ id ∘ i₂    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
+              π₂ ∘ i₂         ≡⟨⟩
+              π₂ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₂ ⟩
+              id              ∎
+        }
     }
+
