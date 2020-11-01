@@ -38,11 +38,10 @@ record IsPreadditive (_⊹_ : Op⇒₂) (𝟎 : Op⇒₀) : Set (levelOfTerm �
   field
     ⊹-zero-isMonoid : IsMonoid (_≈_ {A} {B}) _⊹_ 𝟎
     -- TODO: a ring?
-    distrib-⊹ˡ : ∀ {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
-    distrib-⊹ʳ : ∀ {f g : B ⇒ C} {h : A ⇒ B} → (f ⊹ g) ∘ h ≈ (f ∘ h) ⊹ (g ∘ h)
-    distrib-𝟎ˡ : ∀ {g : B ⇒ C} → g ∘ 𝟎 ≈ 𝟎 {A} {C}
-    distrib-𝟎ʳ : ∀ {f : A ⇒ B} → 𝟎 ∘ f ≈ 𝟎 {A} {C}
-    ⊹-resp-≈  : ∀ {f h g i : A ⇒ B} → f ≈ h → g ≈ i → f ⊹ g ≈ h ⊹ i
+    distrib-⊹ˡ : ∀ {A B C} {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
+    distrib-⊹ʳ : ∀ {A B C} {f g : B ⇒ C} {h : A ⇒ B} → (f ⊹ g) ∘ h ≈ (f ∘ h) ⊹ (g ∘ h)
+    distrib-𝟎ˡ : ∀ {A B C} {g : B ⇒ C} → g ∘ 𝟎 ≈ 𝟎 {A} {C}
+    distrib-𝟎ʳ : ∀ {A B C} {f : A ⇒ B} → 𝟎 ∘ f ≈ 𝟎 {A} {C}
 
   module monoid {A} {B} = IsMonoid (⊹-zero-isMonoid {A} {B})
 
@@ -55,6 +54,9 @@ record IsPreadditive (_⊹_ : Op⇒₂) (𝟎 : Op⇒₀) : Set (levelOfTerm �
   ⊹-assoc : ∀ {A B} {f g h : A ⇒ B} → (f ⊹ g) ⊹ h ≈ f ⊹ (g ⊹ h)
   ⊹-assoc {f = f} {g} {h} = monoid.assoc f g h
   
+  ⊹-resp-≈  :  ∀ {A B} {f h g i : A ⇒ B} → f ≈ h → g ≈ i → f ⊹ g ≈ h ⊹ i
+  ⊹-resp-≈ = monoid.∙-cong
+
 record Preadditive : Set (levelOfTerm 𝒞) where
   infixl 6 _⊹_
   field
