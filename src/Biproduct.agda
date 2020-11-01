@@ -10,10 +10,11 @@ open import Relation.Binary.PropositionalEquality using (_≡_)
 open import Algebra.Core using (Op₂)
 open import Algebra.Structures using (IsMonoid)
 
+open Category 𝒞
 open import Categories.Category.Cartesian 𝒞
 open import Categories.Category.Cocartesian 𝒞
 
-open Category 𝒞
+open import Categories.Object.Initial 𝒞
 
 open Equiv using (sym)
 open HomReasoning
@@ -30,9 +31,11 @@ Op⇒₀ = ∀ {A B} → A ⇒ B
 Op⇒₂ : Set (o ⊔ ℓ)
 Op⇒₂ = ∀ {A B} → Op₂ (A ⇒ B)
 
+-- TODO: Pass in a monoid instead.
 record IsPreadditive (_⊹_ : Op⇒₂) (𝟎 : Op⇒₀) : Set (levelOfTerm 𝒞) where
   field
     ⊹-zero-isMonoid : IsMonoid (_≈_ {A} {B}) _⊹_ 𝟎
+    -- TODO: a ring?
     distrib-⊹ˡ : ∀ {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
     distrib-⊹ʳ : ∀ {f g : B ⇒ C} {h : A ⇒ B} → (f ⊹ g) ∘ h ≈ (f ∘ h) ⊹ (g ∘ h)
     distrib-𝟎ˡ : ∀ {g : B ⇒ C} → g ∘ 𝟎 ≈ 𝟎 {A} {C}
@@ -58,7 +61,62 @@ record Preadditive : Set (levelOfTerm 𝒞) where
     isPreadditive : IsPreadditive _⊹_ 𝟎
   open IsPreadditive isPreadditive public
 
-open import Categories.Object.Initial 𝒞
+-- A bicartesian category is cartesian and cocartesian
+record Bicartesian : Set (levelOfTerm 𝒞) where
+  field
+    cartesian   : Cartesian
+    cocartesian : Cocartesian
+  open   Cartesian   cartesian public
+  open Cocartesian cocartesian public
+
+record IsBiproduct (bi : Bicartesian) (pre : Preadditive) : Set (levelOfTerm 𝒞) where
+  open Bicartesian bi
+  open Preadditive pre
+
+  -- TODO: wrap the rest of this record in an anonymous module parametrized by {A B}
+
+  field
+    iso : ∀ {A B} → A + B ≅ A × B
+
+  module iso {A}{B} = _≅_ (iso {A} {B})
+
+  +⇒× : ∀ {A B} → A + B ⇒ A × B
+  +⇒× {A}{B} = iso.from {A} {B}
+
+  ×⇒+ : ∀ {A B} → A × B ⇒ A + B
+  ×⇒+ = iso.to
+
+  +⇒×′ : ∀ {A B} → A + B ⇒ A × B
+  +⇒×′ {A}{B} = ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
+
+  field
+    from-iso : ∀ {A B} → +⇒× {A}{B} ≈ +⇒×′
+
+    π₁∘i₁ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₁ ≈ id
+    π₁∘i₂ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₂ ≈ 𝟎
+    π₂∘i₁ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₁ ≈ 𝟎
+    π₂∘i₂ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₂ ≈ id
+
+  -- []-bi : {f : A ⇒ C} {g : B ⇒ C} → [ f , g ] ≈ (f ∘ π₁ ⊹ g ∘ π₂) ∘ +⇒×
+  -- []-bi {f = f} {g} =
+  --   begin
+  --     [ f , g ] ≈⟨ {!!} ⟩
+  --     f ∘ π₁ ∘ +⇒× ⊹ g ∘ π₂ ∘ +⇒×  ≈⟨ ⊹-resp-≈ {!!} {!!}  ⟩
+  --     (f ∘ π₁) ∘ +⇒× ⊹ (g ∘ π₂) ∘ +⇒×  ≈˘⟨ distrib-⊹ʳ ⟩
+  --     (f ∘ π₁ ⊹ g ∘ π₂) ∘ +⇒×  ∎
+
+-- A biproduct category is bicartesian, has a zero object, and has coinciding
+-- products and coproducts.
+record Biproduct : Set (levelOfTerm 𝒞) where
+  field
+    bicartesian : Bicartesian
+    preadditive : Preadditive
+    isBiproduct : IsBiproduct bicartesian preadditive
+  -- open Bicartesian bicartesian public
+  -- open Preadditive preadditive public
+  open IsBiproduct isBiproduct public
+
+-- open Biproduct public
 
 record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
   field
@@ -140,9 +198,14 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
            } }
     }
 
-  -------------------------------------------------------------------------------
-  -- | Experiment
-  -------------------------------------------------------------------------------
+  bicartesian : Bicartesian
+  bicartesian = record { cartesian = cartesian ; cocartesian = cocartesian }
+
+  -- biproduct : Biproduct
+  -- biproduct = record
+  --   { bicartesian = bicartesian
+  --   ; preadditive = preadditive
+  --   ; isBiproduct = 
 
   open Cocartesian cocartesian
 
@@ -198,57 +261,16 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
       id              ∎
 
   ×⇒+ : A × B ⇒ A + B
-  ×⇒+ = {!!}
+  ×⇒+ = id
 
-  open Iso
-  iso : Iso (+⇒× {A} {B}) (×⇒+ {A} {B})
-  iso = {!!}
-
-{-
-
--- A bicartesian category is cartesian and cocartesian
-record Bicartesian : Set (levelOfTerm 𝒞) where
-  field
-    cartesian   : Cartesian
-    cocartesian : Cocartesian
-  open   Cartesian   cartesian public
-  open Cocartesian cocartesian public
-
-record IsBiproduct (bi : Bicartesian) (pre : Preadditive) : Set (levelOfTerm 𝒞) where
-  open Bicartesian bi
-  open Preadditive pre
-
-  +⇒× : ∀ {A B} → A + B ⇒ A × B
-  +⇒× {A} {B} = ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
-
-  field
-    π₁∘i₁ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₁ ≈ id
-    π₁∘i₂ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₂ ≈ 𝟎
-    π₂∘i₁ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₁ ≈ 𝟎
-    π₂∘i₂ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₂ ≈ id
-
-    ×⇒+ : A × B ⇒ A + B
-    iso : Iso (+⇒× {A} {B}) (×⇒+ {A} {B})
-
-  -- []-bi : {f : A ⇒ C} {g : B ⇒ C} → [ f , g ] ≈ (f ∘ π₁ ⊹ g ∘ π₂) ∘ +⇒×
-  -- []-bi {f = f} {g} =
-  --   begin
-  --     [ f , g ] ≈⟨ {!!} ⟩
-  --     f ∘ π₁ ∘ +⇒× ⊹ g ∘ π₂ ∘ +⇒×  ≈⟨ ⊹-resp-≈  ⟩
-  --     (f ∘ π₁) ∘ +⇒× ⊹ (g ∘ π₂) ∘ +⇒×  ≈˘⟨ distrib-⊹ʳ ⟩
-  --     (f ∘ π₁ ⊹ g ∘ π₂) ∘ +⇒×  ∎
-
--- A biproduct category is bicartesian, has a zero object, and has coinciding
--- products and coproducts.
-record Biproduct : Set (levelOfTerm 𝒞) where
-  field
-    bicartesian : Bicartesian
-    preadditive : Preadditive
-    isBiproduct : IsBiproduct bicartesian preadditive
-  open Bicartesian bicartesian public
-  open Preadditive preadditive public
-  open IsBiproduct isBiproduct public
-
-open Biproduct
-
--}
+  iso : Iso (+⇒× {A} {B}) ×⇒+
+  iso = record
+    { isoˡ = begin
+               ×⇒+ ∘ +⇒× ≈⟨ ∘-resp-≈ʳ +⇒×≡id ⟩
+               id ∘ id   ≈⟨ identity² ⟩
+               id ∎
+    ; isoʳ = begin
+               +⇒× ∘ ×⇒+ ≈⟨ ∘-resp-≈ˡ +⇒×≡id ⟩
+               id ∘ id   ≈⟨ identity² ⟩
+               id ∎
+    }
