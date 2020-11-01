@@ -16,6 +16,9 @@ open import Categories.Category.Cocartesian 𝒞
 open Category 𝒞
 
 open Equiv using (sym)
+open HomReasoning
+open import Categories.Morphism 𝒞
+open import Categories.Morphism.Reasoning 𝒞
 
 private
   variable
@@ -27,7 +30,7 @@ Op⇒₀ = ∀ {A B} → A ⇒ B
 Op⇒₂ : Set (o ⊔ ℓ)
 Op⇒₂ = ∀ {A B} → Op₂ (A ⇒ B)
 
-record IsPreadditive (_⊹_ : Op⇒₂) (𝟎 : Op⇒₀) : Set (o ⊔ ℓ ⊔ e) where
+record IsPreadditive (_⊹_ : Op⇒₂) (𝟎 : Op⇒₀) : Set (levelOfTerm 𝒞) where
   field
     ⊹-zero-isMonoid : IsMonoid (_≈_ {A} {B}) _⊹_ 𝟎
     distrib-⊹ˡ : ∀ {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
@@ -47,7 +50,7 @@ record IsPreadditive (_⊹_ : Op⇒₂) (𝟎 : Op⇒₀) : Set (o ⊔ ℓ ⊔ e
   ⊹-assoc : ∀ {A B} {f g h : A ⇒ B} → (f ⊹ g) ⊹ h ≈ f ⊹ (g ⊹ h)
   ⊹-assoc {f = f} {g} {h} = monoid.assoc f g h
   
-record Preadditive : Set (o ⊔ ℓ ⊔ e) where
+record Preadditive : Set (levelOfTerm 𝒞) where
   infixl 6 _⊹_
   field
     _⊹_ : Op⇒₂
@@ -57,7 +60,7 @@ record Preadditive : Set (o ⊔ ℓ ⊔ e) where
 
 open import Categories.Object.Initial 𝒞
 
-record PreadditiveCartesian : Set (suc (o ⊔ ℓ ⊔ e)) where
+record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
   field
     cartesian : Cartesian
     preadditive : Preadditive
@@ -135,13 +138,73 @@ record PreadditiveCartesian : Set (suc (o ⊔ ℓ ⊔ e)) where
                  h
                    ∎
            } }
-    } where open HomReasoning
+    }
 
+  -------------------------------------------------------------------------------
+  -- | Experiment
+  -------------------------------------------------------------------------------
 
-      -- inject₁ : [ f , g ] ∘ i₁ ≈ f
-      -- inject₂ : [ f , g ] ∘ i₂ ≈ g
-      -- unique   : h ∘ i₁ ≈ f → h ∘ i₂ ≈ g → [ f , g ] ≈ h
+  open Cocartesian cocartesian
 
+  +⇒× : ∀ {A B} → A + B ⇒ A × B
+  +⇒× {A} {B} = ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
+
+  +⇒×≡id : ∀ {A B} → +⇒× {A} {B} ≈ id
+  +⇒×≡id {A} {B} = begin
+    +⇒× {A} {B}
+      ≡⟨⟩
+    ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
+      ≡⟨⟩
+    ⟨ id {A} ∘ π₁ ⊹ 𝟎 ∘ π₂ , 𝟎 ∘ π₁ ⊹ id ∘ π₂ ⟩
+      ≈⟨ ⟨⟩-cong₂ (⊹-resp-≈ identityˡ distrib-𝟎ʳ)
+                  (⊹-resp-≈ distrib-𝟎ʳ identityˡ) ⟩
+    ⟨ π₁ ⊹ 𝟎 , 𝟎 ⊹ π₂ ⟩
+      ≈⟨ ⟨⟩-cong₂ ⊹-identityʳ ⊹-identityˡ ⟩
+    ⟨ π₁ , π₂ ⟩
+      ≈⟨ η ⟩
+    id
+      ∎
+
+  π₁∘i₁ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₁ ≈ id
+  π₁∘i₁ {A} {B} =
+    begin
+      π₁ ∘ +⇒× ∘ i₁   ≈⟨ ∘-resp-≈ʳ (elimˡ +⇒×≡id) ⟩
+      π₁ ∘ i₁         ≡⟨⟩
+      π₁ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₁ ⟩
+      id              ∎
+
+  π₁∘i₂ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₂ ≈ 𝟎
+  π₁∘i₂ {A} {B} =
+    begin
+      π₁ ∘ +⇒× ∘ i₂   ≈⟨ ∘-resp-≈ʳ (elimˡ +⇒×≡id) ⟩
+      π₁ ∘ i₂         ≡⟨⟩
+      π₁ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₁ ⟩
+      𝟎               ∎
+
+  π₂∘i₁ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₁ ≈ 𝟎
+  π₂∘i₁ {A} {B} =
+    begin
+      π₂ ∘ +⇒× ∘ i₁   ≈⟨ ∘-resp-≈ʳ (elimˡ +⇒×≡id) ⟩
+      π₂ ∘ i₁         ≡⟨⟩
+      π₂ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₂ ⟩
+      𝟎               ∎
+
+  π₂∘i₂ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₂ ≈ id
+  π₂∘i₂ {A} {B} =
+    begin
+      π₂ ∘ +⇒× ∘ i₂   ≈⟨ ∘-resp-≈ʳ (elimˡ +⇒×≡id) ⟩
+      π₂ ∘ i₂         ≡⟨⟩
+      π₂ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₂ ⟩
+      id              ∎
+
+  ×⇒+ : A × B ⇒ A + B
+  ×⇒+ = {!!}
+
+  open Iso
+  iso : Iso (+⇒× {A} {B}) (×⇒+ {A} {B})
+  iso = {!!}
+
+{-
 
 -- A bicartesian category is cartesian and cocartesian
 record Bicartesian : Set (levelOfTerm 𝒞) where
@@ -154,12 +217,26 @@ record Bicartesian : Set (levelOfTerm 𝒞) where
 record IsBiproduct (bi : Bicartesian) (pre : Preadditive) : Set (levelOfTerm 𝒞) where
   open Bicartesian bi
   open Preadditive pre
-  field
-    ×⇒+ : A × B ⇒ A + B
-    -- Isomorphism
 
-  +⇒× : A + B ⇒ A × B
-  +⇒× = ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩
+  +⇒× : ∀ {A B} → A + B ⇒ A × B
+  +⇒× {A} {B} = ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
+
+  field
+    π₁∘i₁ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₁ ≈ id
+    π₁∘i₂ : ∀ {A B} → π₁ ∘ +⇒× {A}{B} ∘ i₂ ≈ 𝟎
+    π₂∘i₁ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₁ ≈ 𝟎
+    π₂∘i₂ : ∀ {A B} → π₂ ∘ +⇒× {A}{B} ∘ i₂ ≈ id
+
+    ×⇒+ : A × B ⇒ A + B
+    iso : Iso (+⇒× {A} {B}) (×⇒+ {A} {B})
+
+  -- []-bi : {f : A ⇒ C} {g : B ⇒ C} → [ f , g ] ≈ (f ∘ π₁ ⊹ g ∘ π₂) ∘ +⇒×
+  -- []-bi {f = f} {g} =
+  --   begin
+  --     [ f , g ] ≈⟨ {!!} ⟩
+  --     f ∘ π₁ ∘ +⇒× ⊹ g ∘ π₂ ∘ +⇒×  ≈⟨ ⊹-resp-≈  ⟩
+  --     (f ∘ π₁) ∘ +⇒× ⊹ (g ∘ π₂) ∘ +⇒×  ≈˘⟨ distrib-⊹ʳ ⟩
+  --     (f ∘ π₁ ⊹ g ∘ π₂) ∘ +⇒×  ∎
 
 -- A biproduct category is bicartesian, has a zero object, and has coinciding
 -- products and coproducts.
@@ -173,3 +250,5 @@ record Biproduct : Set (levelOfTerm 𝒞) where
   open IsBiproduct isBiproduct public
 
 open Biproduct
+
+-}
