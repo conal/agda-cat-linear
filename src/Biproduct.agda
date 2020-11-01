@@ -71,16 +71,14 @@ record Bicartesian : Set (levelOfTerm 𝒞) where
   open   Cartesian   cartesian public
   open Cocartesian cocartesian public
 
-record IsBiproduct (bi : Bicartesian) (pre : Preadditive) : Set (levelOfTerm 𝒞) where
+record IsBiproduct (bi : Bicartesian) (pre : Preadditive) (A B : Obj) : Set (levelOfTerm 𝒞) where
   open Bicartesian bi
   open Preadditive pre
 
-  -- TODO: factor out a record parametrized by A & B to reduce the type
-  -- parameters below. See Product and BinaryProducts in Cartesian.
   field
-    iso : ∀ {A B} → A + B ≅ A × B
+    iso : A + B ≅ A × B
 
-  module iso {A}{B} = _≅_ (iso {A}{B})
+  module iso = _≅_ iso
 
   +⇒× : A + B ⇒ A × B
   +⇒× = iso.from
@@ -88,16 +86,16 @@ record IsBiproduct (bi : Bicartesian) (pre : Preadditive) : Set (levelOfTerm �
   ×⇒+ : A × B ⇒ A + B
   ×⇒+ = iso.to
 
-  +⇒×′ : ∀ {A B} → A + B ⇒ A × B
-  +⇒×′ {A}{B} = ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
+  +⇒×′ : A + B ⇒ A × B
+  +⇒×′ = ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
 
   field
-    +⇒×′≈ : +⇒×′ {A}{B} ≈ +⇒×
+    +⇒×′≈ : +⇒×′ ≈ +⇒×  -- important?
 
-    π₁∘i₁ : π₁ ∘ +⇒× {A}{B} ∘ i₁ ≈ id
-    π₁∘i₂ : π₁ ∘ +⇒× {A}{B} ∘ i₂ ≈ 𝟎
-    π₂∘i₁ : π₂ ∘ +⇒× {A}{B} ∘ i₁ ≈ 𝟎
-    π₂∘i₂ : π₂ ∘ +⇒× {A}{B} ∘ i₂ ≈ id
+    π₁∘i₁ : π₁ ∘ +⇒× ∘ i₁ ≈ id
+    π₁∘i₂ : π₁ ∘ +⇒× ∘ i₂ ≈ 𝟎
+    π₂∘i₁ : π₂ ∘ +⇒× ∘ i₁ ≈ 𝟎
+    π₂∘i₂ : π₂ ∘ +⇒× ∘ i₂ ≈ id
 
   -- []-bi : {f : A ⇒ C} {g : B ⇒ C} → [ f , g ] ≈ (f ∘ π₁ ⊹ g ∘ π₂) ∘ +⇒×
   -- []-bi {f = f} {g} =
@@ -113,10 +111,10 @@ record Biproduct : Set (levelOfTerm 𝒞) where
   field
     bicartesian : Bicartesian
     preadditive : Preadditive
-    isBiproduct : IsBiproduct bicartesian preadditive
+    isBiproduct : ∀ {A B} → IsBiproduct bicartesian preadditive A B
   -- open Bicartesian bicartesian public
   -- open Preadditive preadditive public
-  open IsBiproduct isBiproduct public
+  -- open IsBiproduct isBiproduct public
 
 -- open Biproduct public
 
@@ -209,9 +207,9 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
   biproduct = record
     { bicartesian = bicartesian
     ; preadditive = preadditive
-    ; isBiproduct = record
+    ; isBiproduct = λ {A B} → record
         { iso = id≅
-        ; +⇒×′≈ = λ {A B} →
+        ; +⇒×′≈ =
           begin
             ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
               ≡⟨⟩
@@ -224,25 +222,25 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
               ≈⟨ η ⟩
             id
               ∎
-        ; π₁∘i₁ = λ {A B} →
+        ; π₁∘i₁ =
             begin
               π₁ ∘ id ∘ i₁    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
               π₁ ∘ i₁         ≡⟨⟩
               π₁ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₁ ⟩
               id              ∎
-        ; π₁∘i₂ = λ {A B} →
+        ; π₁∘i₂ =
             begin
               π₁ ∘ id ∘ i₂    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
               π₁ ∘ i₂         ≡⟨⟩
               π₁ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₁ ⟩
               𝟎               ∎
-        ; π₂∘i₁ = λ {A B} →
+        ; π₂∘i₁ =
             begin
               π₂ ∘ id ∘ i₁    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
               π₂ ∘ i₁         ≡⟨⟩
               π₂ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₂ ⟩
               𝟎               ∎
-        ; π₂∘i₂ = λ {A B} →
+        ; π₂∘i₂ =
             begin
               π₂ ∘ id ∘ i₂    ≈⟨ ∘-resp-≈ʳ identityˡ ⟩
               π₂ ∘ i₂         ≡⟨⟩
