@@ -159,7 +159,7 @@ module _ (R : Semiring r ℓr) where
   open import Relation.Binary.Reasoning.MultiSetoid
 
   open import Biproduct lsm
-  open LeftSemimodule
+  open LeftSemimodule using (≈ᴹ-sym; ≈ᴹ-refl)
 
   LSM-Preadditive : Preadditive
   LSM-Preadditive = record
