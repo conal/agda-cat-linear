@@ -90,48 +90,74 @@ record IsBiproduct (bi : Bicartesian) (pre : Preadditive) (A B : Obj)
   field
     from≈ : from ≈ from′
 
-    from∘i₁ : from ∘ i₁ ≈ ⟨ id , 𝟎 ⟩
-    from∘i₂ : from ∘ i₂ ≈ ⟨ 𝟎 , id ⟩
-
-  π₁∘from : π₁ ∘ from ≈ [ id , 𝟎 ]
-  π₁∘from = begin
-              π₁ ∘ from                        ≈⟨ ∘-resp-≈ʳ from≈ ⟩
-              π₁ ∘ ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩ ≈⟨ project₁ ⟩
-              [ id , 𝟎 ]                       ∎
-
-  π₂∘from : π₂ ∘ from ≈ [ 𝟎 , id ]
-  π₂∘from = begin
-              π₂ ∘ from                        ≈⟨ ∘-resp-≈ʳ from≈ ⟩
-              π₂ ∘ ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩ ≈⟨ project₂ ⟩
-              [ 𝟎 , id ]                       ∎
+    from∘i₁≈ : from ∘ i₁ ≈ ⟨ id , 𝟎 ⟩
+    from∘i₂≈ : from ∘ i₂ ≈ ⟨ 𝟎 , id ⟩
 
   π₁∘i₁ : π₁ ∘ from ∘ i₁ ≈ id
   π₁∘i₁ =
     begin
-      π₁ ∘ from ∘ i₁  ≈⟨ ∘-resp-≈ʳ from∘i₁ ⟩
+      π₁ ∘ from ∘ i₁  ≈⟨ ∘-resp-≈ʳ from∘i₁≈ ⟩
       π₁ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₁ ⟩
       id              ∎
 
   π₁∘i₂ : π₁ ∘ from ∘ i₂ ≈ 𝟎
   π₁∘i₂ =
     begin
-      π₁ ∘ from ∘ i₂  ≈⟨ ∘-resp-≈ʳ from∘i₂ ⟩
+      π₁ ∘ from ∘ i₂  ≈⟨ ∘-resp-≈ʳ from∘i₂≈ ⟩
       π₁ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₁ ⟩
       𝟎               ∎
 
   π₂∘i₁ : π₂ ∘ from ∘ i₁ ≈ 𝟎
   π₂∘i₁ =
     begin
-      π₂ ∘ from ∘ i₁  ≈⟨ ∘-resp-≈ʳ from∘i₁ ⟩
+      π₂ ∘ from ∘ i₁  ≈⟨ ∘-resp-≈ʳ from∘i₁≈ ⟩
       π₂ ∘ ⟨ id , 𝟎 ⟩ ≈⟨ project₂ ⟩
       𝟎               ∎
 
   π₂∘i₂ : π₂ ∘ from ∘ i₂ ≈ id
   π₂∘i₂ =
     begin
-      π₂ ∘ from ∘ i₂  ≈⟨ ∘-resp-≈ʳ from∘i₂ ⟩
+      π₂ ∘ from ∘ i₂  ≈⟨ ∘-resp-≈ʳ from∘i₂≈ ⟩
       π₂ ∘ ⟨ 𝟎 , id ⟩ ≈⟨ project₂ ⟩
       id              ∎
+
+  -- A few more lemmas. I don't know which will be useful.
+
+  π₁∘from≈ : π₁ ∘ from ≈ [ id , 𝟎 ]
+  π₁∘from≈ = begin
+               π₁ ∘ from                        ≈⟨ ∘-resp-≈ʳ from≈ ⟩
+               π₁ ∘ ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩ ≈⟨ project₁ ⟩
+               [ id , 𝟎 ]                       ∎
+
+  π₂∘from≈ : π₂ ∘ from ≈ [ 𝟎 , id ]
+  π₂∘from≈ = begin
+               π₂ ∘ from                        ≈⟨ ∘-resp-≈ʳ from≈ ⟩
+               π₂ ∘ ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩ ≈⟨ project₂ ⟩
+               [ 𝟎 , id ]                       ∎
+
+  π₁≈ : π₁ ≈ [ id , 𝟎 ] ∘ to
+  π₁≈ = begin
+          π₁               ≈˘⟨ cancelʳ isoʳ ⟩
+          (π₁ ∘ from) ∘ to ≈⟨ ∘-resp-≈ˡ π₁∘from≈ ⟩
+          [ id , 𝟎 ] ∘ to  ∎
+
+  π₂≈ : π₂ ≈ [ 𝟎 , id ] ∘ to
+  π₂≈ = begin
+          π₂               ≈˘⟨ cancelʳ isoʳ ⟩
+          (π₂ ∘ from) ∘ to ≈⟨ ∘-resp-≈ˡ π₂∘from≈ ⟩
+          [ 𝟎 , id ] ∘ to  ∎
+
+  i₁≈ : i₁ ≈ to ∘ ⟨ id , 𝟎 ⟩
+  i₁≈ = begin
+          i₁               ≈˘⟨ cancelˡ isoˡ ⟩
+          to ∘ (from ∘ i₁) ≈⟨ ∘-resp-≈ʳ from∘i₁≈ ⟩
+          to ∘ ⟨ id , 𝟎 ⟩  ∎
+
+  i₂≈ : i₂ ≈ to ∘ ⟨ 𝟎 , id ⟩
+  i₂≈ = begin
+          i₂               ≈˘⟨ cancelˡ isoˡ ⟩
+          to ∘ (from ∘ i₂) ≈⟨ ∘-resp-≈ʳ from∘i₂≈ ⟩
+          to ∘ ⟨ 𝟎 , id ⟩  ∎
 
   -- []-bi : {f : A ⇒ C} {g : B ⇒ C} → [ f , g ] ≈ (f ∘ π₁ ⊹ g ∘ π₂) ∘ from
   -- []-bi {f = f} {g} =
@@ -261,8 +287,8 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
                 ≈⟨ η ⟩
               id
                 ∎)
-        ; from∘i₁ = identityˡ
-        ; from∘i₂ = identityˡ
+        ; from∘i₁≈ = identityˡ
+        ; from∘i₂≈ = identityˡ
         }
     }
 
