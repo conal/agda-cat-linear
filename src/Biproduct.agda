@@ -85,12 +85,25 @@ record IsBiproduct (bi : Bicartesian) (pre : Preadditive) (A B : Obj)
 
   from′ : A + B ⇒ A × B
   from′ = ⟨ [ id {A} , 𝟎 ] , [ 𝟎 , id ] ⟩
+  -- [ ⟨ id , 𝟎 ⟩ , ⟨ 𝟎 , id ⟩ ]
 
   field
-    from′≈ : from′ ≈ from  -- important?
+    from≈ : from ≈ from′
 
     i₁≈⟨⟩ : from ∘ i₁ ≈ ⟨ id , 𝟎 ⟩
     i₂≈⟨⟩ : from ∘ i₂ ≈ ⟨ 𝟎 , id ⟩
+
+  π₁≈[] : π₁ ∘ from ≈ [ id , 𝟎 ]
+  π₁≈[] = begin
+            π₁ ∘ from                        ≈⟨ ∘-resp-≈ʳ from≈ ⟩
+            π₁ ∘ ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩ ≈⟨ project₁ ⟩
+            [ id , 𝟎 ]                       ∎
+
+  π₂≈[] : π₂ ∘ from ≈ [ 𝟎 , id ]
+  π₂≈[] = begin
+            π₂ ∘ from                        ≈⟨ ∘-resp-≈ʳ from≈ ⟩
+            π₂ ∘ ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩ ≈⟨ project₂ ⟩
+            [ 𝟎 , id ]                       ∎
 
   π₁∘i₁ : π₁ ∘ from ∘ i₁ ≈ id
   π₁∘i₁ =
@@ -147,7 +160,7 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
   field
     cartesian : Cartesian
     preadditive : Preadditive
-  open Cartesian cartesian public
+  open Cartesian   cartesian   public
   open Preadditive preadditive public
   field
     -- Extra help needed for the proofs
@@ -224,7 +237,7 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
            } }
     }
 
-  open Cocartesian cocartesian
+  open Cocartesian cocartesian public
 
   bicartesian : Bicartesian
   bicartesian = record { cartesian = cartesian ; cocartesian = cocartesian }
@@ -235,19 +248,19 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
     ; preadditive = preadditive
     ; isBiproduct = λ {A B} → record
         { +⇔× = id≅
-        ; from′≈ =
-          begin
-            ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩
-              ≡⟨⟩  -- [_,_] definition above
-            ⟨ id ∘ π₁ ⊹ 𝟎 ∘ π₂ , 𝟎 ∘ π₁ ⊹ id ∘ π₂ ⟩
-              ≈⟨ ⟨⟩-cong₂ (⊹-resp-≈ identityˡ distrib-𝟎ʳ)
-                          (⊹-resp-≈ distrib-𝟎ʳ identityˡ) ⟩
-            ⟨ π₁ ⊹ 𝟎 , 𝟎 ⊹ π₂ ⟩
-              ≈⟨ ⟨⟩-cong₂ ⊹-identityʳ ⊹-identityˡ ⟩
-            ⟨ π₁ , π₂ ⟩
-              ≈⟨ η ⟩
-            id
-              ∎
+        ; from≈ = sym (
+            begin
+              ⟨ [ id , 𝟎 ] , [ 𝟎 , id ] ⟩
+                ≡⟨⟩  -- [_,_] definition above
+              ⟨ id ∘ π₁ ⊹ 𝟎 ∘ π₂ , 𝟎 ∘ π₁ ⊹ id ∘ π₂ ⟩
+                ≈⟨ ⟨⟩-cong₂ (⊹-resp-≈ identityˡ distrib-𝟎ʳ)
+                            (⊹-resp-≈ distrib-𝟎ʳ identityˡ) ⟩
+              ⟨ π₁ ⊹ 𝟎 , 𝟎 ⊹ π₂ ⟩
+                ≈⟨ ⟨⟩-cong₂ ⊹-identityʳ ⊹-identityˡ ⟩
+              ⟨ π₁ , π₂ ⟩
+                ≈⟨ η ⟩
+              id
+                ∎)
         ; i₁≈⟨⟩ = identityˡ
         ; i₂≈⟨⟩ = identityˡ
         }
@@ -257,3 +270,5 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
 -- duality, turning the cocartesian into a cartesian for the opposite category.
 -- Similarly, dualize bicartesian to a bicartesian, and a biproduct to a
 -- biproduct.
+
+
