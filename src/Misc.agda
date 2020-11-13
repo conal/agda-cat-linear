@@ -4,20 +4,6 @@
 
 module Misc where
 
-infixr 4 _,₁_ _,₂_
-
-open import Data.Product
-
-_,₁_ : ∀ {z a b} {Z : Set z} {A : Set a} {B : Set b}
-     → (Z → A) → (Z → B) → (Z → A × B)
-f ,₁ g = λ z → f z , g z
-
-_,₂_ : ∀ {y z a b} {Y : Set y} {Z : Set z} {A : Set a} {B : Set b}
-     → (Y → Z → A) → (Y → Z → B) → (Y → Z → A × B)
-f ,₂ g = λ y z → f y z , g y z
-
--- TODO: maybe generalize _,₁_ _,₂_ to dependent function types
-
 -- open import Level
 
 open import Categories.Category 
@@ -54,5 +40,16 @@ module _ {o ℓ e} {C : Category o ℓ e} where
   id≡ : {A : Obj} → A ≡ A
   id≡ = refl
 
+  open import Data.Product renaming (_×_ to _×′_)
 
-       
+  open import Categories.Category.Cartesian
+  module _ {cartesian : Cartesian C} where
+    open Cartesian cartesian
+    ⟨⟩⁻¹ : ∀ {A B C} → (A ⇒ B × C) → (A ⇒ B) ×′ (A ⇒ C)
+    ⟨⟩⁻¹ f = π₁ ∘ f , π₂ ∘ f
+
+  open import Categories.Category.Cocartesian
+  module _ {cocartesian : Cocartesian C} where
+    open Cocartesian cocartesian
+    []⁻¹ : ∀ {A B C} → (A + B ⇒ C) → (A ⇒ C) ×′ (B ⇒ C)
+    []⁻¹ f = f ∘ i₁ , f ∘ i₂
