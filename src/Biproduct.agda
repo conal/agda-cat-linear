@@ -159,8 +159,8 @@ record IsBiproduct (bi : Bicartesian) (pre : Preadditive) (A B : Obj)
           to ∘ (from ∘ i₂) ≈⟨ ∘-resp-≈ʳ from∘i₂≈ ⟩
           to ∘ ⟨ 𝟎 , id ⟩  ∎
 
-  -- []-bi : {f : A ⇒ C} {g : B ⇒ C} → [ f , g ] ≈ (f ∘ π₁ ⊹ g ∘ π₂) ∘ from
-  -- []-bi {f = f} {g} =
+  -- []≈ : {f : A ⇒ C} {g : B ⇒ C} → [ f , g ] ≈ (f ∘ π₁ ⊹ g ∘ π₂) ∘ from
+  -- []≈ {f = f} {g} =
   --   begin
   --     [ f , g ] ≈⟨ {!!} ⟩
   --     f ∘ π₁ ∘ from ⊹ g ∘ π₂ ∘ from  ≈⟨ ⊹-resp-≈ {!!} {!!}  ⟩
@@ -295,6 +295,6 @@ record PreadditiveCartesian : Set (levelOfTerm 𝒞) where
 -- TODO: Define PreadditiveCocartesian that starts with a cocartesian. Use
 -- duality, turning the cocartesian into a cartesian for the opposite category.
 -- Similarly, dualize bicartesian to a bicartesian, and a biproduct to a
--- biproduct.
+-- biproduct. Or don't bother.
 
 
