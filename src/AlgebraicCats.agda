@@ -246,6 +246,7 @@ module _ (R : Semiring r ℓr) where
                               f x ≈⟨ f-cong x≈y ⟩
                               f y  ∎)
            }
+        -- Distributivity. Only the left ones rely on linearity.
         -- distrib-⊹ˡ : ∀ {A B C} {f g : A ⇒ B} {h : B ⇒ C} → h ∘ (f ⊹ g) ≈ (h ∘ f) ⊹ (h ∘ g)
         ; distrib-⊹ˡ = λ {A B C} {(f′ , _) (g′ , _) (h′ , h+ , _)} {x y} x≈y →
             let module B = LeftSemimodule B
@@ -259,6 +260,8 @@ module _ (R : Semiring r ℓr) where
               h (f x) C.+ᴹ h (g x) ≈⟨ C.+ᴹ-cong (h-cong (f-cong x≈y))
                                                 (h-cong (g-cong x≈y)) ⟩
               h (f y) C.+ᴹ h (g y) ∎
+        -- distrib-𝟎ˡ : ∀ {A B C} {g : B ⇒ C} → g ∘ 𝟎 ≈ 𝟎 {A} {C}
+        ; distrib-𝟎ˡ = λ {A B C} {(_ , _ , g0 , _)} x≈y → g0
         -- distrib-⊹ʳ : ∀ {A B C} {f g : B ⇒ C} {h : A ⇒ B} → (f ⊹ g) ∘ h ≈ (f ∘ h) ⊹ (g ∘ h)
         ; distrib-⊹ʳ = λ {A B C} {(f′ , _) (g′ , _) (h′ , _)} {x y} x≈y →
             let module C = LeftSemimodule C
@@ -270,8 +273,6 @@ module _ (R : Semiring r ℓr) where
               f (h x) C.+ᴹ g (h x) ≈⟨ C.+ᴹ-cong (f-cong (h-cong x≈y))
                                                 (g-cong (h-cong x≈y)) ⟩
               f (h y) C.+ᴹ g (h y) ∎
-        -- distrib-𝟎ˡ : ∀ {A B C} {g : B ⇒ C} → g ∘ 𝟎 ≈ 𝟎 {A} {C}
-        ; distrib-𝟎ˡ = λ {A B C} {(_ , _ , g0 , _)} x≈y → g0
         -- distrib-𝟎ʳ : ∀ {A B C} {f : A ⇒ B} → 𝟎 ∘ f ≈ 𝟎 {A} {C}
         ; distrib-𝟎ʳ = λ {A B C} x≈y → ≈ᴹ-refl C
         }
