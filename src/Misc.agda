@@ -24,10 +24,10 @@ module _ {o ℓ e} {C : Category o ℓ e} where
   _∘≅_ : {A B C : Obj} → B ≅ C → A ≅ B → A ≅ C
 
   g ∘≅ f = record
-   { iso = record { isoˡ = cancelInner isoˡG ○  isoˡF
-                  ; isoʳ = cancelInner isoʳF ○  isoʳG }
-   } where open _≅_ g renaming (isoˡ to isoˡG ; isoʳ to isoʳG)
-           open _≅_ f renaming (isoˡ to isoˡF ; isoʳ to isoʳF)
+   { iso = record { isoˡ = cancelInner g-isoˡ ○  f-isoˡ
+                  ; isoʳ = cancelInner f-isoʳ ○  g-isoʳ }
+   } where open _≅_ g renaming (isoˡ to g-isoˡ ; isoʳ to g-isoʳ)
+           open _≅_ f renaming (isoˡ to f-isoˡ ; isoʳ to f-isoʳ)
 
   -- TODO: category of isomorphisms
 
